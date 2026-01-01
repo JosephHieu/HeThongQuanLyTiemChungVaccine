@@ -1,10 +1,10 @@
-package com.example.demo;
+package com.josephhieu.vaccinebackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class VaccineManagementApplicationTests {
+class VaccinebackendApplicationTests {
 
     @Test
     void contextLoads() {

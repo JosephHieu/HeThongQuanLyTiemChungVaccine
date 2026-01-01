@@ -1,13 +1,13 @@
-package com.example.demo;
+package com.josephhieu.vaccinebackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class VaccineManagementApplication {
+public class VaccinebackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(VaccineManagementApplication.class, args);
+        SpringApplication.run(VaccinebackendApplication.class, args);
     }
 
 }
