@@ -3,6 +3,7 @@ package com.josephhieu.vaccinebackend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class TaiKhoan {
 
     /**
@@ -67,5 +69,6 @@ public class TaiKhoan {
      * Tập hợp các quyền hạn được gán cho tài khoản này qua bảng trung gian.
      */
     @OneToMany(mappedBy = "taiKhoan")
-    private Set<ChiTietPhanQuyen> chiTietPhanQuyens;
+    @Builder.Default
+    private Set<ChiTietPhanQuyen> chiTietPhanQuyens = new HashSet<>();
 }
