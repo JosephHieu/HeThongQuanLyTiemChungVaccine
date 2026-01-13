@@ -25,4 +25,6 @@ public class UserResponse {
     private String moTa;
     private String email;
     private Set<String> roles;
+
+    private String token;
 }

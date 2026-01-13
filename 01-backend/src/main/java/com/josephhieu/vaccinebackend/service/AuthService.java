@@ -3,15 +3,18 @@ package com.josephhieu.vaccinebackend.service;
 import com.josephhieu.vaccinebackend.dto.request.LoginRequest;
 import com.josephhieu.vaccinebackend.dto.request.RegisterRequest;
 import com.josephhieu.vaccinebackend.dto.response.UserResponse;
+import com.josephhieu.vaccinebackend.entity.BenhNhan;
 import com.josephhieu.vaccinebackend.entity.ChiTietPhanQuyen;
 import com.josephhieu.vaccinebackend.entity.PhanQuyen;
 import com.josephhieu.vaccinebackend.entity.TaiKhoan;
 import com.josephhieu.vaccinebackend.entity.id.ChiTietPhanQuyenId;
 import com.josephhieu.vaccinebackend.exception.AppException;
 import com.josephhieu.vaccinebackend.exception.ErrorCode;
+import com.josephhieu.vaccinebackend.repository.BenhNhanRepository;
 import com.josephhieu.vaccinebackend.repository.ChiTietPhanQuyenRepository;
 import com.josephhieu.vaccinebackend.repository.PhanQuyenRepository;
 import com.josephhieu.vaccinebackend.repository.TaiKhoanRepository;
+import com.josephhieu.vaccinebackend.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +36,9 @@ public class AuthService {
     private final TaiKhoanRepository taiKhoanRepository;
     private final PhanQuyenRepository phanQuyenRepository;
     private final ChiTietPhanQuyenRepository chiTietPhanQuyenRepository;
+    private final BenhNhanRepository benhNhanRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider tokenProvider;
 
     /**
      * Thực hiện đăng ký tài khoản người dùng và tự động gán quyền mặc định.
@@ -64,6 +69,17 @@ public class AuthService {
 
         user = taiKhoanRepository.save(user);
 
+        // 1. Tạo hồ sơ Bệnh nhân tương ứng (Bắt buộc theo Schema)
+        BenhNhan profile = BenhNhan.builder()
+                .taiKhoan(user)
+                .tenBenhNhan(user.getHoTen())
+                .ngaySinh(request.getNgaySinh())
+                .sdt(request.getSdt())
+                .gioiTinh(request.getGioiTinh())
+                .diaChi(user.getNoiO())
+                .build();
+        benhNhanRepository.save(profile);
+
         // 2. Gán quyền mặc định "Normal User Account"
         PhanQuyen role = phanQuyenRepository.findByTenQuyen("Normal User Account")
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
@@ -78,16 +94,7 @@ public class AuthService {
         chiTietPhanQuyenRepository.save(chiTiet);
 
         // 4. Trả về Response đầy đủ thông tin để Frontend sử dụng (Mapping thủ công hoặc dùng Mapper)
-        return UserResponse.builder()
-                .maTaiKhoan(user.getMaTaiKhoan())
-                .tenDangNhap(user.getTenDangNhap())
-                .hoTen(user.getHoTen())
-                .cmnd(user.getCmnd())
-                .noiO(user.getNoiO())
-                .moTa(user.getMoTa())
-                .email(user.getEmail())
-                .roles(Collections.singleton(role.getTenQuyen())) // Trả về quyền vừa gán
-                .build();
+        return mapToUserResponse(user, Collections.singleton(role.getTenQuyen()), null);
     }
 
     /**
@@ -110,7 +117,16 @@ public class AuthService {
                 .map(ct -> ct.getPhanQuyen().getTenQuyen())
                 .collect(Collectors.toSet());
 
+        String token = tokenProvider.generateToken(user);
+
         // 4. Trả về DTO chuẩn hóa
+        return mapToUserResponse(user, roles, token);
+    }
+
+    /**
+     * Hàm phụ trợ để chuẩn hóa dữ liệu trả về, tránh lặp lại code.
+     */
+    private UserResponse mapToUserResponse(TaiKhoan user, Set<String> roles, String token) {
         return UserResponse.builder()
                 .maTaiKhoan(user.getMaTaiKhoan())
                 .tenDangNhap(user.getTenDangNhap())
@@ -120,6 +136,7 @@ public class AuthService {
                 .moTa(user.getMoTa())
                 .email(user.getEmail())
                 .roles(roles)
+                .token(token) // Đã bổ sung trường Token
                 .build();
     }
 }
