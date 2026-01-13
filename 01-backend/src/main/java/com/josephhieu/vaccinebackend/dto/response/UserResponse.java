@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -15,8 +16,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse {
+
     private UUID maTaiKhoan;
     private String tenDangNhap;
     private String hoTen;
+    private String cmnd;
+    private String noiO;
+    private String moTa;
     private String email;
+    private Set<String> roles;
 }

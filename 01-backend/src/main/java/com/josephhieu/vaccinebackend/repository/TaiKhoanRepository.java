@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, UUID> {
 
     Optional<TaiKhoan> findByTenDangNhap(String tenDangNhap);
+
+    boolean existsByTenDangNhap(String tenDangNhap);
 }
