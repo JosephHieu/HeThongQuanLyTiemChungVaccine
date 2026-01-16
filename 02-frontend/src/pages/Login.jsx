@@ -25,10 +25,11 @@ const Login = () => {
       );
 
       if (response.data.code === 1000) {
-        const { token, roles } = response.data.result;
+        const { token, roles, hoTen } = response.data.result;
         localStorage.setItem("token", token);
         localStorage.setItem("role", roles[0]);
-        toast.success("Đăng nhập thành công!");
+        localStorage.setItem("userName", hoTen);
+        toast.success(`Chào mừng ${hoTen} trở lại!`);
 
         if (roles.includes("Administrator")) {
           navigate("/admin/dashboard");
@@ -109,13 +110,6 @@ const Login = () => {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-gray-600 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                Ghi nhớ đăng nhập
-              </label>
               <a
                 href="#"
                 className="text-blue-600 hover:text-blue-700 font-medium transition-colors"

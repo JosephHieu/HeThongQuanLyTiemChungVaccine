@@ -2,6 +2,7 @@ package com.josephhieu.vaccinebackend.exception;
 
 import com.josephhieu.vaccinebackend.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -41,5 +42,31 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.internalServerError().body(apiResponse);
+    }
+
+    /**
+     * Xử lý lỗi khi dữ liệu đầu vào không hợp lệ (Validation Error).
+     * Ví dụ: Để trống các ô Username, Password....
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ApiResponse<?>> handleValidation(MethodArgumentNotValidException exception) {
+        // 1. Lấy mã lỗi được định nghĩa trong DTO (ví dụ: "MISSING_INFO")
+        String enumKey = exception.getBindingResult().getFieldError().getDefaultMessage();
+
+        ErrorCode errorCode = ErrorCode.MISSING_INFO; // Mặc định là lỗi thiếu thông tin
+
+        try {
+            // 2. Ánh xạ chuỗi từ DTO sang Enum ErrorCode để lấy mã 1008 và message chuẩn
+            errorCode = ErrorCode.valueOf(enumKey);
+        } catch (IllegalArgumentException e) {
+            // Nếu không tìm thấy enum tương ứng, giữ nguyên mặc định
+        }
+
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
 }

@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AccountManagement from "./pages/AccountManagement";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -48,10 +49,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
 
           {/* Các trang con khớp với mục lục Screen Content */}
-          <Route
-            path="accounts"
-            element={<Placeholder title="Quản lý tài khoản (Account)" />}
-          />
+          <Route path="accounts" element={<AccountManagement />} />
           <Route
             path="warehouse"
             element={<Placeholder title="Quản lý kho bãi (Kho bãi)" />}

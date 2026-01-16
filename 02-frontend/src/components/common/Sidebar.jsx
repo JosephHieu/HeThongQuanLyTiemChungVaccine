@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   UserCog,
   ShieldCheck,
@@ -29,13 +30,31 @@ const Sidebar = () => {
       label: "Báo cáo",
     },
     { path: "/admin/about", icon: <Info size={20} />, label: "About" },
-    { path: "/admin/logout", icon: <LogOut size={20} />, label: "Đăng xuất" },
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    window.location.href = "/login";
+    // Hiển thị Popup xác nhận
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn đăng xuất?",
+      text: "Mọi phiên làm việc hiện tại sẽ kết thúc!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Đăng xuất",
+      cancelButtonText: "Hủy",
+      background: "#ffffff",
+      customClass: {
+        popup: "rounded-2xl",
+        confirmButton: "rounded-lg px-4 py-2",
+        cancelButton: "rounded-lg px-4 py-2",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    });
   };
 
   return (

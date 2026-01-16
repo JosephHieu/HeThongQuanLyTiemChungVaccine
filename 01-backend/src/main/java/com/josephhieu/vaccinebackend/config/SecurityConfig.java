@@ -5,6 +5,7 @@ import com.josephhieu.vaccinebackend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -54,6 +55,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("api/admin/**").hasAuthority("Administrator")
+                        .requestMatchers(HttpMethod.GET, "/api/user/**").hasAuthority("ROLE_Administrator")
+                        .requestMatchers(HttpMethod.POST, "/api/users").hasAuthority("ROLE_Administrator")
                         .requestMatchers("/api/kho/**").hasAnyAuthority("Administrator", "Quản lý kho")
                         .anyRequest().authenticated()
                 )
