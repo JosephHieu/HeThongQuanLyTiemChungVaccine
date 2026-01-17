@@ -8,54 +8,136 @@ import {
   CreditCard,
   MapPin,
   AlignLeft,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const CreateUserModal = ({ isOpen, onClose }) => {
+// BỔ SUNG: Thêm onSuccess vào props
+const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
   const [rolesList, setRolesList] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  // Tên các trường (key) phải khớp chính xác với UserCreationRequest ở Backend
   const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    maQuyen: "",
-    fullname: "",
-    cmnd: "",
-    address: "",
-    description: "",
+    tenDangNhap: "", // Backend: tenDangNhap
+    matKhau: "", // Backend: matKhau
+    maQuyen: "", // Backend: maQuyen
+    hoTen: "", // Backend: hoTen
+    cmnd: "", // Backend: cmnd
+    noiO: "", // Backend: noiO
+    moTa: "", // Backend: moTa
   });
 
-  // Lấy danh sách quyền khi Modal được mở
+  // Hàm kiểm tra dữ liệu trước khi gửi (Client-side validation)
+  const validate = () => {
+    let tempErrors = {};
+    // 1. Kiểm tra Username: Không dấu, không khoảng trắng
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!formData.tenDangNhap) {
+      tempErrors.tenDangNhap = "Tên đăng nhập không được để trống";
+    } else if (!usernameRegex.test(formData.tenDangNhap)) {
+      tempErrors.tenDangNhap = "Username không được chứa khoảng trắng hoặc dấu";
+    }
+
+    // 2. Kiểm tra Mật khẩu: Tối thiểu 6 ký tự
+    if (!formData.matKhau) {
+      tempErrors.matKhau = "Mật khẩu không được để trống";
+    } else if (formData.matKhau.length < 6) {
+      tempErrors.matKhau = "Mật khẩu phải có ít nhất 6 ký tự";
+    }
+
+    // 3. Kiểm tra CMND: Phải là số và đúng độ dài
+    const cmndRegex = /^[0-9]{9,12}$/;
+    if (!formData.cmnd) {
+      tempErrors.cmnd = "Vui lòng nhập số CMND";
+    } else if (!cmndRegex.test(formData.cmnd)) {
+      tempErrors.cmnd = "CMND phải là số và có từ 9 đến 12 chữ số";
+    }
+
+    // 4. Kiểm tra Họ tên: Không chứa số
+    const nameRegex = /^[^0-9]*$/;
+    if (!formData.hoTen) {
+      tempErrors.hoTen = "Vui lòng nhập họ tên";
+    } else if (!nameRegex.test(formData.hoTen)) {
+      tempErrors.hoTen = "Họ tên không được chứa chữ số";
+    }
+
+    if (!formData.noiO) tempErrors.noiO = "Vui lòng nhập nơi ở";
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
+  // Tự động reset form khi đóng/mở modal
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        tenDangNhap: "",
+        matKhau: "",
+        maQuyen: "",
+        hoTen: "",
+        cmnd: "",
+        noiO: "",
+        moTa: "",
+      });
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen) {
       const fetchRoles = async () => {
         try {
           const response = await axiosClient.get("/roles");
-          // Giả sử API trả về mảng trực tiếp hoặc nằm trong .result
           const data = response.data.result || response.data;
           setRolesList(data);
-
-          // Gán giá trị mặc định là quyền đầu tiên nếu có
           if (data.length > 0) {
             setFormData((prev) => ({ ...prev, maQuyen: data[0].maQuyen }));
           }
         } catch (error) {
-          toast.error("Không thể tải danh sách quyền hạn." + error.message);
+          toast.error("Không thể tải danh sách quyền hạn.");
         }
       };
       fetchRoles();
     }
   }, [isOpen]);
 
-  const handleSubmit = (e) => {
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Kiểm tra để trống bất kỳ ô nào
-    if (Object.values(formData).some((val) => val === "")) {
-      toast.error("Vui lòng nhập đầy đủ thông tin."); // Thông báo theo SRS
+
+    // Nếu validate sai thì dừng lại, không gọi API
+    if (!validate()) {
+      toast.error("Vui lòng kiểm tra lại các thông tin.");
       return;
     }
-    console.log("Dữ liệu gửi lên Backend:", formData);
-    toast.success("Tạo tài khoản thành công!");
-    onClose();
+
+    try {
+      setLoading(true);
+      await axiosClient.post("/users/create", formData);
+      toast.success("Tạo tài khoản thành công!");
+      onSuccess();
+      onClose();
+    } catch (error) {
+      // Bắt lỗi từ Backend (ví dụ: tên đăng nhập đã tồn tại)
+      if (error.response?.data?.code === 1002) {
+        setErrors({ tenDangNhap: "Tên đăng nhập này đã được sử dụng" });
+      } else {
+        toast.error("Đã có lỗi xảy ra khi lưu.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
@@ -67,7 +149,7 @@ const CreateUserModal = ({ isOpen, onClose }) => {
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"
+            className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -83,16 +165,18 @@ const CreateUserModal = ({ isOpen, onClose }) => {
               <InputGroup
                 icon={<User size={18} />}
                 label="Username"
-                value={formData.username}
-                onChange={(v) => setFormData({ ...formData, username: v })}
+                value={formData.tenDangNhap}
+                error={errors.tenDangNhap}
+                onChange={(v) => handleInputChange("tenDangNhap", v)}
                 placeholder="Tên đăng nhập"
               />
               <InputGroup
                 icon={<Lock size={18} />}
                 label="Password"
                 type="password"
-                value={formData.password}
-                onChange={(v) => setFormData({ ...formData, password: v })}
+                value={formData.matKhau}
+                error={errors.matKhau}
+                onChange={(v) => handleInputChange("matKhau", v)}
                 placeholder="••••••••"
               />
 
@@ -106,13 +190,12 @@ const CreateUserModal = ({ isOpen, onClose }) => {
                     size={18}
                   />
                   <select
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
                     value={formData.maQuyen}
                     onChange={(e) =>
                       setFormData({ ...formData, maQuyen: e.target.value })
                     }
                   >
-                    {/* Đổ dữ liệu động từ rolesList */}
                     {rolesList.map((role) => (
                       <option key={role.maQuyen} value={role.maQuyen}>
                         {role.tenQuyen}
@@ -131,43 +214,41 @@ const CreateUserModal = ({ isOpen, onClose }) => {
               <InputGroup
                 icon={<AlignLeft size={18} />}
                 label="Họ tên"
-                value={formData.fullname}
-                onChange={(v) => setFormData({ ...formData, fullname: v })}
+                value={formData.hoTen}
+                error={errors.hoTen}
+                onChange={(v) => handleInputChange("hoTen", v)}
                 placeholder="Nguyễn Văn A"
               />
               <InputGroup
                 icon={<CreditCard size={18} />}
                 label="Số CMND"
                 value={formData.cmnd}
-                onChange={(v) => setFormData({ ...formData, cmnd: v })}
+                error={errors.cmnd}
+                onChange={(v) => handleInputChange("cmnd", v)}
                 placeholder="123456789"
               />
               <InputGroup
                 icon={<MapPin size={18} />}
                 label="Nơi ở"
-                value={formData.address}
-                onChange={(v) => setFormData({ ...formData, address: v })}
+                value={formData.noiO}
+                error={errors.noiO}
+                onChange={(v) => handleInputChange("noiO", v)}
                 placeholder="Địa chỉ thường trú"
               />
             </div>
           </div>
 
-          {/* Description */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">
               Mô tả (Description)
             </label>
             <textarea
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"
-              placeholder="Thông tin bổ sung về nhân viên..."
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              value={formData.moTa}
+              onChange={(e) => handleInputChange("moTa", e.target.value)}
             />
           </div>
 
-          {/* Buttons */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
             <button
               type="button"
@@ -178,9 +259,10 @@ const CreateUserModal = ({ isOpen, onClose }) => {
             </button>
             <button
               type="submit"
-              className="px-8 py-2.5 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-200 transition-all"
+              disabled={loading}
+              className="px-8 py-2.5 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-200 transition-all disabled:opacity-50"
             >
-              Lưu
+              {loading ? "Đang lưu..." : "Lưu"}
             </button>
           </div>
         </form>
@@ -189,7 +271,6 @@ const CreateUserModal = ({ isOpen, onClose }) => {
   );
 };
 
-// Component con để tái sử dụng giao diện Input
 const InputGroup = ({
   icon,
   label,
@@ -197,20 +278,54 @@ const InputGroup = ({
   value,
   onChange,
   placeholder,
-}) => (
-  <div className="space-y-1.5">
-    <label className="text-sm font-medium text-slate-700">{label}</label>
-    <div className="relative">
-      <div className="absolute left-3 top-2.5 text-slate-400">{icon}</div>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-      />
+  error,
+}) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordField = type === "password";
+  const inputType = isPasswordField
+    ? showPassword
+      ? "text"
+      : "password"
+    : type;
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium text-slate-700">{label}</label>
+      <div className="relative">
+        <div className="absolute left-3 top-2.5 text-slate-400">{icon}</div>
+
+        <input
+          type={inputType}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          // Thêm border đỏ nếu có lỗi
+          className={`w-full pl-10 pr-10 py-2 bg-slate-50 border rounded-xl outline-none transition-all ${
+            error
+              ? "border-red-500 focus:ring-2 focus:ring-red-100"
+              : "border-slate-200 focus:ring-2 focus:ring-blue-500"
+          }`}
+        />
+
+        {isPasswordField && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            // Thêm cursor-pointer để hiện hình ngón tay
+            className="absolute right-3 top-2.5 text-slate-400 hover:text-blue-600 cursor-pointer transition-colors"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
+      </div>
+      {/* Hiển thị câu thông báo lỗi nhỏ phía dưới */}
+      {error && (
+        <p className="text-[11px] text-red-500 font-medium ml-1 animate-in slide-in-from-top-1">
+          {error}
+        </p>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default CreateUserModal;
