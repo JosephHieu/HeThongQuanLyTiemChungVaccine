@@ -126,11 +126,18 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
       onSuccess();
       onClose();
     } catch (error) {
-      // Bắt lỗi từ Backend (ví dụ: tên đăng nhập đã tồn tại)
-      if (error.response?.data?.code === 1002) {
-        setErrors({ tenDangNhap: "Tên đăng nhập này đã được sử dụng" });
+      const apiError = error.response?.data;
+
+      console.log("Dữ liệu lỗi từ server: ", apiError);
+      // Trường hợp 1: Trùng tên đăng nhập (Mã 1001 - USER_EXISTED)
+      if (apiError && apiError.code === 1001) {
+        setErrors((prev) => ({
+          ...prev,
+          tenDangNhap: "Tên đăng nhập này đã được sử dụng",
+        }));
+        toast.error("Tên đăng nhập đã tồn tại!");
       } else {
-        toast.error("Đã có lỗi xảy ra khi lưu.");
+        toast.error(apiError?.message || "Đã có lỗi xảy ra khi lưu.");
       }
     } finally {
       setLoading(false);
@@ -141,9 +148,10 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+      {/* MODAL BOX: Khung chính của Modal */}
+      <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col">
+        {/* 1. HEADER: Cố định (flex-none) */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 flex-none">
           <h2 className="text-xl font-bold text-slate-800">
             Tạo tài khoản mới
           </h2>
@@ -155,112 +163,119 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nhóm 1: Thông tin đăng nhập */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                Tài khoản
-              </h3>
-              <InputGroup
-                icon={<User size={18} />}
-                label="Username"
-                value={formData.tenDangNhap}
-                error={errors.tenDangNhap}
-                onChange={(v) => handleInputChange("tenDangNhap", v)}
-                placeholder="Tên đăng nhập"
-              />
-              <InputGroup
-                icon={<Lock size={18} />}
-                label="Password"
-                type="password"
-                value={formData.matKhau}
-                error={errors.matKhau}
-                onChange={(v) => handleInputChange("matKhau", v)}
-                placeholder="••••••••"
-              />
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">
-                  Phân quyền
-                </label>
-                <div className="relative">
-                  <Shield
-                    className="absolute left-3 top-2.5 text-slate-400"
-                    size={18}
-                  />
-                  <select
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-                    value={formData.maQuyen}
-                    onChange={(e) =>
-                      setFormData({ ...formData, maQuyen: e.target.value })
-                    }
-                  >
-                    {rolesList.map((role) => (
-                      <option key={role.maQuyen} value={role.maQuyen}>
-                        {role.tenQuyen}
-                      </option>
-                    ))}
-                  </select>
+        {/* 2. FORM: Container chính cho nội dung và nút bấm */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          {/* BODY: Vùng chứa input - Có thanh cuộn (flex-1) */}
+          <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Nhóm 1: Tài khoản */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                  Tài khoản
+                </h3>
+                <InputGroup
+                  icon={<User size={18} />}
+                  label="Username"
+                  value={formData.tenDangNhap}
+                  error={errors.tenDangNhap}
+                  onChange={(v) => handleInputChange("tenDangNhap", v)}
+                  placeholder="Tên đăng nhập"
+                />
+                <InputGroup
+                  icon={<Lock size={18} />}
+                  label="Password"
+                  type="password"
+                  value={formData.matKhau}
+                  error={errors.matKhau}
+                  onChange={(v) => handleInputChange("matKhau", v)}
+                  placeholder="••••••••"
+                />
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">
+                    Phân quyền
+                  </label>
+                  <div className="relative">
+                    <Shield
+                      className="absolute left-3 top-2.5 text-slate-400"
+                      size={18}
+                    />
+                    <select
+                      className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer"
+                      value={formData.maQuyen}
+                      onChange={(e) =>
+                        handleInputChange("maQuyen", e.target.value)
+                      }
+                    >
+                      {rolesList.map((role) => (
+                        <option key={role.maQuyen} value={role.maQuyen}>
+                          {role.tenQuyen}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+              </div>
+
+              {/* Nhóm 2: Cá nhân */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                  Cá nhân
+                </h3>
+                <InputGroup
+                  icon={<AlignLeft size={18} />}
+                  label="Họ tên"
+                  value={formData.hoTen}
+                  error={errors.hoTen}
+                  onChange={(v) => handleInputChange("hoTen", v)}
+                  placeholder="Nguyễn Văn A"
+                />
+                <InputGroup
+                  icon={<CreditCard size={18} />}
+                  label="Số CMND"
+                  value={formData.cmnd}
+                  error={errors.cmnd}
+                  onChange={(v) => handleInputChange("cmnd", v)}
+                  placeholder="123456789"
+                />
+                <InputGroup
+                  icon={<MapPin size={18} />}
+                  label="Nơi ở"
+                  value={formData.noiO}
+                  error={errors.noiO}
+                  onChange={(v) => handleInputChange("noiO", v)}
+                  placeholder="Địa chỉ thường trú"
+                />
               </div>
             </div>
 
-            {/* Nhóm 2: Thông tin định danh */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                Cá nhân
-              </h3>
-              <InputGroup
-                icon={<AlignLeft size={18} />}
-                label="Họ tên"
-                value={formData.hoTen}
-                error={errors.hoTen}
-                onChange={(v) => handleInputChange("hoTen", v)}
-                placeholder="Nguyễn Văn A"
-              />
-              <InputGroup
-                icon={<CreditCard size={18} />}
-                label="Số CMND"
-                value={formData.cmnd}
-                error={errors.cmnd}
-                onChange={(v) => handleInputChange("cmnd", v)}
-                placeholder="123456789"
-              />
-              <InputGroup
-                icon={<MapPin size={18} />}
-                label="Nơi ở"
-                value={formData.noiO}
-                error={errors.noiO}
-                onChange={(v) => handleInputChange("noiO", v)}
-                placeholder="Địa chỉ thường trú"
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Mô tả (Description)
+              </label>
+              <textarea
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"
+                value={formData.moTa}
+                onChange={(e) => handleInputChange("moTa", e.target.value)}
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">
-              Mô tả (Description)
-            </label>
-            <textarea
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"
-              value={formData.moTa}
-              onChange={(e) => handleInputChange("moTa", e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          {/* 3. FOOTER: Luôn cố định ở đáy Modal (flex-none) */}
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 flex-none bg-white">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-6 py-2.5 font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
             >
               Thoát
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-2.5 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-200 transition-all disabled:opacity-50"
+              className="px-8 py-2.5 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-200 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
             >
               {loading ? "Đang lưu..." : "Lưu"}
             </button>
