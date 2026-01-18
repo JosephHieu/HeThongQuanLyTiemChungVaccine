@@ -14,7 +14,7 @@ import {
 import toast from "react-hot-toast";
 
 // BỔ SUNG: Thêm onSuccess vào props
-const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
+const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
   const [rolesList, setRolesList] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -38,14 +38,17 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
     if (!formData.tenDangNhap) {
       tempErrors.tenDangNhap = "Tên đăng nhập không được để trống";
     } else if (!usernameRegex.test(formData.tenDangNhap)) {
-      tempErrors.tenDangNhap = "Username không được chứa khoảng trắng hoặc dấu";
+      tempErrors.tenDangNhap = "Username không hợp lệ";
     }
 
     // 2. Kiểm tra Mật khẩu: Tối thiểu 6 ký tự
-    if (!formData.matKhau) {
-      tempErrors.matKhau = "Mật khẩu không được để trống";
-    } else if (formData.matKhau.length < 6) {
-      tempErrors.matKhau = "Mật khẩu phải có ít nhất 6 ký tự";
+    // CHỈ KIỂM TRA MẬT KHẨU KHI TẠO MỚI
+    if (!selectedUser) {
+      if (!formData.matKhau) {
+        tempErrors.matKhau = "Mật khẩu không được để trống";
+      } else if (formData.matKhau.length < 6) {
+        tempErrors.matKhau = "Mật khẩu phải có ít nhất 6 ký tự";
+      }
     }
 
     // 3. Kiểm tra CMND: Phải là số và đúng độ dài
@@ -76,14 +79,15 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
       setFormData({
         tenDangNhap: "",
         matKhau: "",
-        maQuyen: "",
+        maQuyen: rolesList[0]?.maQuyen || "",
         hoTen: "",
         cmnd: "",
         noiO: "",
         moTa: "",
       });
+      setErrors({}); // Xóa lỗi khi đóng modal
     }
-  }, [isOpen]);
+  }, [isOpen, rolesList]);
 
   useEffect(() => {
     if (isOpen) {
@@ -96,6 +100,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
             setFormData((prev) => ({ ...prev, maQuyen: data[0].maQuyen }));
           }
         } catch (error) {
+          console.log(error);
           toast.error("Không thể tải danh sách quyền hạn.");
         }
       };
@@ -103,6 +108,29 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
     }
   }, [isOpen]);
 
+  // Khi mở modal, nếu có selectedUser thì điền dữ liệu vào form
+  useEffect(() => {
+    if (isOpen && selectedUser && rolesList.length > 0) {
+      // 1. Lấy tên quyền hiện tại của user (thường là roles[0])
+      const currentRoleName = selectedUser.roles[0];
+
+      // 2. Tìm trong danh sách tất cả quyền (rolesList) để lấy ra mã (maQuyen) tương ứng
+      const matchedRole = rolesList.find((r) => r.tenQuyen === currentRoleName);
+
+      setFormData({
+        tenDangNhap: selectedUser.tenDangNhap,
+        matKhau: "******",
+        // 3. QUAN TRỌNG: Gán maQuyen (mã), không được gán tenQuyen (tên)
+        maQuyen: matchedRole
+          ? matchedRole.maQuyen
+          : rolesList[0]?.maQuyen || "",
+        hoTen: selectedUser.hoTen,
+        cmnd: selectedUser.cmnd,
+        noiO: selectedUser.noiO,
+        moTa: selectedUser.moTa || "",
+      });
+    }
+  }, [isOpen, selectedUser, rolesList]);
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
     if (errors[field]) {
@@ -121,9 +149,19 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
 
     try {
       setLoading(true);
-      await axiosClient.post("/users/create", formData);
-      toast.success("Tạo tài khoản thành công!");
-      onSuccess();
+      if (selectedUser) {
+        // GỌI API PUT ĐỂ SỬA
+        await axiosClient.put(`/users/${selectedUser.maTaiKhoan}`, formData);
+        toast.success("Cập nhật thành công!", {
+          duration: 3000,
+          position: "top-right",
+        });
+      } else {
+        // GỌI API POST ĐỂ THÊM
+        await axiosClient.post("/users/create", formData);
+        toast.success("Tạo mới thành công!");
+      }
+      if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
       const apiError = error.response?.data;
@@ -151,9 +189,10 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
       {/* MODAL BOX: Khung chính của Modal */}
       <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col">
         {/* 1. HEADER: Cố định (flex-none) */}
+        {/* Tiêu đề động */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 flex-none">
           <h2 className="text-xl font-bold text-slate-800">
-            Tạo tài khoản mới
+            {selectedUser ? "Cập nhật tài khoản" : "Tạo tài khoản mới"}
           </h2>
           <button
             onClick={onClose}
@@ -182,17 +221,21 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
                   value={formData.tenDangNhap}
                   error={errors.tenDangNhap}
                   onChange={(v) => handleInputChange("tenDangNhap", v)}
+                  disabled={!!selectedUser} // Khóa nếu đang sửa
                   placeholder="Tên đăng nhập"
                 />
-                <InputGroup
-                  icon={<Lock size={18} />}
-                  label="Password"
-                  type="password"
-                  value={formData.matKhau}
-                  error={errors.matKhau}
-                  onChange={(v) => handleInputChange("matKhau", v)}
-                  placeholder="••••••••"
-                />
+                {/* ẨN MẬT KHẨU KHI SỬA */}
+                {!selectedUser && (
+                  <InputGroup
+                    icon={<Lock size={18} />}
+                    label="Password"
+                    type="password"
+                    value={formData.matKhau}
+                    error={errors.matKhau}
+                    onChange={(v) => handleInputChange("matKhau", v)}
+                    placeholder="••••••••"
+                  />
+                )}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700">
                     Phân quyền
@@ -294,6 +337,7 @@ const InputGroup = ({
   onChange,
   placeholder,
   error,
+  disabled,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = type === "password";
@@ -314,12 +358,13 @@ const InputGroup = ({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           // Thêm border đỏ nếu có lỗi
-          className={`w-full pl-10 pr-10 py-2 bg-slate-50 border rounded-xl outline-none transition-all ${
-            error
-              ? "border-red-500 focus:ring-2 focus:ring-red-100"
-              : "border-slate-200 focus:ring-2 focus:ring-blue-500"
-          }`}
+          className={`w-full pl-10 pr-10 py-2 border rounded-xl outline-none transition-all ${
+            disabled
+              ? "bg-slate-100 text-slate-400 opacity-70 cursor-not-allowed border-slate-200"
+              : "bg-slate-50 border-slate-200 focus:ring-2 focus:ring-blue-500 text-slate-700"
+          } ${error ? "border-red-500 focus:ring-red-100" : ""}`}
         />
 
         {isPasswordField && (

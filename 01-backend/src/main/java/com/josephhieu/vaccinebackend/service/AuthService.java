@@ -112,6 +112,12 @@ public class AuthService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
+        // --- BỔ SUNG: Kiểm tra tài khoản có bị khóa hay không ---
+        // Nếu trangThai == false nghĩa là tài khoản bị khóa
+        if (!user.isTrangThai()) {
+            throw new AppException(ErrorCode.USER_LOCKED);
+        }
+
         // 3. Lấy danh sách quyền hạn để trả về
         Set<String> roles = user.getChiTietPhanQuyens().stream()
                 .map(ct -> ct.getPhanQuyen().getTenQuyen())

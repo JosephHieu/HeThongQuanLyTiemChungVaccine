@@ -21,9 +21,9 @@ const Login = () => {
         {
           tenDangNhap: username,
           matKhau: password,
-        }
+        },
       );
-
+      // Backend trả về code 1000 cho thành công
       if (response.data.code === 1000) {
         const { token, roles, hoTen } = response.data.result;
         localStorage.setItem("token", token);
@@ -38,9 +38,13 @@ const Login = () => {
         }
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        toast.error("Sai username hoặc password.");
+      const apiError = error.response?.data;
+
+      if (apiError && apiError.message) {
+        // Hiển thị trực tiếp message từ Backend (Ví dụ: "Tài khoản của bạn đã bị khóa...")
+        toast.error(apiError.message);
       } else {
+        // Trường hợp lỗi mạng hoặc server không phản hồi theo chuẩn
         toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
       }
     } finally {

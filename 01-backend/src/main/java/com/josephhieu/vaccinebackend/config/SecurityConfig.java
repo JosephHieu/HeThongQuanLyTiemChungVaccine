@@ -44,10 +44,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()) // Đăng ký bộ xác thực
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("api/admin/**").hasAuthority("Administrator")
                         .requestMatchers("/api/roles/**").hasAuthority("Administrator")
-                        .requestMatchers("/api/user/**").hasAuthority("Administrator")
+                        .requestMatchers("/api/users/**").hasAuthority("Administrator")
                         .requestMatchers("/api/kho/**").hasAnyAuthority("Administrator", "Quản lý kho")
                         .anyRequest().authenticated()
                 )
@@ -88,7 +88,7 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // URL của Frontend
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
 

@@ -27,4 +27,6 @@ public class UserResponse {
     private Set<String> roles;
 
     private String token;
+
+    private boolean trangThai;
 }

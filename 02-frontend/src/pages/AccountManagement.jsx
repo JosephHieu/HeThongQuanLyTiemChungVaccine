@@ -6,8 +6,11 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import CreateUserModal from "../components/modals/CreateUserModal";
+import ConfirmModal from "../components/modals/ConfirmModal";
 import axiosClient from "../api/axiosClient";
 import toast from "react-hot-toast";
 
@@ -15,6 +18,11 @@ const AccountManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null); // Để lưu user khi nhấn Sửa
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [userToToggle, setUserToToggle] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   // Trạng thái phân trang khớp với PageResponse ở Backend
   const [pagination, setPagination] = useState({
@@ -24,13 +32,48 @@ const AccountManagement = () => {
     totalElements: 0,
   });
 
+  // Khi nhấn vào nút Khóa/Mở khóa trên bảng
+  const handleToggleClick = (user) => {
+    setUserToToggle(user);
+    setIsConfirmOpen(true);
+  };
+
+  // Khi nhấn xác nhận trong Modal đẹp
+  const confirmToggleStatus = async () => {
+    if (!userToToggle) return;
+
+    try {
+      setConfirmLoading(true);
+      await axiosClient.patch(
+        `/users/${userToToggle.maTaiKhoan}/toggle-status`,
+      );
+
+      // THÔNG BÁO ĐẸP SAU KHI XONG
+      const action = userToToggle.trangThai ? "khóa" : "mở khóa";
+      toast.success(
+        `Tài khoản ${userToToggle.tenDangNhap} đã được ${action}!`,
+        {
+          icon: userToToggle.trangThai ? "🔒" : "🔓",
+          style: { borderRadius: "12px", background: "#333", color: "#fff" },
+        },
+      );
+
+      setIsConfirmOpen(false);
+      fetchUsers(pagination.currentPage); // Tải lại danh sách
+    } catch (error) {
+      toast.error("Không thể cập nhật trạng thái.");
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
   // Hàm lấy dữ liệu từ Backend
   const fetchUsers = useCallback(
     async (page = 1) => {
       setLoading(true);
       try {
         const response = await axiosClient.get(
-          `/users?page=${page}&size=${pagination.pageSize}`
+          `/users?page=${page}&size=${pagination.pageSize}`,
         );
         const { data, totalPages, currentPage, totalElements } =
           response.data.result;
@@ -48,8 +91,13 @@ const AccountManagement = () => {
         setLoading(false);
       }
     },
-    [pagination.pageSize]
+    [pagination.pageSize],
   );
+
+  const handleEditClick = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
 
   // Load dữ liệu khi trang web vừa mở
   useEffect(() => {
@@ -59,7 +107,8 @@ const AccountManagement = () => {
   // Xử lý sau khi thêm User thành công (để danh sách tự cập nhật)
   const handleCreateSuccess = () => {
     setIsModalOpen(false);
-    fetchUsers(1); // Tải lại trang đầu tiên để thấy người dùng mới nhất
+    setSelectedUser(null); // BỔ SUNG: Reset lại selectedUser sau khi xong
+    fetchUsers(pagination.currentPage);
   };
 
   return (
@@ -75,7 +124,10 @@ const AccountManagement = () => {
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setSelectedUser(null); // BỔ SUNG: Reset lại selectedUser khi tạo mới
+            setIsModalOpen(true);
+          }}
           className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-xl
              hover:bg-blue-700 transition-all cursor-pointer"
         >
@@ -100,6 +152,9 @@ const AccountManagement = () => {
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
                   Quyền hạn
                 </th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">
+                  Trạng thái
+                </th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">
                   Thao tác
                 </th>
@@ -108,7 +163,7 @@ const AccountManagement = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="text-center py-10 text-slate-400">
+                  <td colSpan="5" className="text-center py-10 text-slate-400">
                     Đang tải dữ liệu...
                   </td>
                 </tr>
@@ -116,7 +171,11 @@ const AccountManagement = () => {
                 users.map((user) => (
                   <tr
                     key={user.maTaiKhoan}
-                    className="hover:bg-blue-50/30 transition-colors group"
+                    className={
+                      !user.trangThai
+                        ? "opacity-60 bg-slate-50/50"
+                        : "hover:bg-slate-50/50"
+                    }
                   >
                     <td className="px-6 py-4 font-medium text-slate-700">
                       {user.tenDangNhap}
@@ -135,6 +194,37 @@ const AccountManagement = () => {
                       </div>
                     </td>
                     {/* Các nút Thao tác giữ nguyên */}
+
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${user.trangThai ? "bg-green-100 text-green-600" : "bg-rose-100 text-rose-600"}`}
+                      >
+                        {user.trangThai ? "Hoạt động" : "Bị khóa"}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleEditClick(user)}
+                          className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg cursor-pointer"
+                          title="Sửa"
+                        >
+                          <ShieldCheck size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleToggleClick(user)}
+                          className={`p-2 rounded-lg cursor-pointer ${user.trangThai ? "text-amber-500 hover:bg-amber-50" : "text-green-500 hover:bg-green-50"}`}
+                          title={user.trangThai ? "Khóa" : "Mở khóa"}
+                        >
+                          {user.trangThai ? (
+                            <Lock size={18} />
+                          ) : (
+                            <Unlock size={18} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
@@ -142,7 +232,7 @@ const AccountManagement = () => {
           </table>
         </div>
 
-        {/* BỔ SUNG: THANH ĐIỀU KHIỂN PHÂN TRANG */}
+        {/* PHÂN TRANG */}
         <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-100">
           <p className="text-sm text-slate-500">
             Trang {pagination.currentPage} trên {pagination.totalPages}
@@ -168,8 +258,35 @@ const AccountManagement = () => {
 
       <CreateUserModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedUser(null); // BỔ SUNG: Reset lại selectedUser khi đóng modal
+        }}
         onSuccess={handleCreateSuccess} // Truyền callback để refresh dữ liệu
+        selectedUser={selectedUser} // BỔ SUNG: Truyền selectedUser vào đây
+      />
+
+      {/* Modal Xác nhận Khóa (Chỉ đặt 1 cái duy nhất ở ngoài vòng lặp) */}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmToggleStatus}
+        loading={confirmLoading}
+        type={userToToggle?.trangThai ? "warning" : "success"}
+        title={
+          userToToggle
+            ? userToToggle.trangThai
+              ? "Khóa tài khoản"
+              : "Mở khóa tài khoản"
+            : ""
+        }
+        message={
+          userToToggle
+            ? userToToggle.trangThai
+              ? `Bạn có chắc chắn muốn khóa tài khoản "${userToToggle.tenDangNhap}"?`
+              : `Bạn muốn mở khóa cho tài khoản "${userToToggle.tenDangNhap}"?`
+            : ""
+        }
       />
     </div>
   );

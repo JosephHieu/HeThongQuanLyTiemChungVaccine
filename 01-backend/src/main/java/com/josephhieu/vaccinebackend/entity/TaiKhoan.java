@@ -2,7 +2,10 @@ package com.josephhieu.vaccinebackend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -71,4 +74,15 @@ public class TaiKhoan {
     @OneToMany(mappedBy = "taiKhoan")
     @Builder.Default
     private Set<ChiTietPhanQuyen> chiTietPhanQuyens = new HashSet<>();
+
+    @Column(name = "TrangThai")
+    private boolean trangThai = true;
+
+    @CreationTimestamp
+    @Column(name = "NgayTao", updatable = false)
+    private LocalDateTime ngayTao;
+
+    @UpdateTimestamp
+    @Column(name = "NgayCapNhat")
+    private LocalDateTime ngayCapNhat;
 }

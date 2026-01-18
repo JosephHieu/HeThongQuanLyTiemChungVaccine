@@ -13,7 +13,9 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Lỗi chưa phân loại", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_EXISTED(1001, "Tên đăng nhập đã tồn tại!", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "Người dùng không tồn tại", HttpStatus.NOT_FOUND),
-    UNAUTHENTICATED(1006, "Sai username / password", HttpStatus.UNAUTHORIZED),
+    ROLE_NOT_FOUND(1006, "Quyền hạn không tồn tại!", HttpStatus.BAD_REQUEST),
+    UNAUTHENTICATED(1009, "Sai username / password", HttpStatus.UNAUTHORIZED),
+    USER_LOCKED(1007, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.", HttpStatus.FORBIDDEN),
     MISSING_INFO(1008, "Vui lòng nhập đầy đủ thông tin", HttpStatus.BAD_REQUEST);
     ;
 

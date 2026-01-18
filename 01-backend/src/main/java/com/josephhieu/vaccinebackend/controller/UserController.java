@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 /**
  * Controller xử lý các nghiệp vụ liên quan đến tài khoản người dùng.
  */
@@ -44,6 +46,25 @@ public class UserController {
         return ApiResponse.<PageResponse<UserResponse>>builder()
                 .code(1000)
                 .result(userService.getAllUsers(page, size)) // Gọi service đã xử lý PageResponse
+                .build();
+    }
+
+    // Api Sửa thông tin
+    @PutMapping("/{id}")
+    public ApiResponse<UserResponse> updateUser(@PathVariable UUID id, @RequestBody @Valid UserCreationRequest request) {
+
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(id, request))
+                .build();
+    }
+
+    // API Khóa/ Mở khóa
+    @PatchMapping("/{id}/toggle-status")
+    public ApiResponse<String> toggleStatus(@PathVariable UUID id) {
+
+        userService.toggleLock(id);
+        return ApiResponse.<String>builder()
+                .result("Cập nhật trạng thái thành công")
                 .build();
     }
 }

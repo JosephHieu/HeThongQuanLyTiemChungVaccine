@@ -13,6 +13,12 @@ const userApi = {
   getRoles: () => {
     return axiousClient.get("/roles");
   },
+
+  // API Sửa: PUT /api/users/{id}
+  update: (id, data) => axiousClient.put(`/users/${id}`, data),
+
+  // API Khóa/Mở khóa: PATCH /api/users/{id}/toggle-status
+  toggleStatus: (id) => axiousClient.patch(`/users/${id}/toggle-status`),
 };
 
 export default userApi;

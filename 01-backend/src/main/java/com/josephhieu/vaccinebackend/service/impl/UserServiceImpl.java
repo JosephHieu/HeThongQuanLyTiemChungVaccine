@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
                         .map(ct -> ct.getPhanQuyen().getTenQuyen())
                         .collect(Collectors.toSet()))
                 .token(null)
+                .trangThai(taiKhoan.isTrangThai())
                 .build();
     }
 
@@ -115,4 +116,53 @@ public class UserServiceImpl implements UserService {
                 .data(users)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public UserResponse updateUser(UUID id, UserCreationRequest request) {
+
+        // 1. Tìm tài khoản hiện có
+        TaiKhoan taiKhoan = taiKhoanRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // 2. Cập nhật thông tin cơ bản
+        taiKhoan.setHoTen(request.getHoTen());
+        taiKhoan.setCmnd(request.getCmnd());
+        taiKhoan.setNoiO(request.getNoiO());
+        taiKhoan.setMoTa(request.getMoTa());
+
+        // 3. Xử lý cập nhật quyền
+        // Xóa quyền cũ
+        chiTietPhanQuyenRepository.deleteByTaiKhoan(taiKhoan);
+
+        // Chuyển String sang UUID
+        UUID roleId = UUID.fromString(request.getMaQuyen());
+        PhanQuyen phanQuyenMoi = phanQuyenRepository.findById(roleId)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+
+        // Khởi tạo khóa phức hợp (EmbeddedId)
+        ChiTietPhanQuyenId compositeId = new ChiTietPhanQuyenId(roleId, taiKhoan.getMaTaiKhoan());
+
+        ChiTietPhanQuyen chiTietMoi = ChiTietPhanQuyen.builder()
+                .id(compositeId) // Gán ID phức hợp
+                .taiKhoan(taiKhoan)
+                .phanQuyen(phanQuyenMoi)
+                .build();
+
+        chiTietPhanQuyenRepository.save(chiTietMoi);
+
+        return mapToUserResponse(taiKhoanRepository.save(taiKhoan));
+    }
+
+    @Override
+    @Transactional
+    public void toggleLock(UUID id) {
+
+        TaiKhoan taiKhoan = taiKhoanRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        taiKhoan.setTrangThai(!taiKhoan.isTrangThai());
+        taiKhoanRepository.save(taiKhoan);
+    }
+
 }
