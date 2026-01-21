@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()) // Đăng ký bộ xác thực
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("api/admin/**").hasAuthority("Administrator")
                         .requestMatchers("/api/roles/**").hasAuthority("Administrator")
                         .requestMatchers("/api/users/**").hasAuthority("Administrator")
