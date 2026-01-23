@@ -25,6 +25,7 @@ const Dashboard = () => {
       icon: <Warehouse />,
       color: "bg-green-500",
       desc: "Quản lý vắc-xin, lô hàng và tồn kho.",
+      path: "/admin/warehouse",
     },
     {
       title: "Nhân viên y tế",

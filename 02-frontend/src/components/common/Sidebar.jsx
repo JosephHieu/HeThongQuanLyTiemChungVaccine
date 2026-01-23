@@ -8,6 +8,7 @@ import {
   Info,
   LogOut,
   LayoutDashboard,
+  Warehouse,
 } from "lucide-react";
 
 const Sidebar = () => {

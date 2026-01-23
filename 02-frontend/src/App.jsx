@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AccountManagement from "./pages/AccountManagement";
 import ScheduleManagement from "./pages/Vaccination/ScheduleManagement";
+import InventoryManagement from "./pages/Inventory/InventoryManagement";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -54,10 +55,7 @@ function App() {
 
           <Route path="schedules" element={<ScheduleManagement />} />
 
-          <Route
-            path="warehouse"
-            element={<Placeholder title="Quản lý kho bãi (Kho bãi)" />}
-          />
+          <Route path="warehouse" element={<InventoryManagement />} />
           <Route path="reports" element={<Placeholder title="Báo cáo" />} />
           <Route
             path="moderator"
