@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Wallet,
   Warehouse,
@@ -9,6 +10,8 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   // Dữ liệu hiển thị dựa trên Screen Content trong tài liệu
   const adminFunctions = [
     {
@@ -40,6 +43,7 @@ const Dashboard = () => {
       icon: <Calendar />,
       color: "bg-rose-500",
       desc: "Theo dõi và điều chỉnh lịch tiêm trung tâm.",
+      path: "/admin/schedules",
     },
     {
       title: "Feedback",
@@ -64,6 +68,7 @@ const Dashboard = () => {
         {adminFunctions.map((item, index) => (
           <div
             key={index}
+            onClick={() => item.path && navigate(item.path)}
             className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer"
           >
             <div
