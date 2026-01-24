@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface LoVacXinRepository extends JpaRepository<LoaiVacXin, UUID> {
+public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
 
     // Tìm kiếm xuyên bảng: LoVacXin -> VacXin -> LoaiVacXin
     @Query("SELECT l FROM LoVacXin l JOIN l.vacXin v JOIN v.loaiVacXin lv WHERE " +

@@ -16,7 +16,14 @@ public enum ErrorCode {
     ROLE_NOT_FOUND(1006, "Quyền hạn không tồn tại!", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1009, "Sai username / password", HttpStatus.UNAUTHORIZED),
     USER_LOCKED(1007, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.", HttpStatus.FORBIDDEN),
-    MISSING_INFO(1008, "Vui lòng nhập đầy đủ thông tin", HttpStatus.BAD_REQUEST);
+    MISSING_INFO(1008, "Vui lòng nhập đầy đủ thông tin", HttpStatus.BAD_REQUEST),
+
+    // INVENTORY ERRORS (1100 - 1199)
+    INVENTORY_NOT_FOUND(1101, "Lô vắc-xin không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1102, "Số lượng tồn kho không đủ để thực hiện xuất", HttpStatus.BAD_REQUEST),
+    VACCINE_TYPE_NOT_FOUND(1103, "Loại vắc-xin không hợp lệ", HttpStatus.BAD_REQUEST),
+    SUPPLIER_NOT_FOUND(1104, "Nhà cung cấp không tồn tại", HttpStatus.NOT_FOUND),
+    INVALID_IMPORT_QUANTITY(1105, "Số lượng nhập kho phải lớn hơn 0", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

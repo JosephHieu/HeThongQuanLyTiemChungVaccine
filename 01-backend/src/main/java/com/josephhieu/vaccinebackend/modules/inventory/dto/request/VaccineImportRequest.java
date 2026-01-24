@@ -27,7 +27,7 @@ public class VaccineImportRequest {
 
     // Thông tin bảng LOVACXIN
     private String maLo; // Số lô nhập từ màn hình
-    private String maNhaCungCap; // UUID
+    private UUID maNhaCungCap; // UUID
     private Integer soLuong;
     private LocalDate ngayNhan;
     private String nuocSanXuat;

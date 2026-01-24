@@ -1,51 +1,80 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ImportVaccineModal from "./components/ImportVaccineModal";
 import { useNavigate } from "react-router-dom";
 import ExportVaccine from "./components/ExportVaccine";
+import inventoryApi from "../../api/inventoryApi";
+
 import {
   Search,
   Package,
   AlertTriangle,
   CheckCircle,
-  Filter,
-  Download,
   Plus,
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const InventoryManagement = () => {
   const navigate = useNavigate();
+
+  // States cho dữ liệu và giao diện
+  const [inventory, setInventory] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("view");
-  const [searchCriteria, setSearchCriteria] = useState("name");
 
-  // Dữ liệu mẫu (sau này sẽ lấy từ API)
-  const mockInventory = [
-    {
-      code: "11357",
-      name: "Phòng bệnh lao",
-      type: "BCG",
-      amount: "500",
-      expiry: "1 năm",
-      status: "Còn",
-    },
-    {
-      code: "23456",
-      name: "Phòng Viêm gan B",
-      type: "ENGERIX B",
-      amount: "0",
-      expiry: "1 năm",
-      status: "Hết",
-    },
-  ];
+  // States cho Phân trang & Tìm kiếm
+  const [searchCriteria, setSearchCriteria] = useState("name");
+  const [searchValue, setSearchValue] = useState("");
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
+  // 1. Hàm lấy dữ liệu từ API
+  const fetchInventory = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await inventoryApi.getInventory(
+        searchCriteria,
+        searchValue,
+        page,
+        10,
+      );
+      // Backend trả về object Page: { content, totalPages, totalElements, ... }
+      setInventory(data.content || []);
+      setTotalPages(data.totalPages || 0);
+      setTotalElements(data.totalElements || 0);
+    } catch (error) {
+      toast.error(error || "Không thể tải dữ liệu kho");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchCriteria, searchValue, page]);
+
+  // Gọi API khi component mount hoặc thay đổi trang/ tìm kiếm
+  useEffect(() => {
+    fetchInventory();
+  }, [fetchInventory]);
+
+  // Xử lý khi nhấn nút Tìm kiếm
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(0); // Quay về trang đầu tiên khi tìm kiếm
+    fetchInventory();
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    // Cuộn nhẹ lên đầu trang để người dùng thấy dữ liệu mới
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* 1. HEADER */}
-
       <header className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
         <button
           onClick={() => navigate("/admin/dashboard")} // Quay về dashboard
@@ -101,25 +130,28 @@ const InventoryManagement = () => {
             <StatCard
               icon={<Package className="text-blue-600" />}
               label="Tổng tồn kho"
-              value="1,500 liều"
+              value={totalElements}
               color="bg-blue-50"
             />
             <StatCard
               icon={<AlertTriangle className="text-amber-600" />}
-              label="Sắp hết hạn"
-              value="2 lô"
+              label="Lô sắp hết hạn"
+              value="--"
               color="bg-amber-50"
             />
             <StatCard
               icon={<CheckCircle className="text-green-600" />}
               label="Tình trạng"
-              value="Ổn định"
+              value="Sẵn sàng"
               color="bg-green-50"
             />
           </div>
 
           {/* SEARCH & FILTER */}
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center">
+          <form
+            onClick={handleSearch}
+            className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center"
+          >
             <div className="relative flex-1 w-full">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -127,6 +159,8 @@ const InventoryManagement = () => {
               />
               <input
                 type="text"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Tìm kiếm nhanh..."
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               />
@@ -135,23 +169,36 @@ const InventoryManagement = () => {
               <span className="text-[10px] font-black text-slate-400 uppercase">
                 Lọc:
               </span>
-              <select className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer py-2">
-                <option>Tên vắc-xin</option>
-                <option>Mã lô</option>
+              <select
+                value={searchCriteria}
+                onChange={(e) => setSearchCriteria(e.target.value)}
+                className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer py-2"
+              >
+                <option value="name">Tên vắc-xin</option>
+                <option value="type">Loại vắc-xin</option>
+                <option value="origin">Nước sản xuất</option>
               </select>
             </div>
-            <button className="w-full md:w-auto px-8 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all">
+            <button
+              type="submit"
+              className="w-full md:w-auto px-8 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all"
+            >
               Tìm kiếm
             </button>
-          </div>
+          </form>
 
           {/* TABLE & PAGINATION */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative">
+            {loading && (
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            )}
             <table className="w-full text-left">
               <thead className="bg-slate-50/50 border-b border-slate-100">
                 <tr>
                   <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">
-                    Mã lô
+                    Mã lô (ID)
                   </th>
                   <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">
                     Thông tin vắc-xin
@@ -166,28 +213,58 @@ const InventoryManagement = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {mockInventory.map((row, idx) => (
-                  <InventoryRow key={idx} {...row} />
-                ))}
+                {inventory.length > 0 ? (
+                  inventory.map((item) => (
+                    <InventoryRow key={item.maLo} data={item} />
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="p-10 text-center text-slate-400 font-medium"
+                    >
+                      Không tìm thấy dữ liệu phù hợp
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
-            {/* PHÂN TRANG */}
+            {/* PAGINATION */}
             <div className="p-4 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
               <span className="text-xs font-bold text-slate-400">
-                Hiển thị 2 trong số 150 kết quả
+                Trang {page + 1} / {totalPages} (Tổng {totalElements} kết quả)
               </span>
               <div className="flex items-center gap-1">
-                <button className="p-2 hover:bg-white rounded-lg transition-all text-slate-400">
+                <button
+                  disabled={page === 0}
+                  onClick={() => handlePageChange(page - 1)}
+                  className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 disabled:opacity-30"
+                >
                   <ChevronLeft size={16} />
                 </button>
-                <button className="w-8 h-8 bg-blue-600 text-white rounded-lg text-xs font-bold shadow-md shadow-blue-100">
-                  1
-                </button>
-                <button className="w-8 h-8 hover:bg-white text-slate-500 rounded-lg text-xs font-bold transition-all">
-                  2
-                </button>
-                <button className="p-2 hover:bg-white rounded-lg transition-all text-slate-400">
+
+                {/* Các nút số trang */}
+                {[...Array(totalPages)]
+                  .map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handlePageChange(i)}
+                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                        page === i
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-100"
+                          : "hover:bg-white text-slate-500"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))
+                  .slice(Math.max(0, page - 2), Math.min(totalPages, page + 3))}
+                <button
+                  disabled={page >= totalPages - 1}
+                  onClick={() => handlePageChange(page + 1)}
+                  className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 disabled:opacity-30"
+                >
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -196,7 +273,7 @@ const InventoryManagement = () => {
         </div>
       ) : (
         <div className="animate-in slide-in-from-right-4 duration-500">
-          <ExportVaccine inventoryData={mockInventory} />
+          <ExportVaccine onExportSuccess={fetchInventory} />
         </div>
       )}
 
@@ -204,6 +281,7 @@ const InventoryManagement = () => {
       <ImportVaccineModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchInventory} // Load lại data khi nhập kho thành công
       />
     </div>
   );
@@ -225,28 +303,63 @@ const StatCard = ({ icon, label, value, color }) => (
 );
 
 // Component con cho dòng trong bảng
-const InventoryRow = ({ code, name, type, amount, expiry, status }) => (
-  <tr className="hover:bg-slate-50/50 transition-colors group">
-    <td className="p-4 text-sm font-bold text-slate-700">{code}</td>
-    <td className="p-4">
-      <p className="text-sm font-bold text-slate-800">{name}</p>
-      <p className="text-[10px] text-slate-400 font-medium uppercase">{type}</p>
-    </td>
-    <td className="p-4 text-sm font-medium text-slate-600">{amount} liều</td>
-    <td className="p-4 text-sm text-slate-500">{expiry}</td>
-    <td className="p-4 text-center">
-      <span
-        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${status === "Còn" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+const InventoryRow = ({ data }) => {
+  // Map dữ liệu từ InventoryResponse của Backend
+  const {
+    maLo,
+    tenVacXin,
+    tenLoaiVacXin,
+    soLuong,
+    hanSuDung,
+    tinhTrang,
+    nuocSanXuat,
+  } = data;
+
+  return (
+    <tr className="hover:bg-slate-50/50 transition-colors group">
+      <td
+        className="p-4 text-[10px] font-mono font-bold text-slate-400 truncate max-w-[100px]"
+        title={maLo}
       >
-        {status}
-      </span>
-    </td>
-    <td className="p-4 text-right">
-      <button className="p-2 text-slate-400 hover:text-slate-800 transition-colors">
-        <MoreHorizontal size={18} />
-      </button>
-    </td>
-  </tr>
-);
+        {maLo ? maLo.substring(0, 8) : "N/A"}...
+      </td>
+      <td className="p-4">
+        <p className="text-sm font-bold text-slate-800">{tenVacXin}</p>
+        <div className="flex gap-2 mt-1">
+          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase">
+            {tenLoaiVacXin}
+          </span>
+          <span className="text-[9px] bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded font-bold uppercase">
+            {nuocSanXuat}
+          </span>
+        </div>
+      </td>
+      <td className="p-4">
+        <p className="text-sm font-bold text-slate-700">
+          {soLuong.toLocaleString()} liều
+        </p>
+        <p className="text-[10px] text-slate-400">
+          HSD: {new Date(hanSuDung).toLocaleDateString("vi-VN")}
+        </p>
+      </td>
+      <td className="p-4 text-center">
+        <span
+          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+            tinhTrang === "Còn"
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
+          {tinhTrang}
+        </span>
+      </td>
+      <td className="p-4 text-right">
+        <button className="p-2 text-slate-400 hover:text-slate-800 transition-colors">
+          <MoreHorizontal size={18} />
+        </button>
+      </td>
+    </tr>
+  );
+};
 
 export default InventoryManagement;
