@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,9 +25,14 @@ public class UserResponse {
     private String noiO;
     private String moTa;
     private String email;
+    private String sdt;
     private Set<String> roles;
 
     private String token;
 
     private boolean trangThai;
+
+    private LocalDate ngaySinh;
+    private String gioiTinh;
+    private String nguoiGiamHo;
 }

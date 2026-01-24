@@ -23,4 +23,18 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, UUID> {
     Page<TaiKhoan> findAll(Pageable pageable);
 
     boolean existsByTenDangNhap(String tenDangNhap);
+
+    @Query("SELECT DISTINCT t FROM TaiKhoan t " +
+            "JOIN t.chiTietPhanQuyens ct " +
+            "WHERE (:maQuyen IS NULL OR ct.phanQuyen.maQuyen = :maQuyen)")
+    Page<TaiKhoan> findAllByRole(@Param("maQuyen") UUID maQuyen, Pageable pageable);
+
+    @Query("SELECT DISTINCT t FROM TaiKhoan t " +
+            "LEFT JOIN t.chiTietPhanQuyens ct " +
+            "WHERE (:search IS NULL OR LOWER(t.tenDangNhap) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(t.hoTen) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (:maQuyen IS NULL OR ct.phanQuyen.maQuyen = :maQuyen)")
+    Page<TaiKhoan> findAllWithFilter(@Param("search") String search,
+                                     @Param("maQuyen") UUID maQuyen,
+                                     Pageable pageable);
 }

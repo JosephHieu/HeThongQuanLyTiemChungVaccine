@@ -11,6 +11,10 @@ import {
   AlignLeft,
   Eye,
   EyeOff,
+  Mail,
+  Phone,
+  Calendar,
+  UserCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -29,46 +33,56 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
     cmnd: "", // Backend: cmnd
     noiO: "", // Backend: noiO
     moTa: "", // Backend: moTa
+
+    // TRƯỜNG BỔ SUNG CHO BỆNH NHÂN
+    email: "",
+    sdt: "",
+    ngaySinh: "",
+    gioiTinh: "",
+    nguoiGiamHo: "",
   });
+
+  // Xác định xem có phải đang chọn quyền Bệnh nhân không
+  const selectedRole = rolesList.find((r) => r.maQuyen === formData.maQuyen);
+  const isPatient = selectedRole?.tenQuyen === "Normal User Account";
 
   // Hàm kiểm tra dữ liệu trước khi gửi (Client-side validation)
   const validate = () => {
     let tempErrors = {};
-    // 1. Kiểm tra Username: Không dấu, không khoảng trắng
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
-    if (!formData.tenDangNhap) {
+
+    // Validation cơ bản (giữ nguyên của bạn)
+    if (!formData.tenDangNhap)
       tempErrors.tenDangNhap = "Tên đăng nhập không được để trống";
-    } else if (!usernameRegex.test(formData.tenDangNhap)) {
+    else if (!usernameRegex.test(formData.tenDangNhap))
       tempErrors.tenDangNhap = "Username không hợp lệ";
+
+    if (!selectedUser && (!formData.matKhau || formData.matKhau.length < 6)) {
+      tempErrors.matKhau = "Mật khẩu phải có ít nhất 6 ký tự";
     }
 
-    // 2. Kiểm tra Mật khẩu: Tối thiểu 6 ký tự
-    // CHỈ KIỂM TRA MẬT KHẨU KHI TẠO MỚI
-    if (!selectedUser) {
-      if (!formData.matKhau) {
-        tempErrors.matKhau = "Mật khẩu không được để trống";
-      } else if (formData.matKhau.length < 6) {
-        tempErrors.matKhau = "Mật khẩu phải có ít nhất 6 ký tự";
-      }
-    }
-
-    // 3. Kiểm tra CMND: Phải là số và đúng độ dài
     const cmndRegex = /^[0-9]{9,12}$/;
-    if (!formData.cmnd) {
-      tempErrors.cmnd = "Vui lòng nhập số CMND";
-    } else if (!cmndRegex.test(formData.cmnd)) {
+    if (!formData.cmnd || !cmndRegex.test(formData.cmnd)) {
       tempErrors.cmnd = "CMND phải là số và có từ 9 đến 12 chữ số";
     }
 
-    // 4. Kiểm tra Họ tên: Không chứa số
-    const nameRegex = /^[^0-9]*$/;
-    if (!formData.hoTen) {
-      tempErrors.hoTen = "Vui lòng nhập họ tên";
-    } else if (!nameRegex.test(formData.hoTen)) {
-      tempErrors.hoTen = "Họ tên không được chứa chữ số";
-    }
-
+    if (!formData.hoTen) tempErrors.hoTen = "Vui lòng nhập họ tên";
     if (!formData.noiO) tempErrors.noiO = "Vui lòng nhập nơi ở";
+
+    // VALIDATION RIÊNG CHO BỆNH NHÂN
+    if (isPatient) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!formData.email) tempErrors.email = "Email không được để trống";
+      else if (!emailRegex.test(formData.email))
+        tempErrors.email = "Email không hợp lệ";
+
+      if (!formData.sdt) tempErrors.sdt = "Số điện thoại không được để trống";
+      else if (!/^[0-9]{10}$/.test(formData.sdt))
+        tempErrors.sdt = "SĐT phải gồm 10 chữ số";
+
+      if (!formData.ngaySinh) tempErrors.ngaySinh = "Vui lòng chọn ngày sinh";
+      if (!formData.gioiTinh) tempErrors.gioiTinh = "Vui lòng chọn giới tính";
+    }
 
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -85,8 +99,13 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
         cmnd: "",
         noiO: "",
         moTa: "",
+        email: "",
+        sdt: "",
+        ngaySinh: "",
+        gioiTinh: "",
+        nguoiGiamHo: "",
       });
-      setErrors({}); // Xóa lỗi khi đóng modal
+      setErrors({});
     }
   }, [isOpen, rolesList]);
 
@@ -128,14 +147,20 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
         cmnd: selectedUser.cmnd,
         noiO: selectedUser.noiO,
         moTa: selectedUser.moTa || "",
+
+        // BỔ SUNG CÁC TRƯỜNG NÀY ĐỂ KHI SỬA NÓ HIỆN LÊN FORM
+        email: selectedUser.email || "",
+        sdt: selectedUser.sdt || "",
+        ngaySinh: selectedUser.ngaySinh || "",
+        gioiTinh: selectedUser.gioiTinh || "",
+        nguoiGiamHo: selectedUser.nguoiGiamHo || "",
       });
     }
   }, [isOpen, selectedUser, rolesList]);
+
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
-    }
+    if (errors[field]) setErrors({ ...errors, [field]: "" });
   };
 
   const handleSubmit = async (e) => {
@@ -152,10 +177,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
       if (selectedUser) {
         // GỌI API PUT ĐỂ SỬA
         await axiosClient.put(`/users/${selectedUser.maTaiKhoan}`, formData);
-        toast.success("Cập nhật thành công!", {
-          duration: 3000,
-          position: "top-right",
-        });
+        toast.success("Cập nhật thành công!");
       } else {
         // GỌI API POST ĐỂ THÊM
         await axiosClient.post("/users/create", formData);
@@ -163,19 +185,20 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
       }
       if (onSuccess) onSuccess();
       onClose();
-    } catch (error) {
-      const apiError = error.response?.data;
-
+    } catch (apiError) {
+      // apiError giờ đã là { code: 1001, message: "..." }
       console.log("Dữ liệu lỗi từ server: ", apiError);
-      // Trường hợp 1: Trùng tên đăng nhập (Mã 1001 - USER_EXISTED)
-      if (apiError && apiError.code === 1001) {
+
+      // Kiểm tra mã lỗi 1001 (User Existed)
+      if (apiError.code === 1001) {
         setErrors((prev) => ({
           ...prev,
-          tenDangNhap: "Tên đăng nhập này đã được sử dụng",
+          tenDangNhap: "Tên đăng nhập này đã tồn tại trên hệ thống!", // Hiện dưới ô Input
         }));
         toast.error("Tên đăng nhập đã tồn tại!");
       } else {
-        toast.error(apiError?.message || "Đã có lỗi xảy ra khi lưu.");
+        // Các lỗi validation khác (nếu có)
+        toast.error(apiError.message || "Đã có lỗi xảy ra.");
       }
     } finally {
       setLoading(false);
@@ -293,6 +316,83 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
                 />
               </div>
             </div>
+
+            {/* NHÓM 3: THÔNG TIN BỆNH NHÂN (HIỂN THỊ CÓ ĐIỀU KIỆN) */}
+            {isPatient && (
+              <div className="pt-6 border-t border-slate-100 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                <h3 className="text-sm font-semibold text-rose-500 uppercase tracking-wider">
+                  Hồ sơ bệnh nhân
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InputGroup
+                    icon={<Mail size={18} />}
+                    label="Email"
+                    type="email"
+                    value={formData.email}
+                    error={errors.email}
+                    onChange={(v) => handleInputChange("email", v)}
+                    placeholder="benhnhan@gmail.com"
+                  />
+                  <InputGroup
+                    icon={<Phone size={18} />}
+                    label="Số điện thoại"
+                    value={formData.sdt}
+                    error={errors.sdt}
+                    onChange={(v) => handleInputChange("sdt", v)}
+                    placeholder="09xxxxxxxx"
+                  />
+                  <InputGroup
+                    icon={<Calendar size={18} />}
+                    label="Ngày sinh"
+                    type="date"
+                    value={formData.ngaySinh}
+                    error={errors.ngaySinh}
+                    onChange={(v) => handleInputChange("ngaySinh", v)}
+                  />
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Giới tính
+                    </label>
+                    <div
+                      className={`flex gap-4 p-2 bg-slate-50 rounded-xl border transition-all ${errors.gioiTinh ? "border-red-500" : "border-slate-200"}`}
+                    >
+                      {["Nam", "Nữ"].map((gt) => (
+                        <label
+                          key={gt}
+                          className="flex-1 flex items-center justify-center gap-2 cursor-pointer py-1"
+                        >
+                          <input
+                            type="radio"
+                            name="gioiTinh"
+                            value={gt}
+                            checked={formData.gioiTinh === gt}
+                            onChange={(e) =>
+                              handleInputChange("gioiTinh", e.target.value)
+                            }
+                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-slate-600">{gt}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {errors.gioiTinh && (
+                      <p className="text-[11px] text-red-500 mt-1">
+                        {errors.gioiTinh}
+                      </p>
+                    )}
+                  </div>
+                  <div className="md:col-span-2">
+                    <InputGroup
+                      icon={<UserCheck size={18} />}
+                      label="Người giám hộ (nếu có)"
+                      value={formData.nguoiGiamHo}
+                      onChange={(v) => handleInputChange("nguoiGiamHo", v)}
+                      placeholder="Họ tên cha/mẹ/người bảo hộ"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">

@@ -15,6 +15,10 @@ import axiosClient from "../api/axiosClient";
 import toast from "react-hot-toast";
 
 const AccountManagement = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [rolesList, setRolesList] = useState([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -73,9 +77,14 @@ const AccountManagement = () => {
       setLoading(true);
       try {
         // axiosClient đã trả về phần 'result' (tức là PageResponse)
-        const result = await axiosClient.get(
-          `/users?page=${page}&size=${pagination.pageSize}`,
-        );
+        const result = await axiosClient.get("/users", {
+          params: {
+            page: page,
+            size: pagination.pageSize,
+            search: searchTerm,
+            maQuyen: selectedRole,
+          },
+        });
 
         // 1. Bóc tách các trường từ PageResponse.java
         // Lưu ý: Backend dùng 'data', không phải 'content'
@@ -95,8 +104,26 @@ const AccountManagement = () => {
         setLoading(false);
       }
     },
-    [pagination.pageSize],
+    [pagination.pageSize, searchTerm, selectedRole],
   );
+
+  // 3. LẤY DANH SÁCH ROLE ĐỂ ĐỔ VÀO BỘ LỌC
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const data = await axiosClient.get("/roles");
+        setRolesList(data);
+      } catch (err) {
+        console.error("Lỗi lấy danh sách quyền:", err);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  // 4. TỰ ĐỘNG REFRESH KHI SEARCH HOẶC LỌC THAY ĐỔI
+  useEffect(() => {
+    fetchUsers(1); // Quay về trang 1 khi lọc
+  }, [searchTerm, selectedRole]);
 
   const handleEditClick = (user) => {
     setSelectedUser(user);
@@ -139,7 +166,42 @@ const AccountManagement = () => {
         </button>
       </div>
 
-      {/* SEARCH BAR ... (giữ nguyên giao diện của bạn) */}
+      {/* SEARCH & FILTER BAR */}
+      <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center">
+        {/* Tìm kiếm */}
+        <div className="relative flex-1 w-full">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            size={18}
+          />
+          <input
+            type="text"
+            placeholder="Tìm theo username hoặc họ tên..."
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Lọc theo quyền */}
+        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-xl border border-slate-100 w-full md:w-auto">
+          <span className="text-[10px] font-black text-slate-400 uppercase">
+            Quyền:
+          </span>
+          <select
+            className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer py-2 outline-none"
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+          >
+            <option value="">Tất cả</option>
+            {rolesList.map((role) => (
+              <option key={role.maQuyen} value={role.maQuyen}>
+                {role.tenQuyen}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {/* DATA TABLE SECTION */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">

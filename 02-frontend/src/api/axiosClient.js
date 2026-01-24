@@ -24,9 +24,15 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     // Tận dụng mã lỗi và message từ AppException/GlobalExceptionHandler
-    const errorMessage =
-      error.response?.data?.message || "Lỗi kết nối hệ thống";
-    return Promise.reject(errorMessage);
+
+    const backendError = error.response?.data;
+
+    // Nếu có cấu trúc ApiResponse (code, message), thì trả về nó
+    if (backendError) {
+      return Promise.reject(backendError);
+    }
+
+    return Promise.reject({ message: "Lỗi kết nối hệ thống" });
   },
 );
 

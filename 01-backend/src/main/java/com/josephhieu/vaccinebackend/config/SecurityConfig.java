@@ -44,11 +44,9 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider()) // Đăng ký bộ xác thực
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("api/admin/**").hasAuthority("Administrator")
-                        .requestMatchers("/api/roles/**").hasAuthority("Administrator")
-                        .requestMatchers("/api/users/**").hasAuthority("Administrator")
+                        .requestMatchers("/api/admin/**", "/api/roles/**", "/api/users/**").hasAuthority("Administrator")                        .requestMatchers("/api/roles/**").hasAuthority("Administrator")
                         .requestMatchers("/api/kho/**").hasAnyAuthority("Administrator", "Quản lý kho")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/patients/me/**").hasAuthority("Normal User Account")                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

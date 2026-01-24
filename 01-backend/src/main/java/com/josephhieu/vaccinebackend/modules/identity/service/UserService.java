@@ -13,7 +13,7 @@ public interface UserService {
     UserResponse createNewUser(UserCreationRequest request);
 
     // Thêm tham số page và size
-    PageResponse<UserResponse> getAllUsers(int page, int size);
+    PageResponse<UserResponse> getAllUsers(int page, int size, String search, String maQuyen);
 
     UserResponse updateUser(UUID id, UserCreationRequest request);
 

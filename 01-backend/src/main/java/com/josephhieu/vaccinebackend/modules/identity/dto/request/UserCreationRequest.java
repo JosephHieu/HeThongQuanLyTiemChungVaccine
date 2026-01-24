@@ -1,5 +1,6 @@
 package com.josephhieu.vaccinebackend.modules.identity.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -7,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 /**
  * Đối tượng vận chuyển dữ liệu khi tạo tài khoản mới.
@@ -48,4 +51,12 @@ public class UserCreationRequest {
 
     /** Thông tin mô tả/Ghi chú về nhân viên (Description). */
     private String moTa;
+
+    private String email;
+    private String sdt;
+    private String gioiTinh;
+    private String nguoiGiamHo;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate ngaySinh;
 }

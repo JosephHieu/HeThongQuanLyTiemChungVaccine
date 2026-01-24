@@ -3,17 +3,11 @@ package com.josephhieu.vaccinebackend.modules.identity.service.impl;
 import com.josephhieu.vaccinebackend.modules.identity.dto.request.UserCreationRequest;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.identity.dto.response.UserResponse;
-import com.josephhieu.vaccinebackend.modules.identity.entity.ChiTietPhanQuyen;
-import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
-import com.josephhieu.vaccinebackend.modules.identity.entity.PhanQuyen;
-import com.josephhieu.vaccinebackend.modules.identity.entity.TaiKhoan;
+import com.josephhieu.vaccinebackend.modules.identity.entity.*;
 import com.josephhieu.vaccinebackend.modules.identity.entity.id.ChiTietPhanQuyenId;
 import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
-import com.josephhieu.vaccinebackend.modules.identity.repository.ChiTietPhanQuyenRepository;
-import com.josephhieu.vaccinebackend.modules.identity.repository.NhanVienRepository;
-import com.josephhieu.vaccinebackend.modules.identity.repository.PhanQuyenRepository;
-import com.josephhieu.vaccinebackend.modules.identity.repository.TaiKhoanRepository;
+import com.josephhieu.vaccinebackend.modules.identity.repository.*;
 import com.josephhieu.vaccinebackend.modules.identity.service.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -38,38 +32,22 @@ public class UserServiceImpl implements UserService {
     private final PhanQuyenRepository phanQuyenRepository;
     private final ChiTietPhanQuyenRepository chiTietPhanQuyenRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final BenhNhanRepository benhNhanRepository;
     private final PasswordEncoder passwordEncoder;
-
-    /**
-     * Chuyển đổi từ Entity sang DTO để bảo mật và tránh vòng lặp JSON.
-     */
-    private UserResponse mapToUserResponse(TaiKhoan taiKhoan) {
-        return UserResponse.builder()
-                .maTaiKhoan(taiKhoan.getMaTaiKhoan())
-                .tenDangNhap(taiKhoan.getTenDangNhap())
-                .hoTen(taiKhoan.getHoTen())
-                .cmnd(taiKhoan.getCmnd())
-                .noiO(taiKhoan.getNoiO())
-                .moTa(taiKhoan.getMoTa())
-                .email(taiKhoan.getEmail())
-                .roles(taiKhoan.getChiTietPhanQuyens().stream()
-                        .map(ct -> ct.getPhanQuyen().getTenQuyen())
-                        .collect(Collectors.toSet()))
-                .token(null)
-                .trangThai(taiKhoan.isTrangThai())
-                .build();
-    }
 
     @Override
     @Transactional
     public UserResponse createNewUser(UserCreationRequest request) {
+        // 1. Kiểm tra tồn tại tên đăng nhập
         if (taiKhoanRepository.existsByTenDangNhap(request.getTenDangNhap())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
+        // 2. Lấy thông tin Quyền
         PhanQuyen role = phanQuyenRepository.findById(UUID.fromString(request.getMaQuyen()))
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
+        // 3. Lưu tài khoản chính
         TaiKhoan taiKhoan = TaiKhoan.builder()
                 .tenDangNhap(request.getTenDangNhap())
                 .matKhau(passwordEncoder.encode(request.getMatKhau()))
@@ -77,15 +55,32 @@ public class UserServiceImpl implements UserService {
                 .cmnd(request.getCmnd())
                 .noiO(request.getNoiO())
                 .moTa(request.getMoTa())
+                .email(request.getEmail())
+                .trangThai(true)
                 .build();
         TaiKhoan savedAccount = taiKhoanRepository.save(taiKhoan);
 
-        NhanVien nhanVien = NhanVien.builder()
-                .tenNhanVien(request.getHoTen())
-                .taiKhoan(savedAccount)
-                .build();
-        nhanVienRepository.save(nhanVien);
+        // 4. LOGIC RẼ NHÁNH
+        if (role.getTenQuyen().equals("Normal User Account")) {
+            BenhNhan benhNhan = BenhNhan.builder()
+                    .taiKhoan(savedAccount)
+                    .tenBenhNhan(request.getHoTen())
+                    .ngaySinh(request.getNgaySinh())
+                    .gioiTinh(request.getGioiTinh())
+                    .diaChi(request.getNoiO())       // DiaChi nên lấy từ noiO của request
+                    .sdt(request.getSdt())           // Gán đúng trường sdt
+                    .nguoiGiamHo(request.getNguoiGiamHo())
+                    .build();
+            benhNhanRepository.save(benhNhan);
+        } else {
+            NhanVien nhanVien = NhanVien.builder()
+                    .tenNhanVien(request.getHoTen())
+                    .taiKhoan(savedAccount)
+                    .build();
+            nhanVienRepository.save(nhanVien);
+        }
 
+        // 5. Lưu chi tiết phân quyền
         ChiTietPhanQuyenId id = new ChiTietPhanQuyenId(role.getMaQuyen(), savedAccount.getMaTaiKhoan());
         ChiTietPhanQuyen detail = ChiTietPhanQuyen.builder()
                 .id(id)
@@ -99,20 +94,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<UserResponse> getAllUsers(int page, int size) {
-        // Đảm bảo page không nhỏ hơn 1 để tránh lỗi index -1
+    public PageResponse<UserResponse> getAllUsers(int page, int size, String search, String maQuyen) {
+        // 1. Validate trang
         int validatedPage = (page < 1) ? 0 : page - 1;
-
         Pageable pageable = PageRequest.of(validatedPage, size, Sort.by("tenDangNhap").ascending());
 
-        Page<TaiKhoan> userPage = taiKhoanRepository.findAll(pageable);
+        // 2. Xử lý UUID từ String (tránh lỗi nếu maQuyen gửi lên bị rỗng)
+        UUID roleUuid = (maQuyen != null && !maQuyen.isEmpty()) ? UUID.fromString(maQuyen) : null;
+
+        // 3. Xử lý Search rỗng
+        String searchKeyword = (search != null && !search.isEmpty()) ? search : null;
+
+        // 4. Gọi Repository với bộ lọc mới
+        Page<TaiKhoan> userPage = taiKhoanRepository.findAllWithFilter(searchKeyword, roleUuid, pageable);
 
         List<UserResponse> users = userPage.getContent().stream()
                 .map(this::mapToUserResponse)
                 .collect(Collectors.toList());
 
         return PageResponse.<UserResponse>builder()
-                .currentPage(validatedPage + 1) // Trả về trang 1 cho Frontend dễ hiểu
+                .currentPage(validatedPage + 1)
                 .pageSize(size)
                 .totalPages(userPage.getTotalPages())
                 .totalElements(userPage.getTotalElements())
@@ -128,31 +129,59 @@ public class UserServiceImpl implements UserService {
         TaiKhoan taiKhoan = taiKhoanRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // 2. Cập nhật thông tin cơ bản
+        // 2. Cập nhật thông tin cơ bản tại bảng TAIKHOAN
         taiKhoan.setHoTen(request.getHoTen());
         taiKhoan.setCmnd(request.getCmnd());
         taiKhoan.setNoiO(request.getNoiO());
         taiKhoan.setMoTa(request.getMoTa());
+        taiKhoan.setEmail(request.getEmail());
 
         // 3. Xử lý cập nhật quyền
-        // Xóa quyền cũ
         chiTietPhanQuyenRepository.deleteByTaiKhoan(taiKhoan);
 
-        // Chuyển String sang UUID
         UUID roleId = UUID.fromString(request.getMaQuyen());
         PhanQuyen phanQuyenMoi = phanQuyenRepository.findById(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
-        // Khởi tạo khóa phức hợp (EmbeddedId)
         ChiTietPhanQuyenId compositeId = new ChiTietPhanQuyenId(roleId, taiKhoan.getMaTaiKhoan());
-
         ChiTietPhanQuyen chiTietMoi = ChiTietPhanQuyen.builder()
-                .id(compositeId) // Gán ID phức hợp
+                .id(compositeId)
                 .taiKhoan(taiKhoan)
                 .phanQuyen(phanQuyenMoi)
                 .build();
-
         chiTietPhanQuyenRepository.save(chiTietMoi);
+
+        // 4. CẬP NHẬT THÔNG TIN CHI TIẾT (Bệnh nhân hoặc Nhân viên)
+        if (phanQuyenMoi.getTenQuyen().equals("Normal User Account")) {
+            // Tìm hồ sơ bệnh nhân hiện có, nếu không có (do trước đó là nhân viên) thì tạo mới
+            BenhNhan benhNhan = benhNhanRepository.findByTaiKhoan(taiKhoan)
+                    .orElse(new BenhNhan());
+
+            benhNhan.setTaiKhoan(taiKhoan);
+            benhNhan.setTenBenhNhan(request.getHoTen());
+            benhNhan.setNgaySinh(request.getNgaySinh());
+            benhNhan.setGioiTinh(request.getGioiTinh());
+            benhNhan.setDiaChi(request.getNoiO());
+            benhNhan.setSdt(request.getSdt());
+            benhNhan.setNguoiGiamHo(request.getNguoiGiamHo());
+
+            benhNhanRepository.save(benhNhan);
+
+            // (Tùy chọn) Xóa bản ghi bên bảng NHANVIEN nếu có để tránh rác
+            nhanVienRepository.findByTaiKhoan(taiKhoan).ifPresent(nhanVienRepository::delete);
+        } else {
+            // Cập nhật bảng NHANVIEN
+            NhanVien nhanVien = nhanVienRepository.findByTaiKhoan(taiKhoan)
+                    .orElse(new NhanVien());
+
+            nhanVien.setTaiKhoan(taiKhoan);
+            nhanVien.setTenNhanVien(request.getHoTen());
+
+            nhanVienRepository.save(nhanVien);
+
+            // (Tùy chọn) Xóa bản ghi bên bảng BENHNHAN nếu có
+            benhNhanRepository.findByTaiKhoan(taiKhoan).ifPresent(benhNhanRepository::delete);
+        }
 
         return mapToUserResponse(taiKhoanRepository.save(taiKhoan));
     }
@@ -168,4 +197,33 @@ public class UserServiceImpl implements UserService {
         taiKhoanRepository.save(taiKhoan);
     }
 
+
+    /**
+     * Chuyển đổi từ Entity sang DTO để bảo mật và tránh vòng lặp JSON.
+     */
+    private UserResponse mapToUserResponse(TaiKhoan user) {
+        UserResponse response = UserResponse.builder()
+                .maTaiKhoan(user.getMaTaiKhoan())
+                .tenDangNhap(user.getTenDangNhap())
+                .hoTen(user.getHoTen())
+                .email(user.getEmail())
+                .cmnd(user.getCmnd())
+                .noiO(user.getNoiO())
+                .moTa(user.getMoTa())
+                .trangThai(user.isTrangThai())
+                .roles(user.getChiTietPhanQuyens().stream()
+                        .map(ct -> ct.getPhanQuyen().getTenQuyen())
+                        .collect(Collectors.toSet()))
+                .build();
+
+        // NẾU LÀ BỆNH NHÂN -> LẤY THÊM THÔNG TIN Y TẾ
+        benhNhanRepository.findByTaiKhoan(user).ifPresent(bn -> {
+            response.setSdt(bn.getSdt());
+            response.setNgaySinh(bn.getNgaySinh());
+            response.setGioiTinh(bn.getGioiTinh());
+            response.setNguoiGiamHo(bn.getNguoiGiamHo());
+        });
+
+        return response;
+    }
 }

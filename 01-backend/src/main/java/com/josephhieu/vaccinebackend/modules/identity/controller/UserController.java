@@ -40,12 +40,14 @@ public class UserController {
      */
     @GetMapping
     public ApiResponse<PageResponse<UserResponse>> getAllUsers(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String maQuyen
     ) {
         return ApiResponse.<PageResponse<UserResponse>>builder()
                 .code(1000)
-                .result(userService.getAllUsers(page, size)) // Gọi service đã xử lý PageResponse
+                .result(userService.getAllUsers(page, size, search, maQuyen))
                 .build();
     }
 
