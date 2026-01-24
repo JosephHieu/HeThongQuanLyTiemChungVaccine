@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axiosClient from "../../api/axiosClient";
+import userApi from "../../api/userApi";
 import {
   X,
   User,
@@ -93,8 +94,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess, selectedUser }) => {
     if (isOpen) {
       const fetchRoles = async () => {
         try {
-          const response = await axiosClient.get("/roles");
-          const data = response.data.result || response.data;
+          const data = await userApi.getRoles();
           setRolesList(data);
           if (data.length > 0) {
             setFormData((prev) => ({ ...prev, maQuyen: data[0].maQuyen }));

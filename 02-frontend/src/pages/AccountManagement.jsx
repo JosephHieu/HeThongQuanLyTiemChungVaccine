@@ -61,7 +61,7 @@ const AccountManagement = () => {
       setIsConfirmOpen(false);
       fetchUsers(pagination.currentPage); // Tải lại danh sách
     } catch (error) {
-      toast.error("Không thể cập nhật trạng thái.");
+      toast.error("Không thể cập nhật trạng thái: " + error.message);
     } finally {
       setConfirmLoading(false);
     }
@@ -72,21 +72,25 @@ const AccountManagement = () => {
     async (page = 1) => {
       setLoading(true);
       try {
-        const response = await axiosClient.get(
+        // axiosClient đã trả về phần 'result' (tức là PageResponse)
+        const result = await axiosClient.get(
           `/users?page=${page}&size=${pagination.pageSize}`,
         );
-        const { data, totalPages, currentPage, totalElements } =
-          response.data.result;
 
-        setUsers(data);
+        // 1. Bóc tách các trường từ PageResponse.java
+        // Lưu ý: Backend dùng 'data', không phải 'content'
+        const { data, totalPages, currentPage, totalElements } = result;
+
+        // 2. Cập nhật State
+        setUsers(data || []);
         setPagination((prev) => ({
           ...prev,
-          currentPage,
-          totalPages,
-          totalElements,
+          currentPage: currentPage, // Backend đã trả về số trang (1-indexed)
+          totalPages: totalPages,
+          totalElements: totalElements,
         }));
       } catch (error) {
-        toast.error("Không thể tải danh sách tài khoản." + error.message);
+        toast.error("Không thể tải danh sách tài khoản: " + error);
       } finally {
         setLoading(false);
       }

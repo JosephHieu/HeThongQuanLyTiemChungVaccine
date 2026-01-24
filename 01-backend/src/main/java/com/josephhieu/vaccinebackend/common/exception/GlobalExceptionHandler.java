@@ -35,6 +35,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiResponse<?>> handleRuntimeException(Exception exception) {
+
+        exception.printStackTrace();
+
         // Log lỗi tại đây để admin có thể kiểm tra sau này
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())

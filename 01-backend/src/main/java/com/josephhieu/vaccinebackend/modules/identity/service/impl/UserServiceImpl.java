@@ -98,9 +98,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<UserResponse> getAllUsers(int page, int size) {
-        // Sử dụng org.springframework.data.domain.Pageable
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("tenDangNhap").ascending());
+        // Đảm bảo page không nhỏ hơn 1 để tránh lỗi index -1
+        int validatedPage = (page < 1) ? 0 : page - 1;
+
+        Pageable pageable = PageRequest.of(validatedPage, size, Sort.by("tenDangNhap").ascending());
 
         Page<TaiKhoan> userPage = taiKhoanRepository.findAll(pageable);
 
@@ -109,7 +112,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
 
         return PageResponse.<UserResponse>builder()
-                .currentPage(page)
+                .currentPage(validatedPage + 1) // Trả về trang 1 cho Frontend dễ hiểu
                 .pageSize(size)
                 .totalPages(userPage.getTotalPages())
                 .totalElements(userPage.getTotalElements())
