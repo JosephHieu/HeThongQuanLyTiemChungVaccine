@@ -16,7 +16,7 @@ import java.util.UUID;
 public class InventoryResponse {
 
     private UUID maLo; // Khóa chính (Internal ID)
-    private String soLoDisplay; // Mã số lô hiển thị cho người dùng (External ID)
+    private String soLo; // Mã số lô hiển thị cho người dùng (External ID)
 
     private String tenVacXin;
     private String tenLoaiVacXin;

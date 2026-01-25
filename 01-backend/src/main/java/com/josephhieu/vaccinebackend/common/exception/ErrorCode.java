@@ -24,6 +24,8 @@ public enum ErrorCode {
     VACCINE_TYPE_NOT_FOUND(1103, "Loại vắc-xin không hợp lệ", HttpStatus.BAD_REQUEST),
     SUPPLIER_NOT_FOUND(1104, "Nhà cung cấp không tồn tại", HttpStatus.NOT_FOUND),
     INVALID_IMPORT_QUANTITY(1105, "Số lượng nhập kho phải lớn hơn 0", HttpStatus.BAD_REQUEST),
+    BATCH_ALREADY_EXISTS(1106, "Số lô này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
+    INVALID_EXPIRY_DATE(1107, "Hạn sử dụng không hợp lệ (phải sau ngày hiện tại)",  HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

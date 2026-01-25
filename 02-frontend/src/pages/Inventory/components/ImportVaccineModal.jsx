@@ -24,7 +24,7 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
     giayPhep: "",
     nuocSanXuat: "",
     hamLuong: "",
-    maLo: "", // Số lô
+    soLo: "",
     hanSuDung: "",
     dieuKienBaoQuan: "",
     doTuoiTiemChung: "",
@@ -36,14 +36,6 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const [formData, setFormData] = useState(initialForm);
-
-  // Hàm reset form
-  const handleReset = () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa tất cả thông tin đã nhập?")) {
-      setFormData(initialForm);
-      toast.success("Đã làm mới biểu mẫu");
-    }
-  };
 
   // Lấy dữ liệu danh mục khi mở Modal
   useEffect(() => {
@@ -75,9 +67,21 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation cơ bản trước khi gửi
-    if (!formData.maLoaiVacXin || !formData.maNhaCungCap) {
-      return toast.error("Vui lòng chọn loại vắc-xin và Nhà cung cấp");
+    // Kiểm tra tất cả các trường bắt buộc theo spec
+    const requiredFields = [
+      "tenVacXin",
+      "maLoaiVacXin",
+      "soLo",
+      "soLuong",
+      "donGia",
+      "hanSuDung",
+      "maNhaCungCap",
+    ];
+
+    const isMissing = requiredFields.some((field) => !formData[field]);
+
+    if (isMissing) {
+      return toast.error("Vui lòng nhập đầy đủ thông tin"); // Đúng câu thông báo trong spec
     }
 
     setIsSubmitting(true);
@@ -89,13 +93,18 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
         soLuong: Number(formData.soLuong),
       };
 
+      // Đảm bảo không gửi maLo rỗng lên server
+      delete payload.maLo;
+
       await inventoryApi.importVaccine(payload);
       toast.success("Nhập kho vắc-xin thành công!");
       onSuccess(); // Reload bảng ở trang chính
       onClose(); // Đóng modal
       setFormData(initialForm);
     } catch (error) {
-      toast.error(error || "Có lỗi xảy ra khi nhập kho");
+      toast.error(
+        error.message || "Số lô đã tồn tại hoặc dữ liệu không hợp lệ",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -126,14 +135,6 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
-              title="Làm mới form"
-            >
-              <RotateCcw size={20} />
-            </button>
             <button
               type="button"
               onClick={onClose}
@@ -188,12 +189,21 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
                 />
               </div>
 
+              <InputField
+                label="Độ tuổi tiêm chủng"
+                name="doTuoiTiemChung"
+                required
+                value={formData.doTuoiTiemChung}
+                onChange={handleChange}
+                placeholder="Ví dụ: Trẻ em từ 2 tháng tuổi"
+              />
+
               <div className="grid grid-cols-2 gap-4">
                 <InputField
                   label="Số lô"
-                  name="maLo"
+                  name="soLo"
                   required
-                  value={formData.maLo}
+                  value={formData.soLo}
                   onChange={handleChange}
                   placeholder="Ví dụ: BATCH-2026"
                 />
@@ -217,9 +227,13 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
                   </select>
                 </div>
                 <InputField
-                  label="Đơn giá"
+                  label="Đơn giá (VNĐ/liều)"
                   name="donGia"
                   type="number"
+                  min="0" // Chặn dùng nút tăng giảm xuống âm
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") e.preventDefault(); // Chặn gõ dấu trừ và chữ e (exponential)
+                  }}
                   required
                   value={formData.donGia}
                   onChange={handleChange}
@@ -306,7 +320,10 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              setFormData(initialForm);
+              onClose();
+            }}
             className="flex items-center gap-2 px-6 py-2.5 text-slate-500 font-bold text-sm hover:bg-slate-200 rounded-xl transition-all"
           >
             Hủy nhập

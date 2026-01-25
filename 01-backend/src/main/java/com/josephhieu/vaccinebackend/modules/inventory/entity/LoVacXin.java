@@ -20,6 +20,9 @@ public class LoVacXin {
     @Column(name = "MaLo", length = 36, nullable = false)
     private UUID maLo;
 
+    @Column(name = "SoLo", nullable = false)
+    private String soLo; // Số lô thực tế cho con người đọc
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaVacXin")
     private VacXin vacXin;

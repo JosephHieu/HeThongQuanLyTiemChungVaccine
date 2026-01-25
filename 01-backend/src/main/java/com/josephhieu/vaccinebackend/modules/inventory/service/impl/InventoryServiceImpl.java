@@ -47,9 +47,21 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public InventoryResponse importVaccine(VaccineImportRequest request) {
 
-        // 1. Kiểm tra/Tạo danh mục Vắc-xin gốc (Master Data)
+        // Kiểm tra số lô trùng lặp
+        if (loVacXinRepository.existsBySoLo(request.getSoLo())) {
+            throw new AppException(ErrorCode.BATCH_ALREADY_EXISTS);
+        }
+
+        // 1. Kiểm tra/Cập nhật danh mục Vắc-xin gốc
         VacXin vacXin = vacXinRepository.findByTenVacXin(request.getTenVacXin())
-                .orElseGet(() -> createNewVaccineCategory(request));
+                .map(existingVacxin -> {
+                    // Nếu đã tồn tại, hãy cập nhật các thông tin y tế mới từ form
+                    existingVacxin.setPhongNguaBenh(request.getPhongNguaBenh());
+                    existingVacxin.setDoTuoiTiemChung(request.getDoTuoiTiemChung());
+                    existingVacxin.setHamLuong(request.getHamLuong());
+                    return vacXinRepository.save(existingVacxin);
+                })
+                .orElseGet(() -> createNewVaccineCategory(request)); // Nếu chưa có thì mới tạo mới
 
         // 2. Kiểm tra Nhà cung cấp
         NhaCungCap ncc = nhaCungCapRepository.findById(request.getMaNhaCungCap())
@@ -59,6 +71,7 @@ public class InventoryServiceImpl implements InventoryService {
         LoVacXin loMoi = LoVacXin.builder()
                 .vacXin(vacXin)
                 .nhaCungCap(ncc)
+                .soLo(request.getSoLo())
                 .soLuong(request.getSoLuong())
                 .ngayNhan(request.getNgayNhan())
                 .nuocSanXuat(request.getNuocSanXuat())
@@ -125,6 +138,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .hamLuong(request.getHamLuong())
                 .dieuKienBaoQuan(request.getDieuKienBaoQuan())
                 .doTuoiTiemChung(request.getDoTuoiTiemChung())
+                .phongNguaBenh(request.getPhongNguaBenh())
                 .build());
     }
 
@@ -134,6 +148,7 @@ public class InventoryServiceImpl implements InventoryService {
     private InventoryResponse mapToResponse(LoVacXin lo) {
         return InventoryResponse.builder()
                 .maLo(lo.getMaLo())
+                .soLo(lo.getSoLo())
                 .tenVacXin(lo.getVacXin().getTenVacXin())
                 .tenLoaiVacXin(lo.getVacXin().getLoaiVacXin().getTenLoaiVacXin())
                 .doTuoiTiemChung(lo.getVacXin().getDoTuoiTiemChung())
@@ -141,6 +156,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .phongNguaBenh(lo.getVacXin().getPhongNguaBenh())
                 .soLuong(lo.getSoLuong())
                 .hanSuDung(lo.getVacXin().getHanSuDung())
+                .dieuKienBaoQuan(lo.getVacXin().getDieuKienBaoQuan())
                 .tinhTrang(lo.getTinhTrang())
                 .nuocSanXuat(lo.getNuocSanXuat())
                 .giayPhep(lo.getGiayPhep())

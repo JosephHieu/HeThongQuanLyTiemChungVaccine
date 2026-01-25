@@ -21,6 +21,7 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
             "(:criteria = 'name' AND LOWER(v.tenVacXin) LIKE LOWER(CONCAT('%', :search, '%'))) OR " +
             "(:criteria = 'type' AND LOWER(lv.tenLoaiVacXin) LIKE LOWER(CONCAT('%', :search, '%'))) OR " +
             "(:criteria = 'origin' AND LOWER(l.nuocSanXuat) LIKE LOWER(CONCAT('%', :search, '%'))) OR " +
+            "(:criteria = 'batch' AND LOWER(l.soLo) LIKE LOWER(CONCAT('%', :search, '%'))) OR " +
             "(:search IS NULL OR :search = '')")
     Page<LoVacXin> searchInventory(@Param("criteria") String criteria,
                                    @Param("search") String search,
@@ -33,4 +34,6 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
     // Tìm các lô sắp hết hạn dựa trên VacXin
     @Query("SELECT l FROM LoVacXin l JOIN l.vacXin v WHERE v.hanSuDung <= :targetDate")
     List<LoVacXin> findExpiringBatches(@Param("targetDate") LocalDate targetDate);
+
+    boolean existsBySoLo(String soLo);
 }

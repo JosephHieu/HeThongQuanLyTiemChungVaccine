@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ImportVaccineModal from "./components/ImportVaccineModal";
 import VaccineDetailModal from "./components/VaccineDetailModal";
+import InventoryRow from "./components/InventoryRow";
 import { useNavigate } from "react-router-dom";
 import ExportVaccine from "./components/ExportVaccine";
 import inventoryApi from "../../api/inventoryApi";
@@ -11,11 +12,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Plus,
-  MoreHorizontal,
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
-  Info,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -56,7 +55,7 @@ const InventoryManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchCriteria, searchValue, page]);
+  }, [searchCriteria, activeSearch, page]);
 
   // Gọi API khi component mount hoặc thay đổi trang/ tìm kiếm
   useEffect(() => {
@@ -75,6 +74,15 @@ const InventoryManagement = () => {
     // Cuộn nhẹ lên đầu trang để người dùng thấy dữ liệu mới
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Tính số lô sắp hết hạn (Ví dụ còn dưới 6 tháng)
+  const expiringCount = (inventory || []).filter((item) => {
+    if (!item.hanSuDung) return false;
+    const hsd = new Date(item.hanSuDung);
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+    return hsd < sixMonthsFromNow;
+  }).length;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -140,7 +148,7 @@ const InventoryManagement = () => {
             <StatCard
               icon={<AlertTriangle className="text-amber-600" />}
               label="Lô sắp hết hạn"
-              value="--"
+              value={expiringCount > 0 ? expiringCount : "0"}
               color="bg-amber-50"
             />
             <StatCard
@@ -153,7 +161,7 @@ const InventoryManagement = () => {
 
           {/* SEARCH & FILTER */}
           <form
-            onClick={handleSearch}
+            onSubmit={handleSearch}
             className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center"
           >
             <div className="relative flex-1 w-full">
@@ -181,6 +189,7 @@ const InventoryManagement = () => {
                 <option value="name">Tên vắc-xin</option>
                 <option value="type">Loại vắc-xin</option>
                 <option value="origin">Nước sản xuất</option>
+                <option value="batch">Số lô sản xuất</option>
               </select>
             </div>
             <button
@@ -206,7 +215,7 @@ const InventoryManagement = () => {
                   </th>
                   <th className="p-4 text-xs font-black text-slate-500 uppercase">
                     Vắc-xin & Phòng bệnh
-                  </th>{" "}
+                  </th>
                   {/* Gộp hoặc tách */}
                   <th className="p-4 text-xs font-black text-slate-500 uppercase">
                     Số liều
@@ -217,7 +226,6 @@ const InventoryManagement = () => {
                   <th className="p-4 text-xs font-black text-slate-500 uppercase text-center">
                     Chi Tiết
                   </th>
-                  <th className="p-4"></th>
                   <th className="p-4"></th>
                 </tr>
               </thead>
@@ -324,50 +332,5 @@ const StatCard = ({ icon, label, value, color }) => (
     </div>
   </div>
 );
-
-// Component con cho dòng trong bảng
-const InventoryRow = ({ data, onDetail }) => {
-  const { maLo, tenVacXin, tenLoaiVacXin, soLuong, tinhTrang } = data;
-
-  return (
-    <tr
-      onClick={() => onDetail(data)} // Click vào bất kỳ đâu trên dòng để xem chi tiết
-      className="hover:bg-blue-50/50 transition-all cursor-pointer group border-b border-slate-50"
-    >
-      <td className="p-4 text-xs font-mono font-bold text-slate-400">
-        {maLo?.substring(0, 8)}...
-      </td>
-      <td className="p-4">
-        <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
-          {tenVacXin}
-        </p>
-        <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase">
-          {tenLoaiVacXin}
-        </span>
-      </td>
-      <td className="p-4">
-        <p className="text-sm font-black text-slate-700">
-          {soLuong.toLocaleString()} liều
-        </p>
-      </td>
-      <td className="p-4 text-center">
-        <span
-          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
-            tinhTrang === "Còn"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {tinhTrang}
-        </span>
-      </td>
-      <td className="p-4 text-right">
-        <button className="p-2 text-slate-300 group-hover:text-blue-500 transition-colors">
-          <Info size={18} />
-        </button>
-      </td>
-    </tr>
-  );
-};
 
 export default InventoryManagement;
