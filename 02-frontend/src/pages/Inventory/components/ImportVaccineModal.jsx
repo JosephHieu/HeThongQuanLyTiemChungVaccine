@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { ThermometerSnowflake } from "lucide-react";
 import inventoryApi from "../../../api/inventoryApi";
 import {
   X,
@@ -25,7 +26,7 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
     hamLuong: "",
     maLo: "", // Số lô
     hanSuDung: "",
-    dieuKienBaoQuan: "2°C - 8°C",
+    dieuKienBaoQuan: "",
     doTuoiTiemChung: "",
     donGia: "",
     soLuong: "",
@@ -36,19 +37,30 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState(initialForm);
 
+  // Hàm reset form
+  const handleReset = () => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa tất cả thông tin đã nhập?")) {
+      setFormData(initialForm);
+      toast.success("Đã làm mới biểu mẫu");
+    }
+  };
+
   // Lấy dữ liệu danh mục khi mở Modal
   useEffect(() => {
     if (isOpen) {
       const fetchMetadata = async () => {
         try {
           const [resCats, resSups] = await Promise.all([
-            inventoryApi.getVaccineTypes(), // Bạn cần thêm hàm này vào inventoryApi.js
-            inventoryApi.getSuppliers(), // Bạn cần thêm hàm này vào inventoryApi.js
+            inventoryApi.getAllVaccineTypes(),
+            inventoryApi.getAllSuppliers(),
           ]);
+          console.log("Danh sách loại:", resCats.result);
           setCategories(resCats || []);
           setSuppliers(resSups || []);
         } catch (error) {
-          toast.error("Không thể tải danh sách danh mục");
+          toast.error(
+            "Không thể tải danh sách danh mục: " + (error.message || error),
+          );
         }
       };
       fetchMetadata();
@@ -62,9 +74,22 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation cơ bản trước khi gửi
+    if (!formData.maLoaiVacXin || !formData.maNhaCungCap) {
+      return toast.error("Vui lòng chọn loại vắc-xin và Nhà cung cấp");
+    }
+
     setIsSubmitting(true);
     try {
-      await inventoryApi.importVaccine(formData);
+      // Đảm bảo convert đơn giá và số lượng về kiểu Number
+      const payload = {
+        ...formData,
+        donGia: Number(formData.donGia),
+        soLuong: Number(formData.soLuong),
+      };
+
+      await inventoryApi.importVaccine(payload);
       toast.success("Nhập kho vắc-xin thành công!");
       onSuccess(); // Reload bảng ở trang chính
       onClose(); // Đóng modal
@@ -99,19 +124,30 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-slate-200 rounded-full transition-colors"
-          >
-            <X size={20} className="text-slate-500" />
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
+              title="Làm mới form"
+            >
+              <RotateCcw size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+            >
+              <X size={20} className="text-slate-50" />
+            </button>
+          </div>
         </div>
 
         {/* Body Form */}
         <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Cột 1 */}
+            {/* Cột 1: Định danh */}
             <div className="space-y-5">
               <h3 className="text-sm font-bold text-blue-600 flex items-center gap-2 mb-4">
                 <ShieldCheck size={16} /> Định danh vắc-xin
@@ -159,7 +195,27 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
                   required
                   value={formData.maLo}
                   onChange={handleChange}
+                  placeholder="Ví dụ: BATCH-2026"
                 />
+                {/* DIỀU KIỆN BẢO QUẢN DƯỚI DẠNG SELECT HOẶC INPUT TỰ DO */}
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    ĐK Bảo quản
+                  </label>
+                  <select
+                    name="dieuKienBaoQuan"
+                    value={formData.dieuKienBaoQuan}
+                    onChange={handleChange}
+                    className="w-full bg-slate-50 border-none rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    <option value="">-- Chọn ĐK --</option>
+                    <option value="2°C - 8°C">2°C - 8°C (Tiêu chuẩn)</option>
+                    <option value="-20°C">Tủ đông (-20°C)</option>
+                    <option value="-70°C">Siêu âm (-70°C)</option>
+                    <option value="Nhiệt độ phòng">Nhiệt độ phòng</option>
+                  </select>
+                </div>
                 <InputField
                   label="Đơn giá"
                   name="donGia"

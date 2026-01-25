@@ -39,7 +39,9 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
 
     // So sánh với trường 'soLuong' từ Backend
     if (quantity > selectedBatch.soLuong) {
-      return toast.error("Số lượng vắc-xin trong kho không đủ");
+      return toast.error(
+        `Kho chỉ còn ${selectedBatch.soLuong} liều, không đủ để xuất!`,
+      );
     }
 
     setIsSubmitting(true);
@@ -50,13 +52,13 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
         soLuongXuat: quantity,
       });
 
-      toast.success(`Xuất vắc-xin ${selectedBatch.tenVacXin} thành công!`);
+      toast.success(`Đã xuất ${quantity} liều ${selectedBatch.tenVacXin}`);
       handleCancel();
 
       // Gọi callback để InventoryManagement tải lại dữ liệu mới nhất
       if (onExportSuccess) onExportSuccess();
     } catch (error) {
-      toast.error(error || "Lỗi khi thực hiện xuất kho");
+      toast.error(error.message || "Lỗi hệ thống khi xuất kho");
     } finally {
       setIsSubmitting(false);
     }
@@ -97,42 +99,67 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Bảng danh sách */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[60vh]">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-100 font-bold text-slate-500 uppercase">
                 <tr>
-                  <th className="p-4">Thông tin vắc-xin</th>
-                  <th className="p-4">Mã lô (ID)</th>
+                  <th className="p-4">Vắc-xin</th>
+                  <th className="p-4">Số lô</th>
                   <th className="p-4">Tồn kho</th>
                   <th className="p-4">Hạn dùng</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredData.map((item) => (
-                  <tr
-                    key={item.maLo}
-                    onClick={() => setSelectedBatch(item)}
-                    className={`cursor-pointer transition-colors ${selectedBatch?.maLo === item.maLo ? "bg-blue-50" : "hover:bg-slate-50"}`}
-                  >
-                    <td className="p-4">
-                      <p className="font-bold text-slate-800">
-                        {item.tenVacXin}
-                      </p>
-                      <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase">
-                        {item.tenLoaiVacXin}
-                      </span>
-                    </td>
-                    <td className="p-4 text-xs font-mono text-slate-400">
-                      {item.maLo.substring(0, 8)}...
-                    </td>
-                    <td className="p-4 font-bold text-blue-600">
-                      {item.soLuong.toLocaleString()} liều
-                    </td>
-                    <td className="p-4 text-slate-500">
-                      {new Date(item.hanSuDung).toLocaleDateString("vi-VN")}
+                {filteredData.length > 0 ? (
+                  filteredData.map((item) => (
+                    <tr
+                      key={item.maLo}
+                      onClick={() => setSelectedBatch(item)}
+                      className={`cursor-pointer transition-all ${
+                        selectedBatch?.maLo === item.maLo
+                          ? "bg-blue-50 ring-1 ring-inset ring-blue-200"
+                          : "hover:bg-slate-50"
+                      }`}
+                    >
+                      <td className="p-4">
+                        <p className="font-bold text-slate-800">
+                          {item.tenVacXin}
+                        </p>
+                        <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold uppercase">
+                          {item.tenLoaiVacXin}
+                        </span>
+                      </td>
+                      <td className="p-4 font-mono text-slate-400">
+                        {item.maLo.substring(0, 8)}
+                      </td>
+                      <td className="p-4 font-bold text-blue-600">
+                        {item.soLuong.toLocaleString()}{" "}
+                        <span className="text-[10px] text-slate-400">liều</span>
+                      </td>
+                      <td className="p-4">
+                        {/* CẢNH BÁO MÀU ĐỎ NẾU SẮP HẾT HẠN */}
+                        <span
+                          className={
+                            new Date(item.hanSuDung) < new Date()
+                              ? "text-red-500 font-bold"
+                              : "text-slate-500"
+                          }
+                        >
+                          {new Date(item.hanSuDung).toLocaleDateString("vi-VN")}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="p-10 text-center text-slate-400 italic"
+                    >
+                      Không tìm thấy lô vắc-xin nào khớp với từ khóa...
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -167,8 +194,10 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
                 </label>
                 <input
                   type="number"
+                  min="1"
+                  max={selectedBatch?.soLuong}
                   className="w-full bg-slate-50 border-none rounded-xl p-3 text-lg font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="0"
+                  placeholder="Nhập số liều..."
                   value={exportQuantity}
                   onChange={(e) => setExportQuantity(e.target.value)}
                 />

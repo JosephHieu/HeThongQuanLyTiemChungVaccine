@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ImportVaccineModal from "./components/ImportVaccineModal";
+import VaccineDetailModal from "./components/VaccineDetailModal";
 import { useNavigate } from "react-router-dom";
 import ExportVaccine from "./components/ExportVaccine";
 import inventoryApi from "../../api/inventoryApi";
@@ -14,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
+  Info,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -25,10 +27,12 @@ const InventoryManagement = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("view");
+  const [selectedDetail, setSelectedDetail] = useState(null);
 
   // States cho Phân trang & Tìm kiếm
   const [searchCriteria, setSearchCriteria] = useState("name");
   const [searchValue, setSearchValue] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -39,7 +43,7 @@ const InventoryManagement = () => {
     try {
       const data = await inventoryApi.getInventory(
         searchCriteria,
-        searchValue,
+        activeSearch,
         page,
         10,
       );
@@ -63,7 +67,7 @@ const InventoryManagement = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setPage(0); // Quay về trang đầu tiên khi tìm kiếm
-    fetchInventory();
+    setActiveSearch(searchValue);
   };
 
   const handlePageChange = (newPage) => {
@@ -197,25 +201,34 @@ const InventoryManagement = () => {
             <table className="w-full text-left">
               <thead className="bg-slate-50/50 border-b border-slate-100">
                 <tr>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">
-                    Mã lô (ID)
+                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                    Mã lô
                   </th>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">
-                    Thông tin vắc-xin
+                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                    Vắc-xin & Phòng bệnh
+                  </th>{" "}
+                  {/* Gộp hoặc tách */}
+                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                    Số liều
                   </th>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest">
-                    Số lượng
+                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                    Tình Trạng
                   </th>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase tracking-widest text-center">
-                    Tình trạng
+                  <th className="p-4 text-xs font-black text-slate-500 uppercase text-center">
+                    Chi Tiết
                   </th>
+                  <th className="p-4"></th>
                   <th className="p-4"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {inventory.length > 0 ? (
                   inventory.map((item) => (
-                    <InventoryRow key={item.maLo} data={item} />
+                    <InventoryRow
+                      key={item.maLo}
+                      data={item}
+                      onDetail={setSelectedDetail}
+                    />
                   ))
                 ) : (
                   <tr>
@@ -273,7 +286,10 @@ const InventoryManagement = () => {
         </div>
       ) : (
         <div className="animate-in slide-in-from-right-4 duration-500">
-          <ExportVaccine onExportSuccess={fetchInventory} />
+          <ExportVaccine
+            inventoryData={inventory}
+            onExportSuccess={fetchInventory}
+          />
         </div>
       )}
 
@@ -282,6 +298,13 @@ const InventoryManagement = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchInventory} // Load lại data khi nhập kho thành công
+      />
+
+      {/* 5. MODAL CHI TIẾT (Thêm vào đây) */}
+      <VaccineDetailModal
+        isOpen={!!selectedDetail}
+        data={selectedDetail}
+        onClose={() => setSelectedDetail(null)}
       />
     </div>
   );
@@ -303,43 +326,28 @@ const StatCard = ({ icon, label, value, color }) => (
 );
 
 // Component con cho dòng trong bảng
-const InventoryRow = ({ data }) => {
-  // Map dữ liệu từ InventoryResponse của Backend
-  const {
-    maLo,
-    tenVacXin,
-    tenLoaiVacXin,
-    soLuong,
-    hanSuDung,
-    tinhTrang,
-    nuocSanXuat,
-  } = data;
+const InventoryRow = ({ data, onDetail }) => {
+  const { maLo, tenVacXin, tenLoaiVacXin, soLuong, tinhTrang } = data;
 
   return (
-    <tr className="hover:bg-slate-50/50 transition-colors group">
-      <td
-        className="p-4 text-[10px] font-mono font-bold text-slate-400 truncate max-w-[100px]"
-        title={maLo}
-      >
-        {maLo ? maLo.substring(0, 8) : "N/A"}...
+    <tr
+      onClick={() => onDetail(data)} // Click vào bất kỳ đâu trên dòng để xem chi tiết
+      className="hover:bg-blue-50/50 transition-all cursor-pointer group border-b border-slate-50"
+    >
+      <td className="p-4 text-xs font-mono font-bold text-slate-400">
+        {maLo?.substring(0, 8)}...
       </td>
       <td className="p-4">
-        <p className="text-sm font-bold text-slate-800">{tenVacXin}</p>
-        <div className="flex gap-2 mt-1">
-          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase">
-            {tenLoaiVacXin}
-          </span>
-          <span className="text-[9px] bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded font-bold uppercase">
-            {nuocSanXuat}
-          </span>
-        </div>
-      </td>
-      <td className="p-4">
-        <p className="text-sm font-bold text-slate-700">
-          {soLuong.toLocaleString()} liều
+        <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+          {tenVacXin}
         </p>
-        <p className="text-[10px] text-slate-400">
-          HSD: {new Date(hanSuDung).toLocaleDateString("vi-VN")}
+        <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase">
+          {tenLoaiVacXin}
+        </span>
+      </td>
+      <td className="p-4">
+        <p className="text-sm font-black text-slate-700">
+          {soLuong.toLocaleString()} liều
         </p>
       </td>
       <td className="p-4 text-center">
@@ -354,8 +362,8 @@ const InventoryRow = ({ data }) => {
         </span>
       </td>
       <td className="p-4 text-right">
-        <button className="p-2 text-slate-400 hover:text-slate-800 transition-colors">
-          <MoreHorizontal size={18} />
+        <button className="p-2 text-slate-300 group-hover:text-blue-500 transition-colors">
+          <Info size={18} />
         </button>
       </td>
     </tr>

@@ -3,9 +3,12 @@ package com.josephhieu.vaccinebackend.modules.inventory.service;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineExportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineImportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.response.InventoryResponse;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.LoaiVacXin;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.NhaCungCap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -45,4 +48,14 @@ public interface InventoryService {
      * @param maLo ID định danh duy nhất (UUID)
      */
     InventoryResponse getBatchDetail(UUID maLo);
+
+    /**
+     * Lấy danh sách tất cả nhà cung cấp để hiển thị Dropdown.
+     */
+    List<NhaCungCap> getAllSuppliers();
+
+    /**
+     * Lấy danh sách tất cả loại vắc-xin để hiển thị Dropdown.
+     */
+    List<LoaiVacXin> getAllVaccineTypes();
 }

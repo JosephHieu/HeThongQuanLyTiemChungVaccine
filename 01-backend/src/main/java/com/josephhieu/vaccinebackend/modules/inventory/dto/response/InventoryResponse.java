@@ -22,6 +22,7 @@ public class InventoryResponse {
     private String tenLoaiVacXin;
     private String hamLuong;
     private String phongNguaBenh;
+    private String doTuoiTiemChung;
 
     private Integer soLuong;
     private BigDecimal donGia; // Đơn giá vắc-xin

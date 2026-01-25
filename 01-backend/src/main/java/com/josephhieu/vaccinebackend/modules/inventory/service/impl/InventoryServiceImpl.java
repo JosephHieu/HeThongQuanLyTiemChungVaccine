@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,7 +35,11 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional(readOnly = true)
     public Page<InventoryResponse> getInventoryPage(String criteria, String search, Pageable pageable) {
-        return loVacXinRepository.searchInventory(criteria, search, pageable)
+
+        // Đảm bảo search không bị null để tránh lỗi Query
+        String searchKey = (search == null) ? "" : search;
+
+        return loVacXinRepository.searchInventory(criteria, searchKey, pageable)
                 .map(this::mapToResponse);
     }
 
@@ -48,7 +53,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         // 2. Kiểm tra Nhà cung cấp
         NhaCungCap ncc = nhaCungCapRepository.findById(request.getMaNhaCungCap())
-                .orElseThrow(() -> new RuntimeException("Lỗi: Nhà cung cấp không tồn tại trong hệ thống."));
+                .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_FOUND));
 
         // 3. Khởi tạo lô hàng mới (Transaction Record)
         LoVacXin loMoi = LoVacXin.builder()
@@ -95,6 +100,16 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
     }
 
+    @Override
+    public List<NhaCungCap> getAllSuppliers() {
+        return nhaCungCapRepository.findAll();
+    }
+
+    @Override
+    public List<LoaiVacXin> getAllVaccineTypes() {
+        return loaiVacXinRepository.findAll();
+    }
+
     /**
      * Helper: Tạo mới danh mục vắc-xin khi nhập loại chưa có trong kho.
      */
@@ -121,6 +136,9 @@ public class InventoryServiceImpl implements InventoryService {
                 .maLo(lo.getMaLo())
                 .tenVacXin(lo.getVacXin().getTenVacXin())
                 .tenLoaiVacXin(lo.getVacXin().getLoaiVacXin().getTenLoaiVacXin())
+                .doTuoiTiemChung(lo.getVacXin().getDoTuoiTiemChung())
+                .hamLuong(lo.getVacXin().getHamLuong())
+                .phongNguaBenh(lo.getVacXin().getPhongNguaBenh())
                 .soLuong(lo.getSoLuong())
                 .hanSuDung(lo.getVacXin().getHanSuDung())
                 .tinhTrang(lo.getTinhTrang())

@@ -37,6 +37,20 @@ const inventoryApi = {
   getBatchDetail: (maLo) => {
     return axiosClient.get(`/v1/inventory/${maLo}`);
   },
+
+  /**
+   * Lấy tất cả nhà cung cấp (để chọn khi nhập kho)
+   */
+  getAllSuppliers: () => {
+    return axiosClient.get("/v1/inventory/suppliers");
+  },
+
+  /**
+   * Lấy tất cả loại vắc-xin (để chọn khi nhập kho)
+   */
+  getAllVaccineTypes: () => {
+    return axiosClient.get("/v1/inventory/vaccine-types");
+  },
 };
 
 export default inventoryApi;

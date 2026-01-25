@@ -4,6 +4,8 @@ import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineExportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineImportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.response.InventoryResponse;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.LoaiVacXin;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.NhaCungCap;
 import com.josephhieu.vaccinebackend.modules.inventory.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -87,6 +90,30 @@ public class InventoryController {
         return ApiResponse.<InventoryResponse>builder()
                 .result(result)
                 .message("Lấy thông tin lô hàng thành công")
+                .build();
+    }
+
+    /**
+     * API: Lấy danh sách tất cả nhà cung cấp (để hiện dropdown).
+     */
+    @GetMapping("/suppliers")
+    public ApiResponse<List<NhaCungCap>> getAllSuppliers() {
+
+        return ApiResponse.<List<NhaCungCap>>builder()
+                .result(inventoryService.getAllSuppliers())
+                .message("Tải danh sách nhà cung cấp thành công")
+                .build();
+    }
+
+    /**
+     * API: Lấy danh sách các loại vắc-xin.
+     */
+    @GetMapping("/vaccine-types")
+    public ApiResponse<List<LoaiVacXin>> getAllVaccineTypes() {
+
+        return ApiResponse.<List<LoaiVacXin>>builder()
+                .result(inventoryService.getAllVaccineTypes())
+                .message("Tải danh sách loại vắc-xin thành công")
                 .build();
     }
 
