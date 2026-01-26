@@ -117,4 +117,14 @@ public class InventoryController {
                 .build();
     }
 
+    /**
+     * API: Lấy tổng số liều vaccine.
+     */
+    @GetMapping("/stats/total-doses")
+    public ApiResponse<Long> getTotalDoses() {
+
+        return ApiResponse.<Long>builder()
+                .result(inventoryService.getTotalDoses())
+                .build();
+    }
 }

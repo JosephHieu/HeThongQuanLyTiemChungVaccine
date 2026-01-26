@@ -115,8 +115,9 @@ const VaccineDetailModal = ({ isOpen, data, onClose }) => {
                 icon={<Barcode size={20} className="text-slate-400" />}
                 label="Mã định danh (ID)"
                 value={
-                  <span title={data.maLo} className="font-mono text-xs">
-                    {data.maLo?.substring(0, 13)}...
+                  /* Loại bỏ substring để hiển thị toàn bộ mã */
+                  <span className="font-mono text-[11px] break-all leading-relaxed text-slate-600">
+                    {data.maLo}
                   </span>
                 }
               />

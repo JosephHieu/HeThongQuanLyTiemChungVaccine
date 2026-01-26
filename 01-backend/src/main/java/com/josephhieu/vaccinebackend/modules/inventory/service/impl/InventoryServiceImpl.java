@@ -123,6 +123,13 @@ public class InventoryServiceImpl implements InventoryService {
         return loaiVacXinRepository.findAll();
     }
 
+    @Override
+    public Long getTotalDoses() {
+
+        Long total = loVacXinRepository.getTotalDoses();
+        return total != null ? total : 0L;
+    }
+
     /**
      * Helper: Tạo mới danh mục vắc-xin khi nhập loại chưa có trong kho.
      */
@@ -141,6 +148,8 @@ public class InventoryServiceImpl implements InventoryService {
                 .phongNguaBenh(request.getPhongNguaBenh())
                 .build());
     }
+
+
 
     /**
      * Helper: Chuyển đổi Entity sang DTO để trả về cho Frontend (Flattening).

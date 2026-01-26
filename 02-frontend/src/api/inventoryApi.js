@@ -51,6 +51,11 @@ const inventoryApi = {
   getAllVaccineTypes: () => {
     return axiosClient.get("/v1/inventory/vaccine-types");
   },
+
+  /**
+   * Lấy tổng số liều trong kho
+   */
+  getTotalDoses: () => axiosClient.get("/v1/inventory/stats/total-doses"),
 };
 
 export default inventoryApi;

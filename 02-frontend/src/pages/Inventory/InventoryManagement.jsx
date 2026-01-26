@@ -27,6 +27,7 @@ const InventoryManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("view");
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [totalDoses, setTotalDoses] = useState(0);
 
   // States cho Phân trang & Tìm kiếm
   const [searchCriteria, setSearchCriteria] = useState("name");
@@ -35,6 +36,15 @@ const InventoryManagement = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+
+  const fetChStats = async () => {
+    try {
+      const res = await inventoryApi.getTotalDoses();
+      setTotalDoses(res);
+    } catch (error) {
+      console.error("Lỗi tải thống kê liều: " + error);
+    }
+  };
 
   // 1. Hàm lấy dữ liệu từ API
   const fetchInventory = useCallback(async () => {
@@ -60,6 +70,7 @@ const InventoryManagement = () => {
   // Gọi API khi component mount hoặc thay đổi trang/ tìm kiếm
   useEffect(() => {
     fetchInventory();
+    fetChStats();
   }, [fetchInventory]);
 
   // Xử lý khi nhấn nút Tìm kiếm
@@ -141,8 +152,8 @@ const InventoryManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard
               icon={<Package className="text-blue-600" />}
-              label="Tổng tồn kho"
-              value={totalElements}
+              label="Tổng số liều hiện có"
+              value={totalDoses.toLocaleString() + " liều"}
               color="bg-blue-50"
             />
             <StatCard

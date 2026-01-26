@@ -130,7 +130,7 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
                         </span>
                       </td>
                       <td className="p-4 font-mono text-slate-400">
-                        {item.maLo.substring(0, 8)}
+                        {item.soLo}
                       </td>
                       <td className="p-4 font-bold text-blue-600">
                         {item.soLuong.toLocaleString()}{" "}
@@ -180,9 +180,12 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
                 <p className="text-sm font-black text-blue-900">
                   {selectedBatch.tenVacXin}
                 </p>
-                <div className="flex justify-between text-xs text-blue-700">
-                  <span>Mã lô: {selectedBatch.maLo.substring(0, 8)}...</span>
-                  <span className="font-bold">
+                <div className="flex justify-between text-[10px] text-blue-700 items-start gap-2">
+                  <span className="break-all flex-1">
+                    Mã định danh:{" "}
+                    <span className="font-mono">{selectedBatch.maLo}</span>
+                  </span>
+                  <span className="font-bold shrink-0">
                     Tồn: {selectedBatch.soLuong} liều
                   </span>
                 </div>

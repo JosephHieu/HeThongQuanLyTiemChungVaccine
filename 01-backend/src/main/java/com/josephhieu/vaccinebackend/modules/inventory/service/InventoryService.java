@@ -58,4 +58,6 @@ public interface InventoryService {
      * Lấy danh sách tất cả loại vắc-xin để hiển thị Dropdown.
      */
     List<LoaiVacXin> getAllVaccineTypes();
+
+    Long getTotalDoses();
 }

@@ -36,4 +36,13 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
     List<LoVacXin> findExpiringBatches(@Param("targetDate") LocalDate targetDate);
 
     boolean existsBySoLo(String soLo);
+
+    // Câu lện JPQL để tính tổng cột soLuong
+    @Query("SELECT SUM(l.soLuong) FROM LoVacXin l")
+    Long getTotalDoses();
+
+    // Tính tông theo điều hiện tìm kiếm
+    @Query("SELECT SUM(l.soLuong) FROM LoVacXin l WHERE l.tinhTrang = 'Còn'")
+    Long getTotalAvailableDoses();
+
 }
