@@ -56,6 +56,15 @@ const inventoryApi = {
    * Lấy tổng số liều trong kho
    */
   getTotalDoses: () => axiosClient.get("/v1/inventory/stats/total-doses"),
+
+  /**
+   * Lấy lịch sử phiếu xuất kho
+   */
+  getExportHistory: (page = 0, size = 10, startDate, endDate) => {
+    return axiosClient.get(`/v1/inventory/export-history`, {
+      params: { page, size, startDate, endDate },
+    });
+  },
 };
 
 export default inventoryApi;

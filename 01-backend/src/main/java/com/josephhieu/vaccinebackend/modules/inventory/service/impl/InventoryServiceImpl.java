@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -149,6 +150,17 @@ public class InventoryServiceImpl implements InventoryService {
         return total != null ? total : 0L;
     }
 
+    @Override
+    public Page<VaccineExportResponse> getExportHistory(LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        Page<PhieuXuat> pages;
+        if (start != null && end != null) {
+            pages = phieuXuatRepository.findByNgayXuatBetween(start, end, pageable);
+        } else {
+            pages = phieuXuatRepository.findAll(pageable);
+        }
+        return pages.map(this::mapToExportResponse);
+    }
+
     /**
      * Helper: Tạo mới danh mục vắc-xin khi nhập loại chưa có trong kho.
      */
@@ -188,6 +200,22 @@ public class InventoryServiceImpl implements InventoryService {
                 .tinhTrang(lo.getTinhTrang())
                 .nuocSanXuat(lo.getNuocSanXuat())
                 .giayPhep(lo.getGiayPhep())
+                .build();
+    }
+
+    private VaccineExportResponse mapToExportResponse(PhieuXuat phieu) {
+
+        return VaccineExportResponse.builder()
+                .maPhieuXuat(phieu.getMaPhieuXuat())
+                .soPhieuXuat(phieu.getSoPhieuXuat())
+                .tenVacXin(phieu.getLoVacXin().getVacXin().getTenVacXin())
+                .soLoThucTe(phieu.getLoVacXin().getSoLo())
+                .soLuongDaXuat(phieu.getSoLuongXuat())
+                .ngayXuat(phieu.getNgayXuat())
+                .noiNhan(phieu.getNoiNhan())
+                .ghiChu(phieu.getGhiChu())
+                // Ở danh sách lịch sử, ta có thể không cần hiện số lượng còn lại trong kho hiện tại
+                .soLuongConLaiTrongKho(phieu.getLoVacXin().getSoLuong())
                 .build();
     }
 }

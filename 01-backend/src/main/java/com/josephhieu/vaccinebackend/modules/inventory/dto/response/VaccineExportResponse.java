@@ -22,4 +22,5 @@ public class VaccineExportResponse {
     private Integer soLuongConLaiTrongKho; // Đề Frontend cập nhật lại UI
     private LocalDateTime ngayXuat;
     private String noiNhan;
+    private String ghiChu;
 }

@@ -4,6 +4,7 @@ import VaccineDetailModal from "./components/VaccineDetailModal";
 import InventoryRow from "./components/InventoryRow";
 import { useNavigate } from "react-router-dom";
 import ExportVaccine from "./components/ExportVaccine";
+import ExportHistory from "./components/ExportHistory";
 import inventoryApi from "../../api/inventoryApi";
 
 import {
@@ -95,14 +96,27 @@ const InventoryManagement = () => {
     return hsd < sixMonthsFromNow;
   }).length;
 
+  // Helper để lấy nhãn cho Tab
+  const getTabLabel = (tab) => {
+    switch (tab) {
+      case "view":
+        return "Xem tình hình kho";
+      case "export":
+        return "Xuất vắc-xin điều phối";
+      case "history":
+        return "Lịch sử phiếu xuất";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* 1. HEADER */}
       <header className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
         <button
-          onClick={() => navigate("/admin/dashboard")} // Quay về dashboard
+          onClick={() => navigate("/admin/dashboard")}
           className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm group"
-          title="Quay lại Dashboard"
         >
           <ArrowLeft
             size={22}
@@ -130,7 +144,7 @@ const InventoryManagement = () => {
 
       {/* 2. TABS SELECTION */}
       <div className="flex border-b border-slate-200 bg-white px-4 rounded-t-2xl">
-        {["view", "export"].map((tab) => (
+        {["view", "export", "history"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -140,186 +154,196 @@ const InventoryManagement = () => {
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
           >
-            {tab === "view" ? "Xem tình hình kho" : "Xuất vắc-xin điều phối"}
+            {getTabLabel(tab)}
           </button>
         ))}
       </div>
 
       {/* 3. NỘI DUNG THAY ĐỔI THEO TAB */}
-      {activeTab === "view" ? (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-          {/* STATS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard
-              icon={<Package className="text-blue-600" />}
-              label="Tổng số liều hiện có"
-              value={totalDoses.toLocaleString() + " liều"}
-              color="bg-blue-50"
-            />
-            <StatCard
-              icon={<AlertTriangle className="text-amber-600" />}
-              label="Lô sắp hết hạn"
-              value={expiringCount > 0 ? expiringCount : "0"}
-              color="bg-amber-50"
-            />
-            <StatCard
-              icon={<CheckCircle className="text-green-600" />}
-              label="Tình trạng"
-              value="Sẵn sàng"
-              color="bg-green-50"
-            />
-          </div>
+      <div className="mt-4">
+        {/* TAB 1: VIEW TỒN KHO */}
+        {activeTab === "view" && (
+          <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            {/* STATS */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCard
+                icon={<Package className="text-blue-600" />}
+                label="Tổng số liều hiện có"
+                value={totalDoses.toLocaleString() + " liều"}
+                color="bg-blue-50"
+              />
+              <StatCard
+                icon={<AlertTriangle className="text-amber-600" />}
+                label="Lô sắp hết hạn"
+                value={expiringCount > 0 ? expiringCount : "0"}
+                color="bg-amber-50"
+              />
+              <StatCard
+                icon={<CheckCircle className="text-green-600" />}
+                label="Tình trạng"
+                value="Sẵn sàng"
+                color="bg-green-50"
+              />
+            </div>
 
-          {/* SEARCH & FILTER */}
-          <form
-            onSubmit={handleSearch}
-            className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center"
-          >
-            <div className="relative flex-1 w-full">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
-              />
-              <input
-                type="text"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="Tìm kiếm nhanh..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-xl border border-slate-100">
-              <span className="text-[10px] font-black text-slate-400 uppercase">
-                Lọc:
-              </span>
-              <select
-                value={searchCriteria}
-                onChange={(e) => setSearchCriteria(e.target.value)}
-                className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer py-2"
-              >
-                <option value="name">Tên vắc-xin</option>
-                <option value="type">Loại vắc-xin</option>
-                <option value="origin">Nước sản xuất</option>
-                <option value="batch">Số lô sản xuất</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              className="w-full md:w-auto px-8 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all"
+            {/* SEARCH & FILTER */}
+            <form
+              onSubmit={handleSearch}
+              className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center"
             >
-              Tìm kiếm
-            </button>
-          </form>
-
-          {/* TABLE & PAGINATION */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative">
-            {loading && (
-              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="relative flex-1 w-full">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder="Tìm kiếm nhanh..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
-            )}
-            <table className="w-full text-left">
-              <thead className="bg-slate-50/50 border-b border-slate-100">
-                <tr>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
-                    Mã lô
-                  </th>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
-                    Vắc-xin & Phòng bệnh
-                  </th>
-                  {/* Gộp hoặc tách */}
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
-                    Số liều
-                  </th>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase">
-                    Tình Trạng
-                  </th>
-                  <th className="p-4 text-xs font-black text-slate-500 uppercase text-center">
-                    Chi Tiết
-                  </th>
-                  <th className="p-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {inventory.length > 0 ? (
-                  inventory.map((item) => (
-                    <InventoryRow
-                      key={item.maLo}
-                      data={item}
-                      onDetail={setSelectedDetail}
-                    />
-                  ))
-                ) : (
+              <div className="flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-xl border border-slate-100">
+                <span className="text-[10px] font-black text-slate-400 uppercase">
+                  Lọc:
+                </span>
+                <select
+                  value={searchCriteria}
+                  onChange={(e) => setSearchCriteria(e.target.value)}
+                  className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer py-2"
+                >
+                  <option value="name">Tên vắc-xin</option>
+                  <option value="type">Loại vắc-xin</option>
+                  <option value="origin">Nước sản xuất</option>
+                  <option value="batch">Số lô sản xuất</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full md:w-auto px-8 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 transition-all"
+              >
+                Tìm kiếm
+              </button>
+            </form>
+
+            {/* TABLE & PAGINATION */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative">
+              {loading && (
+                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              )}
+              <table className="w-full text-left">
+                <thead className="bg-slate-50/50 border-b border-slate-100">
                   <tr>
-                    <td
-                      colSpan="5"
-                      className="p-10 text-center text-slate-400 font-medium"
-                    >
-                      Không tìm thấy dữ liệu phù hợp
-                    </td>
+                    <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                      Mã lô
+                    </th>
+                    <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                      Vắc-xin & Phòng bệnh
+                    </th>
+                    <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                      Số liều
+                    </th>
+                    <th className="p-4 text-xs font-black text-slate-500 uppercase">
+                      Tình Trạng
+                    </th>
+                    <th className="p-4 text-xs font-black text-slate-500 uppercase text-center">
+                      Chi Tiết
+                    </th>
+                    <th className="p-4"></th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {inventory.length > 0 ? (
+                    inventory.map((item) => (
+                      <InventoryRow
+                        key={item.maLo}
+                        data={item}
+                        onDetail={setSelectedDetail}
+                      />
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="p-10 text-center text-slate-400 font-medium"
+                      >
+                        Không tìm thấy dữ liệu phù hợp
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
 
-            {/* PAGINATION */}
-            <div className="p-4 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
-              <span className="text-xs font-bold text-slate-400">
-                Trang {page + 1} / {totalPages} (Tổng {totalElements} kết quả)
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  disabled={page === 0}
-                  onClick={() => handlePageChange(page - 1)}
-                  className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 disabled:opacity-30"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                {/* Các nút số trang */}
-                {[...Array(totalPages)]
-                  .map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handlePageChange(i)}
-                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                        page === i
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-100"
-                          : "hover:bg-white text-slate-500"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))
-                  .slice(Math.max(0, page - 2), Math.min(totalPages, page + 3))}
-                <button
-                  disabled={page >= totalPages - 1}
-                  onClick={() => handlePageChange(page + 1)}
-                  className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 disabled:opacity-30"
-                >
-                  <ChevronRight size={16} />
-                </button>
+              {/* PAGINATION */}
+              <div className="p-4 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                <span className="text-xs font-bold text-slate-400">
+                  Trang {page + 1} / {totalPages} (Tổng {totalElements} kết quả)
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    disabled={page === 0}
+                    onClick={() => handlePageChange(page - 1)}
+                    className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 disabled:opacity-30"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  {[...Array(totalPages)]
+                    .map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handlePageChange(i)}
+                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${page === i ? "bg-blue-600 text-white shadow-md shadow-blue-100" : "hover:bg-white text-slate-500"}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))
+                    .slice(
+                      Math.max(0, page - 2),
+                      Math.min(totalPages, page + 3),
+                    )}
+                  <button
+                    disabled={page >= totalPages - 1}
+                    onClick={() => handlePageChange(page + 1)}
+                    className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 disabled:opacity-30"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="animate-in slide-in-from-right-4 duration-500">
-          <ExportVaccine
-            inventoryData={inventory}
-            onExportSuccess={fetchInventory}
-          />
-        </div>
-      )}
+        )}
 
-      {/* 4. MODAL NHẬP KHO */}
+        {/* TAB 2: XUẤT KHO */}
+        {activeTab === "export" && (
+          <div className="animate-in slide-in-from-right-4 duration-500">
+            <ExportVaccine
+              inventoryData={inventory}
+              onExportSuccess={() => {
+                fetchInventory();
+                fetChStats();
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: LỊCH SỬ PHIẾU XUẤT */}
+        {activeTab === "history" && (
+          <div className="animate-in slide-in-from-left-4 duration-500">
+            <ExportHistory />
+          </div>
+        )}
+      </div>
+
+      {/* 4. MODALS */}
       <ImportVaccineModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchInventory} // Load lại data khi nhập kho thành công
+        onSuccess={fetchInventory}
       />
-
-      {/* 5. MODAL CHI TIẾT (Thêm vào đây) */}
       <VaccineDetailModal
         isOpen={!!selectedDetail}
         data={selectedDetail}
@@ -329,7 +353,7 @@ const InventoryManagement = () => {
   );
 };
 
-// Component con cho Thẻ thống kê
+// StatCard Component (Giữ nguyên)
 const StatCard = ({ icon, label, value, color }) => (
   <div
     className={`${color} p-6 rounded-2xl border border-white flex items-center gap-4 shadow-sm`}

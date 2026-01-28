@@ -13,8 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,6 +129,23 @@ public class InventoryController {
 
         return ApiResponse.<Long>builder()
                 .result(inventoryService.getTotalDoses())
+                .build();
+    }
+
+    /**
+     * API: Lấy lịch sử tất cả các phiếu xuất kho.
+     * Endpoint: GET /api/v1/inventory/export-history
+     */
+    @GetMapping("/export-history")
+    public ApiResponse<Page<VaccineExportResponse>> getExportHistory(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayXuat").descending());
+        return ApiResponse.<Page<VaccineExportResponse>>builder()
+                .result(inventoryService.getExportHistory(startDate, endDate, pageable))
                 .build();
     }
 }
