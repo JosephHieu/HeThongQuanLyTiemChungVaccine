@@ -22,7 +22,6 @@ public class ScheduleResponse {
     private UUID maLichTiemChung;
     private LocalDate ngayTiem;
     private String thoiGian;
-    private String tenVacXin;     // Trả về tên thay vì chỉ trả về ID
     private Integer soLuong;
     private Integer daDangKy;     // Tổng số bệnh nhân đã đăng ký thực tế
     private String doTuoi;

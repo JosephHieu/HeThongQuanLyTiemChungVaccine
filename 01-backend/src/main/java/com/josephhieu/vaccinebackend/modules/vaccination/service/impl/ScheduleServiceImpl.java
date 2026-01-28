@@ -5,6 +5,7 @@ import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
 import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
 import com.josephhieu.vaccinebackend.modules.identity.repository.NhanVienRepository;
+import com.josephhieu.vaccinebackend.modules.inventory.repository.VacXinRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.StaffSummaryResponse;
@@ -48,23 +49,19 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .ghiChu(request.getGhiChu())
                 .build();
 
-        // Lưu thông tin lịch tiêm chính
         lichTiemChung = lichTiemChungRepository.save(lichTiemChung);
 
         // 2. Xử lý gán danh sách bác sĩ tham gia đợt tiêm
-        if (request.getDanhSachBacSiIds() != null && !request.getDanhSachBacSiIds().isEmpty()) {
+        if (request.getDanhSachBacSiIds() != null) {
             for (UUID maNhanVien : request.getDanhSachBacSiIds()) {
-
                 NhanVien nhanVien = nhanVienRepository.findById(maNhanVien)
                         .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-                // Tạo bản ghi trong bảng trung gian CHITIET_NV_THAMGIA
                 ChiTietNhanVienThamGia chiTiet = ChiTietNhanVienThamGia.builder()
                         .id(new NhanVienThamGiaId(maNhanVien, lichTiemChung.getMaLichTiem()))
                         .nhanVien(nhanVien)
                         .lichTiemChung(lichTiemChung)
                         .build();
-
                 chiTietNhanVienThamGiaRepository.save(chiTiet);
             }
         }
@@ -77,21 +74,16 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Transactional(readOnly = true)
     public PageResponse<ScheduleResponse> getAllSchedules(int page, int size, String search, LocalDate start, LocalDate end) {
 
-        // 1. Chuẩn bị phân trang (trang trong Spring bắt đầu từ 0)
         int validatePage = (page < 1) ? 0 : page - 1;
         Pageable pageable = PageRequest.of(validatePage, size, Sort.by("ngayTiem").descending());
 
-        // 2. Tìm kiếm dữ liệu từ Repository
-        // Sử dụng hàm findByNgayTiemBetweenAndDiaDiemContaining đã viết ở Repository
-        // Nếu start/end null, hãy truyền khoảng thời gian rộng (ví dụ từ năm 2000 đến 2100)
         LocalDate startDate = (start != null) ? start : LocalDate.of(2000, 1, 1);
-        LocalDate endDate = (end != null) ? end : LocalDate.of(2000, 12, 31);
+        LocalDate endDate = (end != null) ? end : LocalDate.of(2100, 12, 31);
         String searchKey = (search != null) ? search : "";
 
         Page<LichTiemChung> schedulePage = lichTiemChungRepository
                 .findByNgayTiemBetweenAndDiaDiemContaining(startDate, endDate, searchKey, pageable);
 
-        // 3. Map sang Response DTO
         List<ScheduleResponse> data = schedulePage.getContent().stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -158,23 +150,41 @@ public class ScheduleServiceImpl implements ScheduleService {
         lichTiemChungRepository.delete(schedule);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ScheduleResponse getScheduleByDate(LocalDate date) {
+        // Tìm lịch tiêm theo ngày
+        return lichTiemChungRepository.findByNgayTiem(date)
+                .map(this::mapToResponse)
+                .orElse(null); // Trả về null nếu ngày đó chưa có lịch
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LocalDate> getActiveDatesInPeriod(LocalDate start, LocalDate end) {
+        // Lấy danh sách các ngày có lịch tiêm trong khoảng thời gian (thường là 1 tháng)
+        return lichTiemChungRepository.findAllByNgayTiemBetween(start, end)
+                .stream()
+                .map(LichTiemChung::getNgayTiem)
+                .distinct()
+                .toList();
+    }
+
     /**
      * Chuyển đổi Entity sang Response DTO để hiển thị trên giao diện.
      */
     private ScheduleResponse mapToResponse(LichTiemChung entity) {
 
-        // 1. Gọi Repository để đếm số lượng người đã đăng ký thực tế
         long registeredCount = lichTiemChungRepository.countRegisteredPatients(entity.getMaLichTiem());
 
-        // 2. Lấy danh sách bác sĩ đã gán cho lịch này để hiển thị lên UI
         List<StaffSummaryResponse> staffList = chiTietNhanVienThamGiaRepository
                 .findByLichTiemChung_MaLichTiem(entity.getMaLichTiem()).stream()
                 .map(ct -> StaffSummaryResponse.builder()
                         .maNhanVien(ct.getNhanVien().getMaNhanVien())
+                        // LƯU Ý: Kiểm tra trường tên trong NhanVien là 'hoTen' hay 'tenNhanVien'
                         .tenNhanVien(ct.getNhanVien().getTenNhanVien())
                         .build())
                 .toList();
-
 
         return ScheduleResponse.builder()
                 .maLichTiemChung(entity.getMaLichTiem())
@@ -182,8 +192,8 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .thoiGian(entity.getThoiGianChung())
                 .diaDiem(entity.getDiaDiem())
                 .soLuong(entity.getSoLuongNguoiTiem())
-                .daDangKy((int) registeredCount) // Đã bổ sung
-                .danhSachBacSi(staffList)        // Đã bổ sung
+                .daDangKy((int) registeredCount)
+                .danhSachBacSi(staffList)
                 .ghiChu(entity.getGhiChu())
                 .doTuoi(entity.getDoiTuong())
                 .build();

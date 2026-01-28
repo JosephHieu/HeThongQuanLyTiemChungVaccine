@@ -5,6 +5,7 @@ import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCre
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface ScheduleService {
@@ -16,4 +17,10 @@ public interface ScheduleService {
     ScheduleResponse updateSchedule(UUID id, ScheduleCreationRequest request);
 
     void deleteSchedule(UUID id);
+
+    ScheduleResponse getScheduleByDate(LocalDate date);
+
+    List<LocalDate> getActiveDatesInPeriod(LocalDate start, LocalDate end);
+
+
 }

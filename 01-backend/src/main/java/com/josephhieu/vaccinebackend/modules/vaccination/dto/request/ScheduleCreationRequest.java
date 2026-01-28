@@ -21,7 +21,6 @@ public class ScheduleCreationRequest {
 
     private LocalDate ngayTiem; // Ngày tổ chức tiêm
     private String thoiGian;    // Thời gian cụ thể (Sáng/Chiều hoặc khung giờ)
-    private UUID maVacXin;      // ID của loại vắc xin sẽ tiêm
     private Integer soLuong;    // Số lượng vắc xin dự kiến cho đợt này
     private String doTuoi;      // Độ tuổi khuyên dùng (VD: Trẻ em < 5 tuổi)
     private String diaDiem;     // Địa điểm tổ chức đợt tiêm

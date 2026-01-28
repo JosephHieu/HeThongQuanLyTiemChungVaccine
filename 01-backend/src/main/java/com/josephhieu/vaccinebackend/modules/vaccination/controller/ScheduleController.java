@@ -1,6 +1,7 @@
 package com.josephhieu.vaccinebackend.modules.vaccination.controller;
 
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
+import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.service.ScheduleService;
@@ -8,10 +9,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Controller quản lý các yêu cầu liên quan đến Lịch tiêm chủng.
@@ -26,22 +29,89 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     /**
-     * API tạo mới một lịch tiêm chủng và phân công bác sĩ trực.
-     * Tương ứng với hành động nhấn nút "Save" trên giao diện.
-     *
-     * @param request DTO chứa thông tin lịch tiêm và danh sách ID bác sĩ.
-     * @return ApiResponse chứa thông tin lịch tiêm đã được tạo thành công.
+     * Lấy chi tiết lịch tiêm theo một ngày cụ thể.
+     * Dùng để đổ dữ liệu vào ScheduleForm khi người dùng click vào CalendarSidebar.
+     */
+    @GetMapping("/by-date")
+    public ApiResponse<ScheduleResponse> getByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        log.info("Truy vấn lịch tiêm cho ngày: {}", date);
+        return ApiResponse.<ScheduleResponse>builder()
+                .result(scheduleService.getScheduleByDate(date))
+                .build();
+    }
+
+    /**
+     * Lấy danh sách các ngày có lịch tiêm trong một khoảng thời gian.
+     * Dùng để hiển thị các "dấu chấm xanh" báo hiệu có lịch trên CalendarSidebar.
+     */
+    @GetMapping("/active-dates")
+    public ApiResponse<List<LocalDate>> getActiveDates(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+        return ApiResponse.<List<LocalDate>>builder()
+                .result(scheduleService.getActiveDatesInPeriod(start, end))
+                .build();
+    }
+
+    /**
+     * Tạo mới lịch tiêm chủng.
      */
     @PostMapping
     public ApiResponse<ScheduleResponse> createSchedule(@RequestBody @Valid ScheduleCreationRequest request) {
 
-        log.info("Tiếp nhận yêu cầu tạo lịch tiêm vào ngày: {}", request.getNgayTiem());
-
-        ScheduleResponse response = scheduleService.createScheduleService(request);
-
         return ApiResponse.<ScheduleResponse>builder()
-                .result(response)
+                .result(scheduleService.createScheduleService(request))
                 .message("Tạo lịch tiêm chủng thành công")
                 .build();
     }
+
+    /**
+     * Cập nhật lịch tiêm chủng hiện có.
+     * Tương ứng với hành động "Lưu lại" sau khi chỉnh sửa trên giao diện.
+     */
+    @PutMapping("/{id}")
+    public ApiResponse<ScheduleResponse> updateSchedule(
+            @PathVariable UUID id,
+            @RequestBody @Valid ScheduleCreationRequest request) {
+
+        return ApiResponse.<ScheduleResponse>builder()
+                .result(scheduleService.updateSchedule(id, request))
+                .message("Cập nhật lịch tiêm thành công")
+                .build();
+    }
+
+    /**
+     * Xóa lịch tiêm chủng.
+     */
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteSchedule(@PathVariable UUID id) {
+        scheduleService.deleteSchedule(id);
+        return ApiResponse.<Void>builder()
+                .message("Xóa lịch tiêm thành công")
+                .build();
+    }
+
+    /**
+     * Lấy toàn bộ danh sách lịch tiêm (hỗ trợ phân trang và tìm kiếm).
+     * Dùng cho các màn hình quản lý dạng bảng (List view).
+     */
+    @GetMapping
+    public ApiResponse<PageResponse<ScheduleResponse>> getAllSchedules(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+
+        return ApiResponse.<PageResponse<ScheduleResponse>>builder()
+                .result(scheduleService.getAllSchedules(page, size, search, start, end))
+                .build();
+    }
+
+
+
+
 }

@@ -1,7 +1,6 @@
 package com.josephhieu.vaccinebackend.modules.vaccination.repository;
 
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.LichTiemChung;
-// PHẢI dùng import này của Spring Data
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -44,4 +45,8 @@ public interface LichTiemChungRepository extends JpaRepository<LichTiemChung, UU
                                         @Param("endDate") LocalDate endDate,
                                         @Param("diaDiem") String diaDiem,
                                         Pageable pageable);
+
+    Optional<LichTiemChung> findByNgayTiem(LocalDate ngayTiem);
+
+    List<LichTiemChung> findAllByNgayTiemBetween(LocalDate start, LocalDate end);
 }
