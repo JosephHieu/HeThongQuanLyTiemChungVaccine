@@ -35,4 +35,13 @@ public interface LichTiemChungRepository extends JpaRepository<LichTiemChung, UU
      */
     @Query("SELECT COUNT(d) FROM ChiTietDangKyTiem d WHERE d.lichTiemChung.maLichTiem = :maLichTiem")
     long countRegisteredPatients(@Param("maLichTiem") UUID maLichTiem);
+
+    @Query("SELECT l FROM LichTiemChung l " +
+            "WHERE (:startDate IS NULL OR l.ngayTiem >= :startDate) " +
+            "AND (:endDate IS NULL OR l.ngayTiem <= :endDate) " +
+            "AND (:diaDiem IS NULL OR l.diaDiem LIKE %:diaDiem%)")
+    Page<LichTiemChung> searchSchedules(@Param("startDate") LocalDate startDate,
+                                        @Param("endDate") LocalDate endDate,
+                                        @Param("diaDiem") String diaDiem,
+                                        Pageable pageable);
 }
