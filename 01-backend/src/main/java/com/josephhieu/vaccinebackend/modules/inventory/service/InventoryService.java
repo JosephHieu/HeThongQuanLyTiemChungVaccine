@@ -3,6 +3,7 @@ package com.josephhieu.vaccinebackend.modules.inventory.service;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineExportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineImportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.response.InventoryResponse;
+import com.josephhieu.vaccinebackend.modules.inventory.dto.response.VaccineExportResponse;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoaiVacXin;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.NhaCungCap;
 import org.springframework.data.domain.Page;
@@ -41,7 +42,7 @@ public interface InventoryService {
      * @param request Dữ liệu xuất kho (Mã lô, số lượng)
      * @return Thông tin lô hàng sau khi xuất
      */
-    InventoryResponse exportVaccine(VaccineExportRequest request);
+    VaccineExportResponse exportVaccine(VaccineExportRequest request);
 
     /**
      * Lấy thông tin chi tiết của một lô vắc-xin qua ID.

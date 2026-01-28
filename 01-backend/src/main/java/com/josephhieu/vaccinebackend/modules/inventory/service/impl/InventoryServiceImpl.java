@@ -5,14 +5,9 @@ import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineExportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineImportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.response.InventoryResponse;
-import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
-import com.josephhieu.vaccinebackend.modules.inventory.entity.LoaiVacXin;
-import com.josephhieu.vaccinebackend.modules.inventory.entity.NhaCungCap;
-import com.josephhieu.vaccinebackend.modules.inventory.entity.VacXin;
-import com.josephhieu.vaccinebackend.modules.inventory.repository.LoVacXinRepository;
-import com.josephhieu.vaccinebackend.modules.inventory.repository.LoaiVacXinRepository;
-import com.josephhieu.vaccinebackend.modules.inventory.repository.NhaCungCapRepository;
-import com.josephhieu.vaccinebackend.modules.inventory.repository.VacXinRepository;
+import com.josephhieu.vaccinebackend.modules.inventory.dto.response.VaccineExportResponse;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.*;
+import com.josephhieu.vaccinebackend.modules.inventory.repository.*;
 import com.josephhieu.vaccinebackend.modules.inventory.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +26,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final VacXinRepository vacXinRepository;
     private final LoaiVacXinRepository loaiVacXinRepository;
     private final NhaCungCapRepository nhaCungCapRepository;
+    private final PhieuXuatRepository phieuXuatRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -85,25 +81,48 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional
-    public InventoryResponse exportVaccine(VaccineExportRequest request) {
+    public VaccineExportResponse exportVaccine(VaccineExportRequest request) {
 
+        // 1. Tìm lô vắc-xin hiện tại
         LoVacXin loHienTai = loVacXinRepository.findById(request.getMaLo())
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
 
-        // Kiểm tra Null để tránh NPE trước khi so sánh
-        Integer soLuongHienTai = loHienTai.getSoLuong() != null ? loHienTai.getSoLuong() : 0;
-        Integer soLuongXuat = request.getSoLuongXuat() != null ? request.getSoLuongXuat() : 0;
-
-        if (soLuongHienTai < soLuongXuat) {
+        // 2. Kiểm tra tồn kho
+        int soLuongHienTai = loHienTai.getSoLuong() != null ? loHienTai.getSoLuong() : 0;
+        if (soLuongHienTai < request.getSoLuongXuat()) {
             throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
         }
 
-        // Cập nhật
-        int soLuongMoi = soLuongHienTai - soLuongXuat;
+        // 3. Cập nhật số lượng và tình trạng lô vắc-xin
+        int soLuongMoi = soLuongHienTai - request.getSoLuongXuat();
         loHienTai.setSoLuong(soLuongMoi);
         loHienTai.setTinhTrang(soLuongMoi > 0 ? "Còn" : "Hết");
+        loVacXinRepository.save(loHienTai);
 
-        return mapToResponse(loVacXinRepository.save(loHienTai));
+        // 4. Tạo phiếu xuất mới
+        String soPhieuMoi = "PX-" + System.currentTimeMillis() / 1000;
+
+        PhieuXuat phieu = PhieuXuat.builder()
+                .soPhieuXuat(soPhieuMoi)
+                .loVacXin(loHienTai)
+                .soLuongXuat(request.getSoLuongXuat())
+                .noiNhan(request.getNoiNhan())
+                .ghiChu(request.getGhiChu())
+                .maNhanVien(request.getMaNhanVien())
+                .build();
+
+        PhieuXuat savedPhieu = phieuXuatRepository.save(phieu);
+
+        // 5. Trả về Response DTO cho Frontend
+        return VaccineExportResponse.builder()
+                .soPhieuXuat(savedPhieu.getSoPhieuXuat())
+                .tenVacXin(loHienTai.getVacXin().getTenVacXin())
+                .soLoThucTe(loHienTai.getSoLo())
+                .soLuongDaXuat(savedPhieu.getSoLuongXuat())
+                .soLuongConLaiTrongKho(soLuongMoi)
+                .ngayXuat(savedPhieu.getNgayXuat())
+                .noiNhan(savedPhieu.getNoiNhan())
+                .build();
     }
 
     @Override

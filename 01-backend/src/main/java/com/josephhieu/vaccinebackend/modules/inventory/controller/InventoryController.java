@@ -4,6 +4,7 @@ import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineExportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineImportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.response.InventoryResponse;
+import com.josephhieu.vaccinebackend.modules.inventory.dto.response.VaccineExportResponse;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoaiVacXin;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.NhaCungCap;
 import com.josephhieu.vaccinebackend.modules.inventory.service.InventoryService;
@@ -68,13 +69,13 @@ public class InventoryController {
      * Endpoint: POST /api/v1/inventory/export
      */
     @PostMapping("/export")
-    public ApiResponse<InventoryResponse> exportVaccine(@RequestBody @Valid VaccineExportRequest request) {
+    public ApiResponse<VaccineExportResponse> exportVaccine(@RequestBody @Valid VaccineExportRequest request) {
 
-        InventoryResponse result = inventoryService.exportVaccine(request);
+        VaccineExportResponse result = inventoryService.exportVaccine(request);
 
-        return ApiResponse.<InventoryResponse>builder()
+        return ApiResponse.<VaccineExportResponse>builder()
                 .result(result)
-                .message("Xuất kho vắc-xin thành công")
+                .message("Xuất kho thành công! Số phiếu: " + result.getSoPhieuXuat())
                 .build();
     }
 

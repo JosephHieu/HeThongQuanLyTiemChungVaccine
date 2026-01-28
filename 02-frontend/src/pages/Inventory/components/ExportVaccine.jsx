@@ -16,6 +16,8 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
   const [exportQuantity, setExportQuantity] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [noiNhan, setNoiNhan] = useState("");
+  const [ghiChu, setGhiChu] = useState("");
 
   // 1. Logic lọc danh sách tại chỗ (Frontend Search)
   const filteredData = useMemo(() => {
@@ -28,34 +30,29 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
 
   // 2. Logic gọi API Xuất kho
   const handleExport = async () => {
-    if (!selectedBatch) {
-      return toast.error("Vui lòng chọn một lô vắc-xin để xuất!");
-    }
+    if (!selectedBatch) return toast.error("Vui lòng chọn lô vắc-xin!");
+
+    // Kiểm tra nơi nhận (Vì Backend yêu cầu @NotBlank)
+    if (!noiNhan.trim()) return toast.error("Vui lòng nhập nơi nhận vắc-xin!");
 
     const quantity = parseInt(exportQuantity);
     if (!exportQuantity || isNaN(quantity) || quantity <= 0) {
       return toast.error("Số lượng xuất phải là số dương");
     }
 
-    // So sánh với trường 'soLuong' từ Backend
-    if (quantity > selectedBatch.soLuong) {
-      return toast.error(
-        `Kho chỉ còn ${selectedBatch.soLuong} liều, không đủ để xuất!`,
-      );
-    }
-
     setIsSubmitting(true);
     try {
-      // Gọi API với DTO: { maLo: UUID, soLuongXuat: Integer }
+      // Gửi payload ĐẦY ĐỦ theo DTO mới
       await inventoryApi.exportVaccine({
         maLo: selectedBatch.maLo,
         soLuongXuat: quantity,
+        noiNhan: noiNhan, // <--- Trường mới
+        ghiChu: ghiChu, // <--- Trường mới
+        maNhanVien: null, // Có thể bổ sung ID nhân viên từ AuthContext sau
       });
 
-      toast.success(`Đã xuất ${quantity} liều ${selectedBatch.tenVacXin}`);
+      toast.success(`Đã tạo phiếu xuất kho cho ${selectedBatch.tenVacXin}`);
       handleCancel();
-
-      // Gọi callback để InventoryManagement tải lại dữ liệu mới nhất
       if (onExportSuccess) onExportSuccess();
     } catch (error) {
       toast.error(error.message || "Lỗi hệ thống khi xuất kho");
@@ -67,6 +64,8 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
   const handleCancel = () => {
     setSelectedBatch(null);
     setExportQuantity("");
+    setNoiNhan("");
+    setGhiChu("");
   };
 
   return (
@@ -204,6 +203,34 @@ const ExportVaccine = ({ inventoryData = [], onExportSuccess }) => {
                   value={exportQuantity}
                   onChange={(e) => setExportQuantity(e.target.value)}
                 />
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Đơn vị tiếp nhận (Nơi nhận)
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="VD: Trạm y tế Phường 1..."
+                    value={noiNhan}
+                    onChange={(e) => setNoiNhan(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    Ghi chú lý do xuất
+                  </label>
+                  <textarea
+                    rows="2"
+                    className="w-full bg-slate-50 border-none rounded-xl p-3 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    placeholder="Nhập ghi chú nếu có..."
+                    value={ghiChu}
+                    onChange={(e) => setGhiChu(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-2 pt-4">
