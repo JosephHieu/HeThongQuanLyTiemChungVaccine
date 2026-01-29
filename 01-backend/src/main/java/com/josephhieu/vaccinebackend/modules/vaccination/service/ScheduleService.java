@@ -2,6 +2,7 @@ package com.josephhieu.vaccinebackend.modules.vaccination.service;
 
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 
 import java.time.LocalDate;
@@ -22,5 +23,5 @@ public interface ScheduleService {
 
     List<LocalDate> getActiveDatesInPeriod(LocalDate start, LocalDate end);
 
-
+    PageResponse<RegistrationResponse> getRegistrationsBySchedule(UUID maLichTiem, int page, int size);
 }

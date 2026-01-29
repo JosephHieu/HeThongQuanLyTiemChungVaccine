@@ -3,6 +3,7 @@ package com.josephhieu.vaccinebackend.modules.vaccination.controller;
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.service.ScheduleService;
 import jakarta.validation.Valid;
@@ -111,7 +112,20 @@ public class ScheduleController {
                 .build();
     }
 
+    /**
+     * Lấy danh sách bệnh nhân đã đăng ký cho một lịch tiêm cụ thể.
+     * Dùng để hiển thị bảng RegistrationTable ở giao diện.
+     */
+    @GetMapping("/{id}/registrations")
+    public ApiResponse<PageResponse<RegistrationResponse>> getRegistrations(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
+        return ApiResponse.<PageResponse<RegistrationResponse>>builder()
+                .result(scheduleService.getRegistrationsBySchedule(id, page, size))
+                .build();
+    }
 
 
 }

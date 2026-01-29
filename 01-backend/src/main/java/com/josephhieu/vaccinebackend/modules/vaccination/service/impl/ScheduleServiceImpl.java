@@ -7,11 +7,14 @@ import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
 import com.josephhieu.vaccinebackend.modules.identity.repository.NhanVienRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.repository.VacXinRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.StaffSummaryResponse;
+import com.josephhieu.vaccinebackend.modules.vaccination.entity.ChiTietDangKyTiem;
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.ChiTietNhanVienThamGia;
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.LichTiemChung;
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.id.NhanVienThamGiaId;
+import com.josephhieu.vaccinebackend.modules.vaccination.repository.ChiTietDangKyTiemRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.repository.ChiTietNhanVienThamGiaRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.repository.LichTiemChungRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.service.ScheduleService;
@@ -34,6 +37,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final LichTiemChungRepository lichTiemChungRepository;
     private final ChiTietNhanVienThamGiaRepository chiTietNhanVienThamGiaRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final ChiTietDangKyTiemRepository chiTietDangKyTiemRepository;
 
     @Override
     @Transactional
@@ -168,6 +172,37 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .map(LichTiemChung::getNgayTiem)
                 .distinct()
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<RegistrationResponse> getRegistrationsBySchedule(UUID maLichTiem, int page, int size) {
+        int validatePage = (page < 1) ? 0 : page - 1;
+        Pageable pageable = PageRequest.of(validatePage, size, Sort.by("thoiGianCanTiem").descending());
+
+        // Gọi Repository đã có của bạn
+        Page<ChiTietDangKyTiem> registrationPage = chiTietDangKyTiemRepository
+                .findByLichTiemChung_MaLichTiem(maLichTiem, pageable);
+
+        List<RegistrationResponse> data = registrationPage.getContent().stream()
+                .map(reg -> RegistrationResponse.builder()
+                        .maDangKy(reg.getMaChiTietDKTiem())
+                        .tenBenhNhan(reg.getBenhNhan().getTenBenhNhan())
+                        .soDienThoai(reg.getBenhNhan().getSdt())
+                        // Lấy tên vắc xin từ lô vắc xin mà bệnh nhân đã chọn
+                        .tenVacXin(reg.getLoVacXin() != null ?
+                                reg.getLoVacXin().getVacXin().getTenVacXin() : "Chưa chọn")
+                        .ngayDangKy(reg.getThoiGianCanTiem() != null ? reg.getThoiGianCanTiem().atStartOfDay() : null)
+                        .build())
+                .toList();
+
+        return PageResponse.<RegistrationResponse>builder()
+                .currentPage(page)
+                .pageSize(size)
+                .totalPages(registrationPage.getTotalPages())
+                .totalElements(registrationPage.getTotalElements())
+                .data(data)
+                .build();
     }
 
     /**

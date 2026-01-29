@@ -3,12 +3,15 @@ package com.josephhieu.vaccinebackend.modules.identity.controller;
 import com.josephhieu.vaccinebackend.modules.identity.dto.request.UserCreationRequest;
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
+import com.josephhieu.vaccinebackend.modules.identity.dto.response.StaffSummaryResponse;
 import com.josephhieu.vaccinebackend.modules.identity.dto.response.UserResponse;
 import com.josephhieu.vaccinebackend.modules.identity.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,6 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -59,6 +63,22 @@ public class UserController {
                 .result(userService.updateUser(id, request))
                 .build();
     }
+
+    /**
+     * API Lấy danh sách nhân viên y tế (Bác sĩ).
+     * Dùng để đổ dữ liệu vào dropdown "Bác sĩ phụ trách" ở module Tiêm chủng.
+     * Endpoint: GET /api/users/medical-staffs
+     */
+    @GetMapping("/medical-staffs")
+    public ApiResponse<List<StaffSummaryResponse>> getMedicalStaffs() {
+        log.info("Yêu cầu lấy danh sách nhân viên y tế để phân công lịch trực");
+
+        return ApiResponse.<List<StaffSummaryResponse>>builder()
+                .code(1000)
+                .result(userService.getStaffsByRole("Nhân viên y tế"))
+                .build();
+    }
+
 
     // API Khóa/ Mở khóa
     @PatchMapping("/{id}/toggle-status")

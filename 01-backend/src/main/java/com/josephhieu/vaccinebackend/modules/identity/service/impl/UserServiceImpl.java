@@ -2,6 +2,7 @@ package com.josephhieu.vaccinebackend.modules.identity.service.impl;
 
 import com.josephhieu.vaccinebackend.modules.identity.dto.request.UserCreationRequest;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
+import com.josephhieu.vaccinebackend.modules.identity.dto.response.StaffSummaryResponse;
 import com.josephhieu.vaccinebackend.modules.identity.dto.response.UserResponse;
 import com.josephhieu.vaccinebackend.modules.identity.entity.*;
 import com.josephhieu.vaccinebackend.modules.identity.entity.id.ChiTietPhanQuyenId;
@@ -186,6 +187,7 @@ public class UserServiceImpl implements UserService {
         return mapToUserResponse(taiKhoanRepository.save(taiKhoan));
     }
 
+
     @Override
     @Transactional
     public void toggleLock(UUID id) {
@@ -195,6 +197,22 @@ public class UserServiceImpl implements UserService {
 
         taiKhoan.setTrangThai(!taiKhoan.isTrangThai());
         taiKhoanRepository.save(taiKhoan);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StaffSummaryResponse> getStaffsByRole(String roleName) {
+        // 1. Gọi Repository để Join 4 bảng (NhanVien -> TaiKhoan -> ChiTietPQ -> PhanQuyen)
+        // Lưu ý: Đảm bảo bạn đã thêm hàm findStaffByRoleName vào NhanVienRepository như bước trước
+        List<NhanVien> staffs = nhanVienRepository.findStaffByRoleName(roleName);
+
+        // 2. Chuyển đổi sang DTO rút gọn
+        return staffs.stream()
+                .map(nv -> StaffSummaryResponse.builder()
+                        .maNhanVien(nv.getMaNhanVien())
+                        .tenNhanVien(nv.getTenNhanVien())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 
