@@ -2,6 +2,7 @@ package com.josephhieu.vaccinebackend.modules.vaccination.service;
 
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.BatchSummaryResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 
@@ -19,9 +20,11 @@ public interface ScheduleService {
 
     void deleteSchedule(UUID id);
 
-    ScheduleResponse getScheduleByDate(LocalDate date);
+    ScheduleResponse getScheduleByDateAndShift(LocalDate date, String shift);
 
     List<LocalDate> getActiveDatesInPeriod(LocalDate start, LocalDate end);
 
-    PageResponse<RegistrationResponse> getRegistrationsBySchedule(UUID maLichTiem, int page, int size);
+    PageResponse<RegistrationResponse> getRegistrationsByDate(LocalDate date, int page, int size);
+
+    List<BatchSummaryResponse> getAvailableBatches();
 }

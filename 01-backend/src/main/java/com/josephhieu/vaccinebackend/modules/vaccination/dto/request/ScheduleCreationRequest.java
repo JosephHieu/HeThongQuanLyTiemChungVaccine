@@ -19,6 +19,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScheduleCreationRequest {
 
+    private UUID maLo;
+    private String soLo;
     private LocalDate ngayTiem; // Ngày tổ chức tiêm
     private String thoiGian;    // Thời gian cụ thể (Sáng/Chiều hoặc khung giờ)
     private Integer soLuong;    // Số lượng vắc xin dự kiến cho đợt này

@@ -49,4 +49,10 @@ public interface LichTiemChungRepository extends JpaRepository<LichTiemChung, UU
     Optional<LichTiemChung> findByNgayTiem(LocalDate ngayTiem);
 
     List<LichTiemChung> findAllByNgayTiemBetween(LocalDate start, LocalDate end);
+
+    Optional<LichTiemChung> findByNgayTiemAndThoiGianChung(LocalDate ngayTiem, String thoiGianChung);
+
+    // Cập nhật lại query lấy danh sách ngày có lịch để Sidebar vẫn hiện đúng các chấm xanh
+    @Query("SELECT DISTINCT l.ngayTiem FROM LichTiemChung l WHERE l.ngayTiem BETWEEN :start AND :end")
+    List<LocalDate> findAllActiveDates(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }

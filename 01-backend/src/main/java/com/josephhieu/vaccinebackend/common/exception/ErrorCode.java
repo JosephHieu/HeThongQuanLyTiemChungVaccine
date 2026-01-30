@@ -26,6 +26,7 @@ public enum ErrorCode {
     INVALID_IMPORT_QUANTITY(1105, "Số lượng nhập kho phải lớn hơn 0", HttpStatus.BAD_REQUEST),
     BATCH_ALREADY_EXISTS(1106, "Số lô này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
     INVALID_EXPIRY_DATE(1107, "Hạn sử dụng không hợp lệ (phải sau ngày hiện tại)",  HttpStatus.BAD_REQUEST),
+    BATCH_NOT_FOUND(1108, "Không tìm thấy thông tin lô vắc-xin yêu cầu", HttpStatus.NOT_FOUND)
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

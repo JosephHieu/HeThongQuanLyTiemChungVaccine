@@ -20,6 +20,9 @@ import java.util.UUID;
 public class ScheduleResponse {
 
     private UUID maLichTiemChung;
+    private UUID maLo;
+    private String soLo;
+    private String tenVacXin;
     private LocalDate ngayTiem;
     private String thoiGian;
     private Integer soLuong;

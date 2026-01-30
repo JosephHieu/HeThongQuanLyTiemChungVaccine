@@ -1,4 +1,5 @@
 import React from "react";
+import { Toaster } from "react-hot-toast";
 // Import đầy đủ các thành phần từ react-router-dom
 import {
   BrowserRouter as Router,
@@ -27,6 +28,19 @@ const Placeholder = ({ title }) => (
 function App() {
   return (
     <Router>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          // Tùy chỉnh mặc định (font chữ, thời gian...)
+          style: {
+            fontSize: "14px",
+            fontWeight: "bold",
+            borderRadius: "16px",
+            padding: "12px 24px",
+          },
+        }}
+      />
       <Routes>
         {/* 1. Mặc định khi vào trang web sẽ đẩy về Login */}
         <Route path="/" element={<Navigate to="/login" replace />} />

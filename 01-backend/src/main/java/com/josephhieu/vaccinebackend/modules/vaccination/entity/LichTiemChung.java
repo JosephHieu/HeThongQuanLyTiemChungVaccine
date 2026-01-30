@@ -1,5 +1,6 @@
 package com.josephhieu.vaccinebackend.modules.vaccination.entity;
 
+import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,4 +37,8 @@ public class LichTiemChung {
 
     @Column(name = "DiaDiem", length = 255)
     private String diaDiem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaLo")
+    private LoVacXin loVacXin;
 }

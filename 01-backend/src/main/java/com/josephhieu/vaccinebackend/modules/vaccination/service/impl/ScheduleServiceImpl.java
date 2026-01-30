@@ -5,8 +5,11 @@ import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
 import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
 import com.josephhieu.vaccinebackend.modules.identity.repository.NhanVienRepository;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
+import com.josephhieu.vaccinebackend.modules.inventory.repository.LoVacXinRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.repository.VacXinRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.BatchSummaryResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.StaffSummaryResponse;
@@ -38,10 +41,19 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ChiTietNhanVienThamGiaRepository chiTietNhanVienThamGiaRepository;
     private final NhanVienRepository nhanVienRepository;
     private final ChiTietDangKyTiemRepository chiTietDangKyTiemRepository;
+    private final LoVacXinRepository loVacXinRepository;
 
     @Override
     @Transactional
     public ScheduleResponse createScheduleService(ScheduleCreationRequest request) {
+
+        LoVacXin loVacXin = loVacXinRepository.findById(request.getMaLo())
+                .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND)); //
+
+        // Kiểm tra tồn kho
+        if (request.getSoLuong() > loVacXin.getSoLuong()) {
+            throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+        }
 
         // 1. Ánh xạ từ Request DTO sang Entity LichTiemChung
         LichTiemChung lichTiemChung = LichTiemChung.builder()
@@ -51,6 +63,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .doiTuong(request.getDoTuoi()) // Map: doTuoi -> doiTuong
                 .diaDiem(request.getDiaDiem())
                 .ghiChu(request.getGhiChu())
+                .loVacXin(loVacXin)
                 .build();
 
         lichTiemChung = lichTiemChungRepository.save(lichTiemChung);
@@ -109,6 +122,12 @@ public class ScheduleServiceImpl implements ScheduleService {
         LichTiemChung schedule = lichTiemChungRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        if (request.getMaLo() != null) {
+            LoVacXin loVacXin = loVacXinRepository.findById(request.getMaLo())
+                    .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND));
+            schedule.setLoVacXin(loVacXin);
+        }
+
         // 2. Cập nhật các thông tin cơ bản
         schedule.setNgayTiem(request.getNgayTiem());
         schedule.setThoiGianChung(request.getThoiGian());
@@ -156,9 +175,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ScheduleResponse getScheduleByDate(LocalDate date) {
+    public ScheduleResponse getScheduleByDateAndShift(LocalDate date, String shift) {
         // Tìm lịch tiêm theo ngày
-        return lichTiemChungRepository.findByNgayTiem(date)
+        return lichTiemChungRepository.findByNgayTiemAndThoiGianChung(date, shift)
                 .map(this::mapToResponse)
                 .orElse(null); // Trả về null nếu ngày đó chưa có lịch
     }
@@ -176,13 +195,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<RegistrationResponse> getRegistrationsBySchedule(UUID maLichTiem, int page, int size) {
+    public PageResponse<RegistrationResponse> getRegistrationsByDate(LocalDate date, int page, int size) {
         int validatePage = (page < 1) ? 0 : page - 1;
         Pageable pageable = PageRequest.of(validatePage, size, Sort.by("thoiGianCanTiem").descending());
 
         // Gọi Repository đã có của bạn
         Page<ChiTietDangKyTiem> registrationPage = chiTietDangKyTiemRepository
-                .findByLichTiemChung_MaLichTiem(maLichTiem, pageable);
+                .findByLichTiemChung_NgayTiem(date, pageable);
 
         List<RegistrationResponse> data = registrationPage.getContent().stream()
                 .map(reg -> RegistrationResponse.builder()
@@ -205,6 +224,19 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .build();
     }
 
+    @Override
+    public List<BatchSummaryResponse> getAvailableBatches() {
+
+        return loVacXinRepository.findAll().stream()
+                .map(lo -> BatchSummaryResponse.builder()
+                        .maLo(lo.getMaLo())
+                        .soLo(lo.getSoLo())
+                        .tenVacXin(lo.getVacXin() != null ? lo.getVacXin().getTenVacXin() : "Không xác định")
+                        .soLuongTon(lo.getSoLuong())
+                        .build())
+                .toList();
+    }
+
     /**
      * Chuyển đổi Entity sang Response DTO để hiển thị trên giao diện.
      */
@@ -212,25 +244,41 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         long registeredCount = lichTiemChungRepository.countRegisteredPatients(entity.getMaLichTiem());
 
+        // Kiểm tra NULL an toàn cho Lô vắc xin
+        String soLo = "N/A";
+        String tenVacXin = "Chưa xác định";
+        UUID maLo = null;
+
+        if (entity.getLoVacXin() != null) {
+            maLo = entity.getLoVacXin().getMaLo();
+            soLo = entity.getLoVacXin().getSoLo();
+            if (entity.getLoVacXin().getVacXin() != null) {
+                tenVacXin = entity.getLoVacXin().getVacXin().getTenVacXin();
+            }
+        }
+
+        // Lấy danh sách bác sĩ
         List<StaffSummaryResponse> staffList = chiTietNhanVienThamGiaRepository
                 .findByLichTiemChung_MaLichTiem(entity.getMaLichTiem()).stream()
                 .map(ct -> StaffSummaryResponse.builder()
                         .maNhanVien(ct.getNhanVien().getMaNhanVien())
-                        // LƯU Ý: Kiểm tra trường tên trong NhanVien là 'hoTen' hay 'tenNhanVien'
                         .tenNhanVien(ct.getNhanVien().getTenNhanVien())
                         .build())
                 .toList();
 
         return ScheduleResponse.builder()
                 .maLichTiemChung(entity.getMaLichTiem())
+                .maLo(maLo)
+                .soLo(soLo)
+                .tenVacXin(tenVacXin) // Thêm trường này vào Response để Frontend hiển thị
                 .ngayTiem(entity.getNgayTiem())
                 .thoiGian(entity.getThoiGianChung())
                 .diaDiem(entity.getDiaDiem())
                 .soLuong(entity.getSoLuongNguoiTiem())
                 .daDangKy((int) registeredCount)
-                .danhSachBacSi(staffList)
-                .ghiChu(entity.getGhiChu())
                 .doTuoi(entity.getDoiTuong())
+                .ghiChu(entity.getGhiChu())
+                .danhSachBacSi(staffList)
                 .build();
     }
 }

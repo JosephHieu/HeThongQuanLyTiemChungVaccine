@@ -3,6 +3,7 @@ package com.josephhieu.vaccinebackend.modules.vaccination.controller;
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.ScheduleCreationRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.BatchSummaryResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.ScheduleResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.service.ScheduleService;
@@ -35,11 +36,12 @@ public class ScheduleController {
      */
     @GetMapping("/by-date")
     public ApiResponse<ScheduleResponse> getByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam String shift) {
 
-        log.info("Truy vấn lịch tiêm cho ngày: {}", date);
+        log.info("Truy vấn lịch tiêm: Ngày {} - Ca {}", date, shift);
         return ApiResponse.<ScheduleResponse>builder()
-                .result(scheduleService.getScheduleByDate(date))
+                .result(scheduleService.getScheduleByDateAndShift(date, shift))
                 .build();
     }
 
@@ -113,19 +115,31 @@ public class ScheduleController {
     }
 
     /**
-     * Lấy danh sách bệnh nhân đã đăng ký cho một lịch tiêm cụ thể.
-     * Dùng để hiển thị bảng RegistrationTable ở giao diện.
+     * Lấy danh sách bệnh nhân đăng ký theo NGÀY.
+     * Giúp UI gọi trực tiếp khi click vào Calendar mà không cần biết mã UUID của lịch.
      */
-    @GetMapping("/{id}/registrations")
-    public ApiResponse<PageResponse<RegistrationResponse>> getRegistrations(
-            @PathVariable UUID id,
+    @GetMapping("/registrations-by-date")
+    public ApiResponse<PageResponse<RegistrationResponse>> getRegistrationsByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         return ApiResponse.<PageResponse<RegistrationResponse>>builder()
-                .result(scheduleService.getRegistrationsBySchedule(id, page, size))
+                .result(scheduleService.getRegistrationsByDate(date, page, size))
                 .build();
     }
 
+    /**
+     * Lấy danh sách các lô vắc-xin khả dụng trong kho.
+     * Dùng để đổ dữ liệu vào ô Select (Dropdown) trên ScheduleForm.
+     */
+    @GetMapping("/available-batches")
+    public ApiResponse<List<BatchSummaryResponse>> getAvailableBatches() {
+
+        log.info("Truy vấn danh sách lô vắc-xin khả dụng cho lịch tiêm");
+        return ApiResponse.<List<BatchSummaryResponse>>builder()
+                .result(scheduleService.getAvailableBatches())
+                .build();
+    }
 
 }
