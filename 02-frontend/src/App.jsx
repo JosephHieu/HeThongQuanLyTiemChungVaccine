@@ -7,13 +7,18 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Login from "./pages/Login";
+
+// Layouts & Auth
 import AdminLayout from "./layouts/AdminLayout";
-import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+
+// Pages
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import AccountManagement from "./pages/AccountManagement";
 import ScheduleManagement from "./pages/Vaccination/ScheduleManagement";
 import InventoryManagement from "./pages/Inventory/InventoryManagement";
+import MedicalRecord from "./pages/Medical/MedicalRecord";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -108,7 +113,7 @@ function App() {
               <ProtectedRoute
                 allowedRoles={["Administrator", "Nhân viên y tế"]}
               >
-                <Placeholder title="Điều phối & Khám bệnh" />
+                <MedicalRecord />
               </ProtectedRoute>
             }
           />

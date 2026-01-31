@@ -238,7 +238,7 @@ const InventoryManagement = () => {
                 <thead className="bg-slate-50/50 border-b border-slate-100">
                   <tr>
                     <th className="p-4 text-xs font-black text-slate-500 uppercase">
-                      Mã lô
+                      Số lô
                     </th>
                     <th className="p-4 text-xs font-black text-slate-500 uppercase">
                       Vắc-xin & Phòng bệnh
