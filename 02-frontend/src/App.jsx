@@ -28,70 +28,120 @@ const Placeholder = ({ title }) => (
 function App() {
   return (
     <Router>
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        toastOptions={{
-          // Tùy chỉnh mặc định (font chữ, thời gian...)
-          style: {
-            fontSize: "14px",
-            fontWeight: "bold",
-            borderRadius: "16px",
-            padding: "12px 24px",
-          },
-        }}
-      />
+      <Toaster position="top-right" />
       <Routes>
-        {/* 1. Mặc định khi vào trang web sẽ đẩy về Login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-
-        {/* 2. Trang Login công khai */}
         <Route path="/login" element={<Login />} />
 
-        {/* 3. Phân hệ Admin: Sử dụng Layout chung có Sidebar */}
-        {/* Route này được bảo vệ, chỉ cho phép Administrator vào */}
+        {/* Cửa tổng /admin: Cho phép tất cả các loại nhân viên vào để thấy Layout */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute allowedRoles={["Administrator"]}>
+            <ProtectedRoute
+              allowedRoles={[
+                "Administrator",
+                "Nhân viên y tế",
+                "Quản lý kho",
+                "Tài chính",
+                "Hỗ trợ khách hàng",
+              ]}
+            >
               <AdminLayout />
             </ProtectedRoute>
           }
         >
-          {/* Mặc định khi vào /admin sẽ chuyển tới dashboard */}
           <Route index element={<Navigate to="dashboard" replace />} />
-
-          {/* Dashboard chính với các thẻ chức năng */}
           <Route path="dashboard" element={<Dashboard />} />
 
-          {/* Các trang con khớp với mục lục Screen Content */}
-          <Route path="accounts" element={<AccountManagement />} />
+          {/* --- PHÂN QUYỀN CHI TIẾT TỪNG PHÂN HỆ --- */}
 
-          <Route path="schedules" element={<ScheduleManagement />} />
+          {/* 1. Quản lý tài khoản: Chỉ duy nhất Admin */}
+          <Route
+            path="accounts"
+            element={
+              <ProtectedRoute allowedRoles={["Administrator"]}>
+                <AccountManagement />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="warehouse" element={<InventoryManagement />} />
-          <Route path="reports" element={<Placeholder title="Báo cáo" />} />
+          {/* 2. Kho vắc-xin: Admin và nhân viên kho */}
+          <Route
+            path="warehouse"
+            element={
+              <ProtectedRoute allowedRoles={["Administrator", "Quản lý kho"]}>
+                <InventoryManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 3. Lịch tiêm: Admin, Hỗ trợ (tư vấn) và Y tế (xem lịch khám) */}
+          <Route
+            path="schedules"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "Administrator",
+                  "Hỗ trợ khách hàng",
+                  "Nhân viên y tế",
+                ]}
+              >
+                <ScheduleManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 4. Báo cáo & Tài chính: Admin và nhân viên tài chính */}
+          <Route
+            path="reports"
+            element={
+              <ProtectedRoute allowedRoles={["Administrator", "Tài chính"]}>
+                <Placeholder title="Báo cáo & Tài chính" />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 5. Điều phối (Khám bệnh): Admin và nhân viên y tế */}
           <Route
             path="moderator"
-            element={<Placeholder title="Điều phối (Moderator)" />}
+            element={
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Nhân viên y tế"]}
+              >
+                <Placeholder title="Điều phối & Khám bệnh" />
+              </ProtectedRoute>
+            }
           />
+
+          {/* 6. Hỗ trợ & Feedback: Admin và nhân viên hỗ trợ */}
+          <Route
+            path="support"
+            element={
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
+              >
+                <Placeholder title="Chăm sóc khách hàng" />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 7. Thông tin chung: Tất cả nhân viên đều xem được */}
           <Route
             path="about"
-            element={<Placeholder title="Thông tin (About)" />}
+            element={<Placeholder title="Thông tin hệ thống" />}
           />
         </Route>
 
-        {/* 4. Trang xử lý khi không có quyền truy cập */}
+        {/* Trang báo lỗi quyền truy cập */}
         <Route
           path="/unauthorized"
           element={
             <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-red-500">
-              Bạn không có quyền truy cập vào khu vực này!
+              Bạn không có quyền truy cập vào phân hệ này!
             </div>
           }
         />
 
-        {/* 5. Trang 404 - Không tìm thấy đường dẫn */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

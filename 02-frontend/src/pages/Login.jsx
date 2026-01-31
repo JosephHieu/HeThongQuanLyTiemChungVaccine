@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
@@ -10,6 +10,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Lấy trang mà người dùng định vào trước khi bị đá ra Login (nếu có)
+  const from = location.state?.from?.pathname || "/admin/dashboard";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,12 +33,32 @@ const Login = () => {
         localStorage.setItem("token", token);
         localStorage.setItem("role", roles[0]);
         localStorage.setItem("userName", hoTen);
-        toast.success(`Chào mừng ${hoTen} trở lại!`);
 
-        if (roles.includes("Administrator")) {
-          navigate("/admin/dashboard");
+        toast.success(`Chào mừng ${hoTen} trở lại!`, {
+          duration: 3000,
+          position: "top-center",
+        });
+
+        // 1. Định nghĩa danh sách tất cả các quyền thuộc khối nhân viên/quản trị
+        const staffRoles = [
+          "Administrator",
+          "Quản lý kho",
+          "Nhân viên y tế",
+          "Tài chính",
+          "Hỗ trợ khách hàng",
+        ];
+
+        // 2. Kiểm tra xem user có ít nhất một quyền nằm trong danh sách staffRoles không
+        const isStaffMember = roles.some((userRole) =>
+          staffRoles.includes(userRole),
+        );
+
+        if (isStaffMember) {
+          // Nếu là nhân viên, đưa về trang định vào (from) hoặc dashboard admin
+          navigate(from, { replace: true });
         } else {
-          navigate("/user/home");
+          // Nếu chỉ là người dân (Normal User Account)
+          navigate("/user/home", { replace: true });
         }
       }
     } catch (error) {
@@ -54,7 +78,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Toaster position="top-center" reverseOrder={false} />
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
         <div className="p-8 md:p-12">
           <div className="text-center mb-8">

@@ -44,9 +44,24 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider()) // Đăng ký bộ xác thực
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**", "/api/roles/**", "/api/users/**").hasAuthority("Administrator")                        .requestMatchers("/api/roles/**").hasAuthority("Administrator")
-                        .requestMatchers("/api/kho/**").hasAnyAuthority("Administrator", "Quản lý kho")
-                        .requestMatchers("/api/patients/me/**").hasAuthority("Normal User Account")                        .anyRequest().authenticated()
+
+                        // Quyền tối cao của Admin
+                        .requestMatchers("/api/admin/**", "/api/roles/**", "/api/users/**").hasAuthority("Administrator")
+
+                        // Quyền Quản lý kho
+                        .requestMatchers("/api/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
+
+                        // Quyền Nhân viên y tế
+                        .requestMatchers("/api/medical/**").hasAnyAuthority("Administrator", "Nhân viên y tế")
+
+                        // Quyền Tài chính
+                        .requestMatchers("/api/finance/**").hasAnyAuthority("Administrator", "Tài chính")
+
+                        // Quyền Hỗ trợ khách hàng
+                        .requestMatchers("/api/support/**").hasAnyAuthority("Administrator", "Hỗ trợ khách hàng")
+
+                        // Quyền cho người dùng (Normal User Account)
+                        .requestMatchers("/api/patients/me/**", "/api/vaccinations/**").hasAuthority("Normal User Account")                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
