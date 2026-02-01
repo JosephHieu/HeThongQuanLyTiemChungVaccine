@@ -26,7 +26,13 @@ public enum ErrorCode {
     INVALID_IMPORT_QUANTITY(1105, "Số lượng nhập kho phải lớn hơn 0", HttpStatus.BAD_REQUEST),
     BATCH_ALREADY_EXISTS(1106, "Số lô này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
     INVALID_EXPIRY_DATE(1107, "Hạn sử dụng không hợp lệ (phải sau ngày hiện tại)",  HttpStatus.BAD_REQUEST),
-    BATCH_NOT_FOUND(1108, "Không tìm thấy thông tin lô vắc-xin yêu cầu", HttpStatus.NOT_FOUND)
+    BATCH_NOT_FOUND(1108, "Không tìm thấy thông tin lô vắc-xin yêu cầu", HttpStatus.NOT_FOUND),
+
+    // MEDICAL ERRORS (1200 - 1299)
+    PATIENT_NOT_FOUND(1201, "Không tìm thấy thông tin bệnh nhân trong hệ thống", HttpStatus.NOT_FOUND),
+    PRESCRIPTION_INVALID(1202, "Thông tin kê đơn không hợp lệ", HttpStatus.BAD_REQUEST),
+    HISTORY_NOT_FOUND(1203, "Không tìm thấy lịch sử tiêm chủng của bệnh nhân", HttpStatus.NOT_FOUND),
+
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

@@ -6,14 +6,26 @@ import {
   Syringe,
   Calendar,
   AlertCircle,
-  Tag,
   Baby,
   Activity,
   Info,
+  Loader2,
 } from "lucide-react";
 
-const ViewTab = ({ data }) => {
-  // Nếu chưa có dữ liệu (chưa tìm kiếm), hiển thị trạng thái trống
+const ViewTab = ({ data, loading }) => {
+  // 1. Trạng thái đang tải dữ liệu (UX chuyên nghiệp)
+  if (loading) {
+    return (
+      <div className="bg-white p-20 rounded-[2.5rem] border border-slate-100 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="text-purple-500 animate-spin" size={48} />
+        <p className="text-slate-400 font-bold animate-pulse">
+          Đang truy xuất hồ sơ bệnh án...
+        </p>
+      </div>
+    );
+  }
+
+  // 2. Trạng thái chưa có dữ liệu
   if (!data) {
     return (
       <div className="bg-white p-16 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-500">
@@ -32,7 +44,6 @@ const ViewTab = ({ data }) => {
       {/* --- CỘT TRÁI: THÔNG TIN HÀNH CHÍNH (4/12) --- */}
       <div className="lg:col-span-4 space-y-6">
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col items-center text-center sticky top-24">
-          {/* Avatar & Tên */}
           <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-full flex items-center justify-center mb-4 shadow-xl ring-4 ring-purple-50">
             <User size={48} />
           </div>
@@ -43,7 +54,6 @@ const ViewTab = ({ data }) => {
             ID: {data.id}
           </div>
 
-          {/* List thông tin chi tiết */}
           <div className="w-full mt-8 space-y-5 text-left border-t border-slate-50 pt-6">
             <InfoItem
               icon={<Calendar size={18} />}
@@ -60,6 +70,7 @@ const ViewTab = ({ data }) => {
               label="Số điện thoại"
               value={data.dienThoai}
             />
+
             <div className="flex gap-3">
               <div className="text-purple-400 mt-1">
                 <MapPin size={18} />
@@ -75,7 +86,6 @@ const ViewTab = ({ data }) => {
             </div>
           </div>
 
-          {/* Badge Người giám hộ (Chỉ hiện nếu có) */}
           {data.nguoiGiamHo && (
             <div className="w-full mt-6 p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3">
               <Baby className="text-amber-500" size={20} />
@@ -133,7 +143,7 @@ const ViewTab = ({ data }) => {
               </div>
             </div>
 
-            {/* Trạng thái phản ứng */}
+            {/* Trạng thái phản ứng (Logic màu sắc khớp với Backend) */}
             <div
               className={`p-6 rounded-[2rem] flex flex-col justify-center border ${
                 data.phanUng === "Bình thường"
@@ -147,13 +157,10 @@ const ViewTab = ({ data }) => {
                   Phản ứng sau tiêm
                 </span>
               </div>
-              <p className="text-xl font-black">
-                {data.phanUng || "Chưa ghi nhận"}
-              </p>
+              <p className="text-xl font-black uppercase">{data.phanUng}</p>
             </div>
           </div>
 
-          {/* Hình trang trí chìm */}
           <Syringe
             className="absolute -right-6 -bottom-6 text-slate-50 rotate-12"
             size={150}
@@ -193,8 +200,8 @@ const ViewTab = ({ data }) => {
           <div className="mt-8 flex items-start gap-2 text-slate-400 italic text-xs">
             <Info size={14} className="shrink-0 mt-0.5" />
             <p>
-              Lưu ý: Nhân viên y tế cần thực hiện khám sàng lọc và kiểm tra phản
-              ứng của bệnh nhân trước khi tiến hành tiêm mũi tiếp theo.
+              Lưu ý: Hệ thống tự động tính toán mũi tiếp theo dựa trên phác đồ
+              tiêm chủng quốc gia và lịch sử tiêm của bệnh nhân.
             </p>
           </div>
         </div>
@@ -203,7 +210,6 @@ const ViewTab = ({ data }) => {
   );
 };
 
-// Component con hỗ trợ hiển thị dòng thông tin
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-3 group">
     <div className="text-purple-300 group-hover:text-purple-500 transition-colors">

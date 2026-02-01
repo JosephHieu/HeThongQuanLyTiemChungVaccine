@@ -11,26 +11,29 @@ import {
   Info,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import medicalApi from "../../../api/medicalApi"; // Import API của bạn
 
-const UpdateTab = ({ data }) => {
+const UpdateTab = ({ data, onUpdateSuccess }) => {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    hoTen: "",
+    tenBenhNhan: "",
     gioiTinh: "Nam",
-    tuoi: "",
+    ngaySinh: "", // Đổi từ tuoi -> ngaySinh để khớp với Backend
     nguoiGiamHo: "",
-    dienThoai: "",
+    sdt: "", // Đổi từ dienThoai -> sdt
     diaChi: "",
   });
 
-  // Đồng bộ dữ liệu từ props vào state khi có dữ liệu mới
+  // Đồng bộ dữ liệu từ props vào state
   useEffect(() => {
     if (data) {
       setFormData({
-        hoTen: data.hoTen || "",
+        tenBenhNhan: data.hoTen || "",
         gioiTinh: data.gioiTinh || "Nam",
-        tuoi: data.tuoi || "",
+        // Lưu ý: data.ngaySinh cần format yyyy-MM-dd để input type="date" hiểu được
+        ngaySinh: data.ngaySinh || "",
         nguoiGiamHo: data.nguoiGiamHo || "",
-        dienThoai: data.dienThoai || "",
+        sdt: data.dienThoai || "",
         diaChi: data.diaChi || "",
       });
     }
@@ -41,14 +44,23 @@ const UpdateTab = ({ data }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Giả lập xử lý lưu dữ liệu
-    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
-      loading: "Đang lưu thay đổi...",
-      success: "Cập nhật hồ sơ thành công!",
-      error: "Có lỗi xảy ra, vui lòng thử lại.",
-    });
+    setLoading(true);
+
+    try {
+      // Gọi API thực tế từ Backend
+      await medicalApi.updateInfo(data.id, formData);
+
+      toast.success("Cập nhật hồ sơ bệnh nhân thành công!");
+
+      // Callback để load lại dữ liệu mới ở trang chủ (MedicalRecord.jsx)
+      if (onUpdateSuccess) onUpdateSuccess();
+    } catch (error) {
+      toast.error(error.message || "Có lỗi xảy ra khi cập nhật!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!data) {
@@ -61,7 +73,6 @@ const UpdateTab = ({ data }) => {
 
   return (
     <div className="bg-white p-6 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-100 animate-in fade-in slide-in-from-right-4 duration-500">
-      {/* Header của Form */}
       <div className="mb-10 border-b border-slate-50 pb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-amber-100 text-amber-600 rounded-2xl">
@@ -76,21 +87,17 @@ const UpdateTab = ({ data }) => {
             </p>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold italic">
-          <Info size={16} /> Thông tin được bảo mật
-        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Lưới các ô nhập liệu - Responsive: 1 cột trên Mobile, 2 cột trên Desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-10 md:gap-y-8">
           <InputGroup
             label="Họ và tên bệnh nhân"
-            name="hoTen"
+            name="tenBenhNhan"
             icon={<User size={18} />}
-            value={formData.hoTen}
+            value={formData.tenBenhNhan}
             onChange={handleChange}
-            placeholder="Ví dụ: Nguyễn Văn A"
+            required
           />
 
           <div className="flex flex-col gap-3">
@@ -122,13 +129,13 @@ const UpdateTab = ({ data }) => {
           </div>
 
           <InputGroup
-            label="Tuổi"
-            name="tuoi"
-            type="number"
+            label="Ngày sinh"
+            name="ngaySinh"
+            type="date" // Chuyển sang chọn ngày để lưu vào DB chính xác hơn
             icon={<Calendar size={18} />}
-            value={formData.tuoi}
+            value={formData.ngaySinh}
             onChange={handleChange}
-            placeholder="Nhập số tuổi"
+            required
           />
 
           <InputGroup
@@ -137,16 +144,15 @@ const UpdateTab = ({ data }) => {
             icon={<Baby size={18} />}
             value={formData.nguoiGiamHo}
             onChange={handleChange}
-            placeholder="Tên cha/mẹ hoặc người thân"
           />
 
           <InputGroup
             label="Số điện thoại liên lạc"
-            name="dienThoai"
+            name="sdt"
             icon={<Phone size={18} />}
-            value={formData.dienThoai}
+            value={formData.sdt}
             onChange={handleChange}
-            placeholder="090..."
+            required
           />
 
           <div className="md:col-span-2">
@@ -156,24 +162,23 @@ const UpdateTab = ({ data }) => {
               icon={<MapPin size={18} />}
               value={formData.diaChi}
               onChange={handleChange}
-              placeholder="Số nhà, tên đường, phường/xã..."
             />
           </div>
         </div>
 
-        {/* Nút hành động */}
         <div className="pt-6 border-t border-slate-50 flex flex-col sm:flex-row gap-4">
           <button
             type="submit"
-            className="flex-1 sm:flex-none px-10 py-4 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-700 hover:shadow-xl hover:shadow-purple-200 transition-all flex items-center justify-center gap-3 uppercase tracking-wider"
+            disabled={loading}
+            className="flex-1 sm:flex-none px-10 py-4 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-700 hover:shadow-xl transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:opacity-50"
           >
-            <CheckCircle size={22} /> Lưu thay đổi
-          </button>
-          <button
-            type="button"
-            className="flex-1 sm:flex-none px-10 py-4 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all flex items-center justify-center gap-3 uppercase tracking-wider"
-          >
-            <XCircle size={22} /> Hủy bỏ
+            {loading ? (
+              "Đang xử lý..."
+            ) : (
+              <>
+                <CheckCircle size={22} /> Lưu thay đổi
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -181,19 +186,18 @@ const UpdateTab = ({ data }) => {
   );
 };
 
-// --- HELPER COMPONENT CHO Ô NHẬP LIỆU ---
 const InputGroup = ({ label, icon, ...props }) => (
   <div className="flex flex-col gap-2 group">
-    <label className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1 transition-colors group-focus-within:text-purple-600">
+    <label className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1 group-focus-within:text-purple-600">
       {label}
     </label>
     <div className="relative">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 transition-colors group-focus-within:text-purple-500">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-purple-500">
         {icon}
       </div>
       <input
         {...props}
-        className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.25rem] focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300 placeholder:font-medium"
+        className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.25rem] focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300"
       />
     </div>
   </div>

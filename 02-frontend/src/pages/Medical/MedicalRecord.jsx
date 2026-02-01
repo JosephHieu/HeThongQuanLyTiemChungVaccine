@@ -3,39 +3,50 @@ import { ClipboardList, Search, UserPlus, FileSignature } from "lucide-react";
 import ViewTab from "./components/ViewTab";
 import UpdateTab from "./components/UpdateTab";
 import PrescribeTab from "./components/PrescribeTab";
-import axiosClient from "../../api/axiosClient";
+import medicalApi from "../../api/medicalApi"; // Thay đổi ở đây
 import toast from "react-hot-toast";
 
 const MedicalRecord = () => {
-  const [activeTab, setActiveTab] = useState("view"); // 'view' | 'update' | 'prescribe'
+  const [activeTab, setActiveTab] = useState("view");
   const [patientId, setPatientId] = useState("");
   const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Hàm tìm kiếm dùng chung cho cả 3 Tab
-  const handleSearch = async (e) => {
-    if (e) e.preventDefault();
+  // Hàm truy xuất dữ liệu (Tách riêng để có thể gọi lại sau khi Update/Kê đơn)
+  const fetchPatientData = async (silent = false) => {
     if (!patientId.trim()) {
-      toast.error("Vui lòng nhập ID bệnh nhân!");
+      if (!silent) toast.error("Vui lòng nhập ID bệnh nhân!");
       return;
     }
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
-      const data = await axiosClient.get(`/medical-records/${patientId}`);
+      // Sử dụng medicalApi đã định nghĩa
+      const data = await medicalApi.getRecord(patientId);
       setPatientData(data);
-      toast.success("Đã truy xuất hồ sơ!");
+      if (!silent) toast.success("Đã truy xuất hồ sơ!");
     } catch (error) {
       setPatientData(null);
-      toast.error("Không tìm thấy bệnh nhân hoặc lỗi kết nối!");
+      // Lấy message lỗi từ AppException trả về
+      toast.error(error.message || "Không tìm thấy bệnh nhân!");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchPatientData();
+  };
+
+  // Hàm được gọi sau khi thực hiện thành công ở các Tab con
+  const handleRefresh = () => {
+    fetchPatientData(true); // silent = true để reload ngầm, không hiện loading che màn hình
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500">
-      {/* --- SECTION 1: HEADER & TÌM KIẾM (Responsive) --- */}
+      {/* --- SECTION 1: HEADER & TÌM KIẾM --- */}
       <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
@@ -63,9 +74,10 @@ const MedicalRecord = () => {
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50"
             >
-              TRUY XUẤT
+              {loading ? "ĐANG TẢI..." : "TRUY XUẤT"}
             </button>
           </form>
         </div>
@@ -98,14 +110,25 @@ const MedicalRecord = () => {
         {activeTab === "view" && (
           <ViewTab data={patientData} loading={loading} />
         )}
-        {activeTab === "update" && <UpdateTab data={patientData} />}
-        {activeTab === "prescribe" && <PrescribeTab data={patientData} />}
+
+        {activeTab === "update" && (
+          <UpdateTab
+            data={patientData}
+            onUpdateSuccess={handleRefresh} // Callback khi update xong
+          />
+        )}
+
+        {activeTab === "prescribe" && (
+          <PrescribeTab
+            data={patientData}
+            onPrescribeSuccess={handleRefresh} // Callback khi kê đơn xong
+          />
+        )}
       </div>
     </div>
   );
 };
 
-// Component con cho Nút Tab
 const TabButton = ({ active, onClick, icon, label }) => (
   <button
     onClick={onClick}
