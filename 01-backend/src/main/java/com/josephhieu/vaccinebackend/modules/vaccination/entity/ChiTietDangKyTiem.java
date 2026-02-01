@@ -35,4 +35,7 @@ public class ChiTietDangKyTiem {
     @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "MaLichTiem")
     private LichTiemChung lichTiemChung;
+
+    @Column(name = "GhiChu", columnDefinition = "TEXT")
+    private String ghiChu;
 }

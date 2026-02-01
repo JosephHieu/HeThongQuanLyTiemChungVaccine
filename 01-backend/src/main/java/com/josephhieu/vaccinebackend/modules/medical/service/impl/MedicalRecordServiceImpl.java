@@ -86,6 +86,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .benhNhan(bn)
                 .loVacXin(lo)
                 .thoiGianCanTiem(request.getThoiGianCanTiem())
+                .ghiChu(request.getGhiChu())
+                .lichTiemChung(null)
                 .build();
 
         chiTietDangKyTiemRepository.save(prescription);
@@ -105,6 +107,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .dienThoai(bn.getSdt())
                 .diaChi(bn.getDiaChi())
                 .nguoiGiamHo(bn.getNguoiGiamHo())
+                .ngaySinh(bn.getNgaySinh() != null ? bn.getNgaySinh().toString() : "") // Sẽ trả về dạng yyyy-MM-dd
                 // Thông tin quá khứ
                 .vacxinDaTiem(latest != null ? latest.getChiTietDangKyTiem().getLoVacXin().getVacXin().getTenVacXin() : "Chưa có dữ liệu")
                 .maLo(latest != null ? latest.getChiTietDangKyTiem().getLoVacXin().getMaLo().toString() : "N/A")

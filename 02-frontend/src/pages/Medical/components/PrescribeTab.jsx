@@ -97,13 +97,18 @@ const PrescribeTab = ({ data, onPrescribeSuccess }) => {
               name="maLoVacXin"
               value={prescription.maLoVacXin}
               onChange={handleChange}
-              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white outline-none transition-all font-bold text-slate-700 appearance-none"
+              className="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all font-bold text-slate-700 appearance-none"
             >
-              <option value="">-- Chọn vắc-xin trong kho --</option>
+              <option value="">-- Chọn vắc-xin từ kho --</option>
               {batches.map((batch) => (
-                <option key={batch.maLo} value={batch.maLo}>
-                  {batch.tenVacxin} (Lô: {batch.soLo} - Còn:{" "}
-                  {batch.soLuongHienTai})
+                <option
+                  key={batch.maLo}
+                  value={batch.maLo}
+                  disabled={batch.soLuong <= 0}
+                >
+                  {/* Khớp hoàn toàn với JSON bạn gửi: tenVacXin, soLo, soLuong */}
+                  {batch.tenVacXin} ({batch.tenLoaiVacXin}) - [Lô: {batch.soLo}]
+                  - (Còn: {batch.soLuong} liều)
                 </option>
               ))}
             </select>

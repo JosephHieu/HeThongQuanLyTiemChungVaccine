@@ -21,6 +21,7 @@ public class MedicalRecordResponse {
     private String dienThoai;
     private String diaChi;
     private String nguoiGiamHo;
+    private String ngaySinh;
 
     // Mũi tiêm gần nhất (Từ HoSoBenhAn -> ChiTietDangKyTiem -> LoVacXin -> Vacxin)
     private String vacxinDaTiem;

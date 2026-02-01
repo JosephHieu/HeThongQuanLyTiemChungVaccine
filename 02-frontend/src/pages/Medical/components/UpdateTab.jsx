@@ -27,11 +27,24 @@ const UpdateTab = ({ data, onUpdateSuccess }) => {
   // Đồng bộ dữ liệu từ props vào state
   useEffect(() => {
     if (data) {
+      // Hàm helper để đảm bảo ngày tháng đúng định dạng yyyy-MM-dd
+      const formatToInputDate = (dateStr) => {
+        if (!dateStr) return "";
+        // Nếu Backend trả về yyyy-MM-dd (mặc định của LocalDate.toString())
+        if (dateStr.includes("-")) return dateStr.split("T")[0];
+
+        // Nếu Backend trả về dd/MM/yyyy, ta cần đảo ngược lại
+        if (dateStr.includes("/")) {
+          const [day, month, year] = dateStr.split("/");
+          return `${year}-${month}-${day}`;
+        }
+        return dateStr;
+      };
+
       setFormData({
         tenBenhNhan: data.hoTen || "",
         gioiTinh: data.gioiTinh || "Nam",
-        // Lưu ý: data.ngaySinh cần format yyyy-MM-dd để input type="date" hiểu được
-        ngaySinh: data.ngaySinh || "",
+        ngaySinh: formatToInputDate(data.ngaySinh), // Cập nhật quan trọng ở đây
         nguoiGiamHo: data.nguoiGiamHo || "",
         sdt: data.dienThoai || "",
         diaChi: data.diaChi || "",
