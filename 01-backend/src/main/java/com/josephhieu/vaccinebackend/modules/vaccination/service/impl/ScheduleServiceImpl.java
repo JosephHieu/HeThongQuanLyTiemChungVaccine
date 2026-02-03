@@ -237,6 +237,21 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScheduleResponse> getOpeningSchedulesForUser() {
+
+        // 1. Lấy lịch từ hôm nay trở đi
+        List<LichTiemChung> schedules = lichTiemChungRepository
+                .findByNgayTiemGreaterThanEqualOrderByNgayTiemAsc(LocalDate.now());
+
+        // 2. Chuyển đồi sang DTO và lọc các lịch còn chỗ
+        return schedules.stream()
+                .map(this::mapToResponse)
+                .filter(s -> s.getSoLuong() > s.getDaDangKy())
+                .toList();
+    }
+
     /**
      * Chuyển đổi Entity sang Response DTO để hiển thị trên giao diện.
      */

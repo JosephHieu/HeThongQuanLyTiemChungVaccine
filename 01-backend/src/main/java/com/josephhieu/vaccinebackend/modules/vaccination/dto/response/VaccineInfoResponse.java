@@ -11,9 +11,10 @@ import java.util.UUID;
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor // Quan trọng: Tạo constructor chứa đúng thứ tự các fields dưới đây
+@AllArgsConstructor
 public class VaccineInfoResponse {
     private UUID maVacXin;        // 1. UUID
+    private String soLo;
     private String tenVacXin;     // 2. String
     private String phongNguaBenh; // 3. String (Khớp với v.phongNguaBenh trong Query)
     private Integer soLuongLieu;  // 4. int/Integer

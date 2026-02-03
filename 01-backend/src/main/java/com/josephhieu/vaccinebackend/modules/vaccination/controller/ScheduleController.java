@@ -142,4 +142,16 @@ public class ScheduleController {
                 .build();
     }
 
+    /**
+     * API dành cho Portal Bệnh nhân: Tra cứu lịch tiêm đang mở (9.5.2).
+     * Endpoint: GET /api/v1/vaccination/schedules/opening
+     */
+    @GetMapping("/opening")
+    public ApiResponse<List<ScheduleResponse>> getOpeningShedules() {
+        log.info("Bệnh nhân tra cứu lịch tiêm đang mở");
+        return ApiResponse.<List<ScheduleResponse>>builder()
+                .result(scheduleService.getOpeningSchedulesForUser())
+                .build();
+    }
+
 }

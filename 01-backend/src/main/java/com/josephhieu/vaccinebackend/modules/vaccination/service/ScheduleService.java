@@ -27,4 +27,6 @@ public interface ScheduleService {
     PageResponse<RegistrationResponse> getRegistrationsByDate(LocalDate date, int page, int size);
 
     List<BatchSummaryResponse> getAvailableBatches();
+
+    List<ScheduleResponse> getOpeningSchedulesForUser();
 }

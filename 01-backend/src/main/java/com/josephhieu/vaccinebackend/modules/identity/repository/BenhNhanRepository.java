@@ -14,4 +14,6 @@ public interface BenhNhanRepository extends JpaRepository<BenhNhan, UUID> {
     Optional<BenhNhan> findByTaiKhoan(TaiKhoan taiKhoan);
 
     boolean existsByTaiKhoan(TaiKhoan taiKhoan);
+
+    Optional<BenhNhan> findByTaiKhoan_TenDangNhap(String tenDangNhap);
 }

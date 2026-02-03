@@ -55,4 +55,10 @@ public interface LichTiemChungRepository extends JpaRepository<LichTiemChung, UU
     // Cập nhật lại query lấy danh sách ngày có lịch để Sidebar vẫn hiện đúng các chấm xanh
     @Query("SELECT DISTINCT l.ngayTiem FROM LichTiemChung l WHERE l.ngayTiem BETWEEN :start AND :end")
     List<LocalDate> findAllActiveDates(@Param("start") LocalDate start, @Param("end") LocalDate end);
+
+    /**
+     * Lấy danh sách lịch tiêm từ một ngày cụ thể trở về sau (thường là hôm nay).
+     * Phục vụ người dân tra cứu lịch tiêm sắp tới trên Portal.
+     */
+    List<LichTiemChung> findByNgayTiemGreaterThanEqualOrderByNgayTiemAsc(LocalDate date);
 }

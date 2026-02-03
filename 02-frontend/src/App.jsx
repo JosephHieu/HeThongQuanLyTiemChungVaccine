@@ -19,6 +19,9 @@ import AccountManagement from "./pages/AccountManagement";
 import ScheduleManagement from "./pages/Vaccination/ScheduleManagement";
 import InventoryManagement from "./pages/Inventory/InventoryManagement";
 import MedicalRecord from "./pages/Medical/MedicalRecord";
+import VaccinePortal from "./pages/VaccinePortal/VaccinePortal";
+import UserLayout from "./layouts/UserLayout";
+import SchedulePortal from "./pages/VaccinePortal/SchedulePortal";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -38,7 +41,36 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Cửa tổng /admin: Cho phép tất cả các loại nhân viên vào để thấy Layout */}
+        {/* --- PHÂN HỆ DÀNH CHO BỆNH NHÂN (USER PORTAL) --- */}
+        <Route
+          path="/user"
+          element={
+            <ProtectedRoute allowedRoles={["Normal User Account"]}>
+              <UserLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* Tự động chuyển hướng vào mục Tra cứu vắc xin */}
+          <Route index element={<Navigate to="vaccines" replace />} />
+
+          {/* 9.5.1: Tra cứu vắc xin */}
+          <Route path="vaccines" element={<VaccinePortal />} />
+
+          {/* 9.5.2: Tra cứu lịch tiêm trung tâm (Sắp làm) */}
+          <Route path="schedules" element={<SchedulePortal />} />
+
+          {/* Các trang khác dùng tạm Placeholder */}
+          <Route
+            path="my-registrations"
+            element={<Placeholder title="Đăng ký của tôi" />}
+          />
+          <Route
+            path="profile"
+            element={<Placeholder title="Hồ sơ cá nhân" />}
+          />
+        </Route>
+
+        {/* --- PHÂN HỆ QUẢN TRỊ / ADMIN (Giữ nguyên code cũ của bạn) --- */}
         <Route
           path="/admin"
           element={

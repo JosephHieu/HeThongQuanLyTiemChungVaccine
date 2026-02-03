@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
 
@@ -20,57 +20,41 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        {
-          tenDangNhap: username,
-          matKhau: password,
-        },
-      );
-      // Backend trả về code 1000 cho thành công
-      if (response.data.code === 1000) {
-        const { token, roles, hoTen } = response.data.result;
-        localStorage.setItem("token", token);
-        localStorage.setItem("role", roles[0]);
-        localStorage.setItem("userName", hoTen);
+      // Gọi API qua client để tự động lấy phần 'result'
+      const result = await axiosClient.post("/auth/login", {
+        tenDangNhap: username,
+        matKhau: password,
+      });
 
-        toast.success(`Chào mừng ${hoTen} trở lại!`, {
-          duration: 3000,
-          position: "top-center",
-        });
+      const { token, roles, hoTen } = result;
 
-        // 1. Định nghĩa danh sách tất cả các quyền thuộc khối nhân viên/quản trị
-        const staffRoles = [
-          "Administrator",
-          "Quản lý kho",
-          "Nhân viên y tế",
-          "Tài chính",
-          "Hỗ trợ khách hàng",
-        ];
+      // Lưu thông tin
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", roles[0]);
+      localStorage.setItem("userName", hoTen);
 
-        // 2. Kiểm tra xem user có ít nhất một quyền nằm trong danh sách staffRoles không
-        const isStaffMember = roles.some((userRole) =>
-          staffRoles.includes(userRole),
-        );
+      toast.success(`Chào mừng ${hoTen} trở lại!`);
 
-        if (isStaffMember) {
-          // Nếu là nhân viên, đưa về trang định vào (from) hoặc dashboard admin
-          navigate(from, { replace: true });
-        } else {
-          // Nếu chỉ là người dân (Normal User Account)
-          navigate("/user/home", { replace: true });
-        }
+      // Logic điều hướng dựa trên Role
+      const staffRoles = [
+        "Administrator",
+        "Quản lý kho",
+        "Nhân viên y tế",
+        "Tài chính",
+        "Hỗ trợ khách hàng",
+      ];
+      const isStaffMember = roles.some((role) => staffRoles.includes(role));
+
+      if (isStaffMember) {
+        // Nhân viên vào trang quản trị
+        navigate(from, { replace: true });
+      } else {
+        // Bệnh nhân vào trang tra cứu vắc-xin (Khớp với App.jsx của bạn)
+        navigate("/user", { replace: true });
       }
     } catch (error) {
-      const apiError = error.response?.data;
-
-      if (apiError && apiError.message) {
-        // Hiển thị trực tiếp message từ Backend (Ví dụ: "Tài khoản của bạn đã bị khóa...")
-        toast.error(apiError.message);
-      } else {
-        // Trường hợp lỗi mạng hoặc server không phản hồi theo chuẩn
-        toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
-      }
+      // error lúc này đã là object {code, message} nhờ interceptor của axiosClient
+      toast.error(error.message || "Đăng nhập thất bại");
     } finally {
       setLoading(false);
     }

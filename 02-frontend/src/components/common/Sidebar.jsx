@@ -10,13 +10,17 @@ import {
   LayoutDashboard,
   Warehouse,
   Calendar,
+  Syringe,
+  CalendarDays,
+  ClipboardList,
+  UserCircle,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth"; // Import hook phân quyền
 
 const Sidebar = () => {
   const { role } = useAuth(); // Lấy role hiện tại
 
-  // 1. Định nghĩa danh sách menu kèm theo quyền truy cập (roles)
+  // --- NHÓM QUẢN TRỊ (ADMIN/STAFF) ---
   const menuItems = [
     {
       path: "/admin/dashboard",
@@ -80,6 +84,32 @@ const Sidebar = () => {
         "Hỗ trợ khách hàng",
       ],
     },
+
+    // --- NHÓM NGƯỜI DÙNG (NORMAL USER) ---
+    {
+      path: "/user/vaccines", // Chức năng 9.5.1
+      icon: <Syringe size={20} />,
+      label: "Tra cứu vắc-xin",
+      roles: ["Normal User Account"],
+    },
+    {
+      path: "/user/schedules", // Chức năng 9.5.2
+      icon: <CalendarDays size={20} />,
+      label: "Lịch tiêm trung tâm",
+      roles: ["Normal User Account"],
+    },
+    {
+      path: "/user/my-registrations",
+      icon: <ClipboardList size={20} />,
+      label: "Đăng ký của tôi",
+      roles: ["Normal User Account"],
+    },
+    {
+      path: "/user/profile",
+      icon: <UserCircle size={20} />,
+      label: "Hồ sơ cá nhân",
+      roles: ["Normal User Account"],
+    },
   ];
 
   // 2. Lọc danh sách: Chỉ giữ lại những mục mà User có quyền truy cập
@@ -105,13 +135,19 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen sticky top-0 shadow-xl">
-      {/* Logo / Brand */}
+    <aside
+      className={`w-64 flex flex-col h-screen sticky top-0 shadow-xl transition-colors duration-300 
+  ${role === "Normal User Account" ? "bg-indigo-900" : "bg-slate-900"}`}
+    >
+      {/* Logo có thể đổi theo role */}
       <div className="p-6 text-xl font-bold text-white border-b border-slate-800 flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm shadow-lg shadow-blue-500/20">
+        <div
+          className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow-lg 
+      ${role === "Normal User Account" ? "bg-emerald-500" : "bg-blue-600"}`}
+        >
           V
         </div>
-        Vaccine System
+        {role === "Normal User Account" ? "Portal Bệnh Nhân" : "Vaccine System"}
       </div>
 
       {/* 3. Hiển thị Menu đã được lọc */}

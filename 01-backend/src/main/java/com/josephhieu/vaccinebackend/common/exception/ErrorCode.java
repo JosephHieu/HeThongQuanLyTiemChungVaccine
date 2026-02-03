@@ -33,6 +33,11 @@ public enum ErrorCode {
     PRESCRIPTION_INVALID(1202, "Thông tin kê đơn không hợp lệ", HttpStatus.BAD_REQUEST),
     HISTORY_NOT_FOUND(1203, "Không tìm thấy lịch sử tiêm chủng của bệnh nhân", HttpStatus.NOT_FOUND),
 
+    // VACCINATION ERRORS (1300-1399)
+    VACCINE_OUT_OF_STOCK(1301, "Vắc-xin này hiện đã hết hàng trong kho", HttpStatus.BAD_REQUEST),
+    SCHEDULE_NOT_FOUND(1302, "Lịch tiêm chủng không tồn tại hoặc đã bị hủy", HttpStatus.NOT_FOUND),
+    REGISTRATION_FAILED(1303, "Đăng ký tiêm chủng thất bại, vui lòng thử lại sau", HttpStatus.INTERNAL_SERVER_ERROR),
+    ALREADY_REGISTERED(1304, "Bạn đã đăng ký mũi tiêm này rồi", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

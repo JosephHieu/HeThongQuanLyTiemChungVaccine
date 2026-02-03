@@ -30,6 +30,7 @@ public class ScheduleResponse {
     private String doTuoi;
     private String diaDiem;
     private String ghiChu;
+    private String loaiVacXin;
 
     /**
      * Thông tin tóm tắt của các bác sĩ tham gia.

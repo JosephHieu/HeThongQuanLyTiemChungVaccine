@@ -19,6 +19,7 @@ public interface VacXinRepository extends JpaRepository<VacXin, UUID> {
 
     @Query("SELECT new com.josephhieu.vaccinebackend.modules.vaccination.dto.response.VaccineInfoResponse(" +
             "v.maVacXin, " +
+            "MAX(l.soLo), " +
             "v.tenVacXin, " +
             "v.phongNguaBenh, " +
             "CAST(SUM(COALESCE(l.soLuong, 0)) AS integer), " +

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -44,5 +45,7 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
     // Tính tông theo điều hiện tìm kiếm
     @Query("SELECT SUM(l.soLuong) FROM LoVacXin l WHERE l.tinhTrang = 'Còn'")
     Long getTotalAvailableDoses();
+
+    Optional<LoVacXin> findFirstByVacXin_MaVacXinAndSoLuongGreaterThanOrderByNgayNhanAsc(UUID maVacXin, Integer minSoLuong);
 
 }
