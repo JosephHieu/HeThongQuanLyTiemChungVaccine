@@ -2,10 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // 1. Thêm useNavigate để tránh lỗi quay lại trang Login
 import userVaccineApi from "../../api/userVaccineApi";
 import toast from "react-hot-toast";
+import RegistrationModal from "./components/modals/RegistrationModal";
 
 const SchedulePortal = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const navigate = useNavigate();
 
   const fetchSchedules = async () => {
@@ -112,10 +117,8 @@ const SchedulePortal = () => {
                         <button
                           className="px-3 py-0.5 bg-white border border-slate-800 font-bold text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-slate-800 hover:text-white active:shadow-none active:translate-x-[1px] active:translate-y-[1px] transition-all"
                           onClick={() => {
-                            // Logic mở Modal đăng ký (Sẽ làm ở bước sau)
-                            toast.success(
-                              `Đang mở đăng ký cho: ${item.tenVacXin}`,
-                            );
+                            setSelectedSchedule(item); // Lưu dữ liệu hàng hiện tại
+                            setIsModalOpen(true); // Mở Modal
                           }}
                         >
                           Đăng ký
@@ -145,6 +148,13 @@ const SchedulePortal = () => {
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <RegistrationModal
+          schedule={selectedSchedule}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={fetchSchedules} // Tải lại bảng sau khi đăng ký thành công
+        />
+      )}
     </div>
   );
 };

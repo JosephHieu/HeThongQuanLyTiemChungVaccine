@@ -262,13 +262,18 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Kiểm tra NULL an toàn cho Lô vắc xin
         String soLo = "N/A";
         String tenVacXin = "Chưa xác định";
+        String loaiVacXin = "N/A"; // THÊM DÒNG NÀY
         UUID maLo = null;
+        UUID maVacXin = null; // THÊM DÒNG NÀY
 
         if (entity.getLoVacXin() != null) {
             maLo = entity.getLoVacXin().getMaLo();
             soLo = entity.getLoVacXin().getSoLo();
+
             if (entity.getLoVacXin().getVacXin() != null) {
+                maVacXin = entity.getLoVacXin().getVacXin().getMaVacXin(); // THÊM DÒNG NÀY: Lấy ID để Frontend gửi lại khi đăng ký
                 tenVacXin = entity.getLoVacXin().getVacXin().getTenVacXin();
+                loaiVacXin = entity.getLoVacXin().getVacXin().getPhongNguaBenh(); // THÊM DÒNG NÀY: Để hiện cột "Loại vắc xin"
             }
         }
 
@@ -283,9 +288,11 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         return ScheduleResponse.builder()
                 .maLichTiemChung(entity.getMaLichTiem())
+                .maVacXin(maVacXin)
                 .maLo(maLo)
                 .soLo(soLo)
-                .tenVacXin(tenVacXin) // Thêm trường này vào Response để Frontend hiển thị
+                .tenVacXin(tenVacXin)
+                .loaiVacXin(loaiVacXin) // THÊM DÒNG NÀY: Để UI không bị trống cột Loại vắc xin
                 .ngayTiem(entity.getNgayTiem())
                 .thoiGian(entity.getThoiGianChung())
                 .diaDiem(entity.getDiaDiem())

@@ -11,12 +11,15 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     UNCATEGORIZED_EXCEPTION(9999, "Lỗi chưa phân loại", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // SECURITY & AUTH (1001 - 1099)
     USER_EXISTED(1001, "Tên đăng nhập đã tồn tại!", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "Người dùng không tồn tại", HttpStatus.NOT_FOUND),
     ROLE_NOT_FOUND(1006, "Quyền hạn không tồn tại!", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1009, "Sai username / password", HttpStatus.UNAUTHORIZED),
     USER_LOCKED(1007, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.", HttpStatus.FORBIDDEN),
     MISSING_INFO(1008, "Vui lòng nhập đầy đủ thông tin", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED(1010, "Bạn không có quyền truy cập chức năng này", HttpStatus.FORBIDDEN),
 
     // INVENTORY ERRORS (1100 - 1199)
     INVENTORY_NOT_FOUND(1101, "Lô vắc-xin không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),
@@ -38,6 +41,8 @@ public enum ErrorCode {
     SCHEDULE_NOT_FOUND(1302, "Lịch tiêm chủng không tồn tại hoặc đã bị hủy", HttpStatus.NOT_FOUND),
     REGISTRATION_FAILED(1303, "Đăng ký tiêm chủng thất bại, vui lòng thử lại sau", HttpStatus.INTERNAL_SERVER_ERROR),
     ALREADY_REGISTERED(1304, "Bạn đã đăng ký mũi tiêm này rồi", HttpStatus.BAD_REQUEST),
+    SCHEDULE_FULL(1305, "Đợt tiêm chủng này đã đủ số lượng người đăng ký", HttpStatus.BAD_REQUEST),
+    SCHEDULE_EXPIRED(1306, "Lịch tiêm chủng này đã kết thúc, không thể đăng ký", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

@@ -25,7 +25,7 @@ const VaccinePortal = () => {
         size: 100,
       });
       // response đã được unwrapped bởi axiosClient (lấy trực tiếp .result)
-      setVaccines(response.content || []);
+      setVaccines(response.content || response || []);
     } catch (error) {
       toast.error(error.message || "Lỗi khi kết nối đến máy chủ");
     } finally {
@@ -40,49 +40,52 @@ const VaccinePortal = () => {
 
   // 3. Xử lý khi nhấn nút "Đăng ký" trong bảng
   const handleOpenRegister = (vaccine) => {
+    // Đảm bảo object vaccine có đủ maVacXin và soLo để Modal hiển thị
     setSelectedVaccine(vaccine);
     setIsModalOpen(true);
   };
 
   return (
     <div className="p-6 bg-slate-100 min-h-screen">
-      <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-none border border-slate-300 overflow-hidden">
-        {/* Header xanh đậm chuẩn phong cách y tế */}
+      <div className="max-w-7xl mx-auto bg-white shadow-xl border border-slate-300 overflow-hidden">
+        {/* Header xanh đậm */}
         <div className="bg-[#1e4e8c] p-2 text-white text-center font-bold text-lg uppercase border-b border-slate-400">
-          Xem thông tin các loại vắc xin
+          Tra cứu thông tin các loại vắc xin
         </div>
 
         <div className="p-6 space-y-8">
-          {/* Bảng dữ liệu hiển thị bên trên */}
+          {/* Bảng dữ liệu - Ưu tiên hiển thị cho người dùng thấy trước */}
           <VaccineInfoTable
             data={vaccines}
             loading={loading}
             onRegister={handleOpenRegister}
           />
 
-          {/* Thanh tìm kiếm hiển thị bên dưới bảng theo SRS */}
-          <div className="bg-slate-50 p-6 border border-slate-200 rounded-lg">
+          {/* Search nằm dưới bảng theo SRS */}
+          <div className="bg-slate-50 p-6 border border-slate-200 rounded-lg shadow-inner">
+            <div className="text-sm font-bold text-slate-700 mb-2 italic">
+              * Nhập tên vắc xin hoặc bệnh cần phòng để tìm kiếm:
+            </div>
             <SearchFilter onSearch={fetchVaccines} />
           </div>
 
-          {/* Nút thoát/xác nhận cuối trang */}
+          {/* Nút OK cuối trang - Thường dùng để quay về Dashboard */}
           <div className="flex justify-center mt-6">
             <button
               onClick={() => navigate("/user")}
-              className="px-12 py-1 bg-slate-200 border border-slate-400 hover:bg-slate-300 font-bold text-slate-700 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all"
+              className="px-12 py-2 bg-slate-300 border border-slate-400 hover:bg-slate-400 font-bold text-slate-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all"
             >
-              OK
+              QUAY LẠI TRANG CHỦ
             </button>
           </div>
         </div>
       </div>
 
-      {/* Modal đăng ký (Popup) */}
       {isModalOpen && (
         <RegistrationModal
-          vaccine={selectedVaccine}
+          schedule={selectedVaccine}
           onClose={() => setIsModalOpen(false)}
-          onSuccess={fetchVaccines} // Cập nhật lại số lượng sau khi đăng ký thành công
+          onSuccess={fetchVaccines}
         />
       )}
     </div>

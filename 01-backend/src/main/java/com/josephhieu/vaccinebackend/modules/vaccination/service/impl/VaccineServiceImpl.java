@@ -48,34 +48,53 @@ public class VaccineServiceImpl implements VaccineService {
     @Transactional
     public void registerVaccination(VaccinationRegistrationRequest request) {
 
-        // 1. Xác định "Ai" đang đăng ký (Lấy từ JWT Token đã được filter xác thực)
+       // 1. Xác định "Ai" đang đăng ký
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
         BenhNhan patient = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // 2. Kiểm tra lịch tiêm chủng có tồn tại không
+        // 2. Kiểm tra lịch tiêm chủng
         LichTiemChung schedule = lichTiemChungRepository.findById(request.getMaLichTiemChung())
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_FOUND));
 
-        // 3. Tự động tìm 1 lô vắc-xin còn hàng cho loại vắc-xin người dùng chọn
-        LoVacXin availableBatch = loVacXinRepository.findFirstByVacXin_MaVacXinAndSoLuongGreaterThanOrderByNgayNhanAsc(
-                        request.getMaVacXin(), 0)
-                .orElseThrow(() -> new AppException(ErrorCode.VACCINE_OUT_OF_STOCK));
+        // 3. Kiểm tra trùng lặp: Người này đã đăng ký lịch này chưa?
+        boolean isAlreadyRegistered = chiTietDangKyTiemRepository
+                .existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiem(patient.getMaBenhNhan(), schedule.getMaLichTiem());
 
-        // 4. Tạo bản ghi đăng ký tiêm chủng
+        if (isAlreadyRegistered) {
+            throw new AppException(ErrorCode.ALREADY_REGISTERED);
+        }
+
+        // 4. Kiểm tra số lượng: Lịch còn chỗ không?
+        long registeredCount = lichTiemChungRepository.countRegisteredPatients(schedule.getMaLichTiem());
+        if (registeredCount >= schedule.getSoLuongNguoiTiem()) {
+            throw new AppException(ErrorCode.SCHEDULE_FULL);
+        }
+
+        // 5. LẤY LÔ VẮC-XIN TRỰC TIẾP TỪ LỊCH TIÊM
+        // (Vì Admin đã gán lô cho lịch rồi, không cần tìm lô khác nữa)
+        LoVacXin batch = schedule.getLoVacXin();
+        if (batch == null || batch.getSoLuong() <= 0) {
+            throw new AppException(ErrorCode.VACCINE_OUT_OF_STOCK);
+        }
+
+        // Bước 5.1: Cập nhật số lượng trong kho (Nếu muốn trừ kho ngay khi đăng ký)
+        batch.setSoLuong(batch.getSoLuong() - 1);
+        loVacXinRepository.save(batch);
+
+        // 6. Tạo bản ghi đăng ký
         ChiTietDangKyTiem registration = ChiTietDangKyTiem.builder()
                 .benhNhan(patient)
-                .loVacXin(availableBatch)
+                .loVacXin(batch)
                 .lichTiemChung(schedule)
-                .thoiGianCanTiem(schedule.getNgayTiem()) // Lấy ngày từ lịch tiêm chủng làm ngày hẹn
+                .thoiGianCanTiem(schedule.getNgayTiem())
                 .ghiChu(request.getGhiChu())
                 .build();
 
         chiTietDangKyTiemRepository.save(registration);
 
-        log.info("Đăng ký thành công cho bệnh nhân: {} - Vắc-xin: {}",
-                patient.getTenBenhNhan(), availableBatch.getVacXin().getTenVacXin());
+        log.info("Đăng ký thành công: Bệnh nhân {} đăng ký lịch ngày {} tại {}",
+                patient.getTenBenhNhan(), schedule.getNgayTiem(), schedule.getDiaDiem());
     }
 
 }

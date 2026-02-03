@@ -31,4 +31,6 @@ public interface ChiTietDangKyTiemRepository extends JpaRepository<ChiTietDangKy
             "ORDER BY ct.thoiGianCanTiem ASC")
     List<ChiTietDangKyTiem> findPendingAppointments(@Param("maBN") UUID maBN);
 
+    boolean existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiem(UUID patientId, UUID scheduleId);
+
 }
