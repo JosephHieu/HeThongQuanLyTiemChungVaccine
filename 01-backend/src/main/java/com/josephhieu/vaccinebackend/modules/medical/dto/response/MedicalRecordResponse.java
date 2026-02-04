@@ -1,10 +1,12 @@
 package com.josephhieu.vaccinebackend.modules.medical.dto.response;
 
+import com.josephhieu.vaccinebackend.modules.medical.dto.PendingRegistrationDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -32,4 +34,6 @@ public class MedicalRecordResponse {
     // Chỉ định tiếp theo (Từ ChiTietDangKyTiem chưa có hồ sơ)
     private String vacxinCanTiem;
     private String thoiGianTiemTiepTheo;
+
+    private List<PendingRegistrationDTO> pendingRegistrations;
 }

@@ -46,6 +46,9 @@ public enum ErrorCode {
     REGISTRATION_NOT_FOUND(1307, "Không tìm thấy thông tin đăng ký tiêm chủng", HttpStatus.NOT_FOUND),
     CANNOT_CANCEL(1308, "Không thể hủy đăng ký đã hoàn thành hoặc quá hạn", HttpStatus.BAD_REQUEST),
     REGISTRATION_EXPIRED(1309, "Đăng ký này đã quá thời gian xử lý", HttpStatus.BAD_REQUEST),
+    INVALID_REGISTRATION_STATUS(1310, "Trạng thái đăng ký không hợp lệ để thực hiện thao tác này", HttpStatus.BAD_REQUEST),
+    VACCINATION_ALREADY_COMPLETED(1311, "Mũi tiêm này đã được xác nhận hoàn thành trước đó", HttpStatus.BAD_REQUEST),
+    OUT_OF_STOCK(1312, "Số lượng vắc-xin trong lô đã hết, không thể thực hiện tiêm", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

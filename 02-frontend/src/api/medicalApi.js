@@ -27,6 +27,11 @@ const medicalApi = {
   prescribe: (id, data) => {
     return axiosClient.post(`/v1/medical/records/${id}/prescribe`, data);
   },
+
+  confirmInjection: (maDangKy, data) => {
+    const url = `/v1/medical/records/confirm-injection/${maDangKy}`;
+    return axiosClient.post(url, data);
+  },
 };
 
 export default medicalApi;

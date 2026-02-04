@@ -6,6 +6,7 @@ import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
 import com.josephhieu.vaccinebackend.modules.identity.repository.BenhNhanRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
 import com.josephhieu.vaccinebackend.modules.inventory.repository.LoVacXinRepository;
+import com.josephhieu.vaccinebackend.modules.medical.dto.PendingRegistrationDTO;
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.PrescribeRequest;
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.UpdatePatientRequest;
 import com.josephhieu.vaccinebackend.modules.medical.dto.response.MedicalRecordResponse;
@@ -15,10 +16,12 @@ import com.josephhieu.vaccinebackend.modules.medical.service.MedicalRecordServic
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.ChiTietDangKyTiem;
 import com.josephhieu.vaccinebackend.modules.vaccination.repository.ChiTietDangKyTiemRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     private final BenhNhanRepository benhNhanRepository;
@@ -38,20 +42,16 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     @Transactional(readOnly = true)
     public MedicalRecordResponse getMedicalRecord(UUID maBenhNhan) {
-        // 1. Lấy thông tin bệnh nhân
         BenhNhan bn = benhNhanRepository.findById(maBenhNhan)
                 .orElseThrow(() -> new AppException(ErrorCode.PATIENT_NOT_FOUND));
 
-        // 2. Lấy mũi tiêm gần nhất từ lịch sử (HoSoBenhAn)
         List<HoSoBenhAn> history = hoSoBenhAnRepository.findHistoryByPatient(maBenhNhan);
         HoSoBenhAn latest = history.isEmpty() ? null : history.get(0);
 
-        // 3. Lấy lịch hẹn tiếp theo (ChiTietDangKyTiem chưa có hồ sơ)
-        // Sử dụng hàm query mà chúng ta đã bổ sung ở bước Repository
+        // Lấy TOÀN BỘ danh sách đang chờ thay vì chỉ lấy 1 cái đầu tiên
         List<ChiTietDangKyTiem> pending = chiTietDangKyTiemRepository.findPendingAppointments(maBenhNhan);
-        ChiTietDangKyTiem next = pending.isEmpty() ? null : pending.get(0);
 
-        return mapToResponse(bn, latest, next);
+        return mapToResponse(bn, latest, pending);
     }
 
     @Override
@@ -93,11 +93,70 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         chiTietDangKyTiemRepository.save(prescription);
     }
 
+    @Override
+    @Transactional
+    public void confirmInjection(UUID maDangKy, String phanUngSauTiem, String customTacDung) {
+        ChiTietDangKyTiem registration = chiTietDangKyTiemRepository.findById(maDangKy)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+
+        // Kiểm tra nếu không phải trạng thái REGISTERED thì không cho tiêm
+        if (!ChiTietDangKyTiem.STATUS_REGISTERED.equals(registration.getTrangThai())) {
+            if (ChiTietDangKyTiem.STATUS_COMPLETED.equals(registration.getTrangThai())) {
+                throw new AppException(ErrorCode.VACCINATION_ALREADY_COMPLETED);
+            }
+            throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
+        }
+
+        LoVacXin lo = registration.getLoVacXin();
+        if (lo == null || lo.getSoLuong() <= 0) {
+            throw new AppException(ErrorCode.OUT_OF_STOCK); // Bây giờ đã có trong Enum
+        }
+        lo.setSoLuong(lo.getSoLuong() - 1);
+        loVacXinRepository.save(lo);
+
+        // 4. Cập nhật trạng thái Đăng ký sang COMPLETED
+        registration.setTrangThai(ChiTietDangKyTiem.STATUS_COMPLETED);
+        chiTietDangKyTiemRepository.save(registration);
+
+        // 5. Tạo hồ sơ bệnh án (HoSoBenhAn)
+        // Tùy chỉnh thoiGianTacDung: Nếu không truyền từ UI, lấy mặc định từ tên Vacxin
+        String tacDung = (customTacDung != null && !customTacDung.isEmpty())
+                ? customTacDung
+                : "Theo phác đồ " + registration.getLoVacXin().getVacXin().getTenVacXin();
+
+        HoSoBenhAn record = HoSoBenhAn.builder()
+                .chiTietDangKyTiem(registration)
+                .thoiGianTiem(LocalDateTime.now())
+                .phanUngSauTiem(phanUngSauTiem != null ? phanUngSauTiem : "Bình thường")
+                .thoiGianTacDung(tacDung)
+                .hoaDon(lo.getHoaDon()) // Thừa hưởng hóa đơn từ lô vắc-xin nếu có
+                .build();
+
+        hoSoBenhAnRepository.save(record);
+
+        log.info("Bệnh nhân {} đã tiêm xong mũi {}. Kho còn lại: {}",
+                registration.getBenhNhan().getTenBenhNhan(),
+                lo.getVacXin().getTenVacXin(),
+                lo.getSoLuong());
+    }
     /**
      * Helper Method: Chuyển đổi các Entity rời rạc thành DTO tổng hợp.
      */
-    private MedicalRecordResponse mapToResponse(BenhNhan bn, HoSoBenhAn latest, ChiTietDangKyTiem next) {
+    private MedicalRecordResponse mapToResponse(BenhNhan bn, HoSoBenhAn latest, List<ChiTietDangKyTiem> pending) {
         int tuoi = (bn.getNgaySinh() != null) ? Period.between(bn.getNgaySinh(), LocalDate.now()).getYears() : 0;
+
+        // Mũi tiêm tiếp theo (lấy cái gần nhất trong danh sách pending)
+        ChiTietDangKyTiem next = pending.isEmpty() ? null : pending.get(0);
+
+        // Map danh sách Pending sang DTO cho Tab "Thực hiện tiêm"
+        List<PendingRegistrationDTO> pendingDTOs = pending.stream()
+                .map(p -> PendingRegistrationDTO.builder()
+                        .id(p.getMaChiTietDKTiem())
+                        .tenVacXin(p.getLoVacXin().getVacXin().getTenVacXin())
+                        .soLo(p.getLoVacXin().getSoLo())
+                        .ngayHen(p.getThoiGianCanTiem().format(DATE_FORMATTER))
+                        .build())
+                .toList();
 
         return MedicalRecordResponse.builder()
                 .id(bn.getMaBenhNhan())
@@ -107,15 +166,20 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .dienThoai(bn.getSdt())
                 .diaChi(bn.getDiaChi())
                 .nguoiGiamHo(bn.getNguoiGiamHo())
-                .ngaySinh(bn.getNgaySinh() != null ? bn.getNgaySinh().toString() : "") // Sẽ trả về dạng yyyy-MM-dd
+                .ngaySinh(bn.getNgaySinh() != null ? bn.getNgaySinh().toString() : "")
+
                 // Thông tin quá khứ
                 .vacxinDaTiem(latest != null ? latest.getChiTietDangKyTiem().getLoVacXin().getVacXin().getTenVacXin() : "Chưa có dữ liệu")
-                .maLo(latest != null ? latest.getChiTietDangKyTiem().getLoVacXin().getMaLo().toString() : "N/A")
+                .maLo(latest != null ? latest.getChiTietDangKyTiem().getLoVacXin().getSoLo() : "N/A")
                 .thoiGianTiemTruoc(latest != null ? latest.getThoiGianTiem().format(DATE_FORMATTER) : "N/A")
                 .phanUng(latest != null ? latest.getPhanUngSauTiem() : "Bình thường")
+
                 // Thông tin tương lai
                 .vacxinCanTiem(next != null ? next.getLoVacXin().getVacXin().getTenVacXin() : "Chưa có chỉ định")
                 .thoiGianTiemTiepTheo(next != null ? next.getThoiGianCanTiem().format(DATE_FORMATTER) : "Chưa đặt lịch")
+
+                // Danh sách chờ tiêm (MỚI)
+                .pendingRegistrations(pendingDTOs)
                 .build();
     }
 }

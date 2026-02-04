@@ -38,4 +38,6 @@ public interface ChiTietDangKyTiemRepository extends JpaRepository<ChiTietDangKy
 
     boolean existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiemAndTrangThaiNot(UUID patientId, UUID scheduleId, String status);
 
+    List<ChiTietDangKyTiem> findByBenhNhan_MaBenhNhanAndTrangThai(UUID maBN, String trangThai);
+
 }

@@ -16,7 +16,10 @@ public interface HoSoBenhAnRepository extends JpaRepository<HoSoBenhAn, UUID> {
      * Tìm hồ sơ bệnh án mới nhất của một bệnh nhân dựa trên thời gian tiêm.
      */
     @Query("SELECT hs FROM HoSoBenhAn hs " +
-            "WHERE hs.chiTietDangKyTiem.benhNhan.maBenhNhan = :maBN " +
+            "JOIN FETCH hs.chiTietDangKyTiem ct " +
+            "JOIN FETCH ct.loVacXin l " +
+            "JOIN FETCH l.vacXin v " +
+            "WHERE ct.benhNhan.maBenhNhan = :maBN " +
             "ORDER BY hs.thoiGianTiem DESC")
     List<HoSoBenhAn> findHistoryByPatient(@Param("maBN") UUID maBN);
 }

@@ -34,4 +34,11 @@ public interface MedicalRecordService {
      * @param request DTO chứa mã lô vắc-xin và ngày hẹn.
      */
     void prescribeVaccine(UUID maBenhNhan, PrescribeRequest request);
+
+    /**
+     * Xác nhận hoàn thành tiêm chủng và tạo hồ sơ bệnh án.
+     * @param maDangKy ID của bản ghi đăng ký tiêm.
+     * @param phanUng Tình trạng phản ứng sau tiêm.
+     */
+    void confirmInjection(UUID maDangKy, String phanUng, String customTacDung);
 }

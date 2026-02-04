@@ -7,8 +7,10 @@ import com.josephhieu.vaccinebackend.modules.medical.dto.response.MedicalRecordR
 import com.josephhieu.vaccinebackend.modules.medical.service.MedicalRecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -54,6 +56,7 @@ public class MedicalController {
      * Dùng cho Tab "Kê đơn".
      */
     @PostMapping("/{id}/prescribe")
+    @PreAuthorize("hasRole('Administrator') or hasRole('Nhân viên y tế')")
     public ApiResponse<String> prescribe(
             @PathVariable UUID id,
             @RequestBody @Valid PrescribeRequest request) {
@@ -64,5 +67,19 @@ public class MedicalController {
                 .build();
     }
 
+    @PostMapping("/confirm-injection/{maDangKy}")
+    @PreAuthorize("hasRole('Administrator') or hasRole('Nhân viên y tế')")
+    public ApiResponse<String> confirmInjection(
+            @PathVariable UUID maDangKy,
+            @RequestBody Map<String, String> request) {
 
+        String phanUng = request.get("phanUngSauTiem");
+        String tacDung = request.get("thoiGianTacDung"); // Lấy từ UI nếu có
+
+        medicalRecordService.confirmInjection(maDangKy, phanUng, tacDung);
+
+        return ApiResponse.<String>builder()
+                .result("Xác nhận tiêm chủng thành công")
+                .build();
+    }
 }
