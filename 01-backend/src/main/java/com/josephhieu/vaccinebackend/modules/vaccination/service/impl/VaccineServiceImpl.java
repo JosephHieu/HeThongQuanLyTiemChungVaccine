@@ -9,6 +9,7 @@ import com.josephhieu.vaccinebackend.modules.inventory.repository.LoVacXinReposi
 import com.josephhieu.vaccinebackend.modules.inventory.repository.VacXinRepository;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.VaccinationRegistrationRequest;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.VaccineSearchRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationHistoryResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.VaccineInfoResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.ChiTietDangKyTiem;
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.LichTiemChung;
@@ -25,6 +26,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +63,11 @@ public class VaccineServiceImpl implements VaccineService {
 
         // 3. Kiểm tra trùng lặp: Người này đã đăng ký lịch này chưa?
         boolean isAlreadyRegistered = chiTietDangKyTiemRepository
-                .existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiem(patient.getMaBenhNhan(), schedule.getMaLichTiem());
+                .existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiemAndTrangThaiNot(
+                        patient.getMaBenhNhan(),
+                        schedule.getMaLichTiem(),
+                        "CANCELED"
+                );
 
         if (isAlreadyRegistered) {
             throw new AppException(ErrorCode.ALREADY_REGISTERED);
@@ -89,12 +97,82 @@ public class VaccineServiceImpl implements VaccineService {
                 .lichTiemChung(schedule)
                 .thoiGianCanTiem(schedule.getNgayTiem())
                 .ghiChu(request.getGhiChu())
+                .trangThai("REGISTERED")
                 .build();
 
         chiTietDangKyTiemRepository.save(registration);
 
         log.info("Đăng ký thành công: Bệnh nhân {} đăng ký lịch ngày {} tại {}",
                 patient.getTenBenhNhan(), schedule.getNgayTiem(), schedule.getDiaDiem());
+    }
+
+    @Override
+    public List<RegistrationHistoryResponse> getMyRegistrations() {
+
+        // 1. Lấy thông tin người dùng hiện tại
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        BenhNhan patient = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // 2. Lấy danh sách đăng ký từ repository
+        return chiTietDangKyTiemRepository.findByBenhNhan_MaBenhNhanOrderByLichTiemChung_NgayTiemDesc(patient.getMaBenhNhan())
+                .stream()
+                .map(item -> {
+                    // Kiểm tra an toàn cho LichTiemChung
+                    String ngayTiem = "N/A";
+                    String thoiGian = "N/A";
+                    String diaDiem = "Chưa xác định";
+
+                    if (item.getLichTiemChung() != null) {
+                        ngayTiem = item.getLichTiemChung().getNgayTiem().toString();
+                        thoiGian = item.getLichTiemChung().getThoiGianChung();
+                        diaDiem = item.getLichTiemChung().getDiaDiem();
+                    }
+
+                    return RegistrationHistoryResponse.builder()
+                            .maDangKy(item.getMaChiTietDKTiem())
+                            .tenVacXin(item.getLoVacXin() != null && item.getLoVacXin().getVacXin() != null
+                                    ? item.getLoVacXin().getVacXin().getTenVacXin() : "Vắc-xin đã bị xóa")
+                            .soLo(item.getLoVacXin() != null ? item.getLoVacXin().getSoLo() : "N/A")
+                            .ngayTiem(ngayTiem)
+                            .thoiGian(thoiGian)
+                            .diaDiem(diaDiem)
+                            .trangThai(item.getTrangThai())
+                            .build();
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void cancelRegistration(UUID maDangKy) {
+
+        // 1. Tìm bản ghi đăng ký
+        ChiTietDangKyTiem registration = chiTietDangKyTiemRepository.findById(maDangKy)
+                .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
+
+        // 2. Bảo mật: Kiểm tra xem người hủy có đúng là người đã đăng ký không
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!registration.getBenhNhan().getTaiKhoan().getTenDangNhap().equals(username)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 3. Chỉ cho phép hủy nếu trạng thái đang là REGISTERED
+        if (!"REGISTERED".equals(registration.getTrangThai())) {
+            throw new AppException(ErrorCode.CANNOT_CANCEL);
+        }
+
+        // 4. Cập nhật trạng thái
+        registration.setTrangThai("CANCELED");
+        chiTietDangKyTiemRepository.save(registration);
+
+        // 5. Hoàn lại vắc-xin vào kho
+        LoVacXin batch = registration.getLoVacXin();
+        batch.setSoLuong(batch.getSoLuong() + 1);
+        loVacXinRepository.save(batch);
+
+        log.info("Bệnh nhân {} đã hủy đăng ký tiêm chủng mã {}", username, maDangKy);
+
     }
 
 }

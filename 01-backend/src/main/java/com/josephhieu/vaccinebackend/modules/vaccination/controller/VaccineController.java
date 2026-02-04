@@ -3,12 +3,17 @@ package com.josephhieu.vaccinebackend.modules.vaccination.controller;
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.VaccinationRegistrationRequest;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.VaccineSearchRequest;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationHistoryResponse;
+import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.VaccineInfoResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.service.VaccineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/vaccinations")
@@ -41,4 +46,30 @@ public class VaccineController {
                 .result("Đăng ký tiêm thành công")
                 .build();
     }
+
+    /**
+     * API Lấy lịch sử đăng ký của người dùng hiện tại
+     * Endpoint: GET /api/v1/vaccinations/my-registrations
+     */
+    @GetMapping("/my-registrations")
+    public ApiResponse<List<RegistrationHistoryResponse>> getMyRegistrations() {
+
+        return ApiResponse.<List<RegistrationHistoryResponse>>builder()
+                .result(vaccineService.getMyRegistrations())
+                .build();
+    }
+
+    /**
+     * API Hủy đăng ký tiêm
+     * Endpoint: POST /api/v1/vaccinations/cancel/{maDangKy}
+     */
+    @PostMapping("/cancel/{maDangKy}")
+    public ApiResponse<String> cancel(@PathVariable UUID maDangKy) {
+
+        vaccineService.cancelRegistration(maDangKy);
+        return ApiResponse.<String>builder()
+                .result("Hủy đăng ký thành công và đã hoàn lại vắc-xin vào kho")
+                .build();
+    }
+
 }

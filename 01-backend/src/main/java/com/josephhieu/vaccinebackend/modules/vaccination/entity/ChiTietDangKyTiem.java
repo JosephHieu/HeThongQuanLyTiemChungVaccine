@@ -38,4 +38,15 @@ public class ChiTietDangKyTiem {
 
     @Column(name = "GhiChu", columnDefinition = "TEXT")
     private String ghiChu;
+
+    @Builder.Default
+    @Column(name = "TrangThai", length = 50, nullable = false)
+    private String trangThai = "REGISTERED";
+
+
+    // Các hằng số để quản lý trạng thái tránh gõ sai chính tả
+    public static final String STATUS_REGISTERED = "REGISTERED";
+    public static final String STATUS_COMPLETED = "COMPLETED";
+    public static final String STATUS_CANCELLED = "CANCELLED";
+    public static final String STATUS_EXPIRED = "EXPIRED";
 }

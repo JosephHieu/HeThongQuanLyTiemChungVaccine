@@ -44,6 +44,8 @@ const userVaccineApi = {
   getMyRegistrations: () => {
     return axiosClient.get("/v1/vaccinations/my-registrations");
   },
+
+  cancelRegistration: (id) => axiosClient.post(`/v1/vaccinations/cancel/${id}`),
 };
 
 export default userVaccineApi;

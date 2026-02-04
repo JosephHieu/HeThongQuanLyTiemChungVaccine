@@ -19,6 +19,7 @@ import { useAuth } from "../../hooks/useAuth"; // Import hook phân quyền
 
 const Sidebar = () => {
   const { role } = useAuth(); // Lấy role hiện tại
+  const isUser = role === "Normal User Account";
 
   // --- NHÓM QUẢN TRỊ (ADMIN/STAFF) ---
   const menuItems = [
@@ -136,48 +137,58 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`w-64 flex flex-col h-screen sticky top-0 shadow-xl transition-colors duration-300 
-  ${role === "Normal User Account" ? "bg-indigo-900" : "bg-slate-900"}`}
+      className={`w-64 flex flex-col h-screen sticky top-0 shadow-xl transition-all duration-300 
+      ${isUser ? "bg-indigo-900 text-white" : "bg-white text-slate-600 border-r border-slate-200"}`}
     >
-      {/* Logo có thể đổi theo role */}
-      <div className="p-6 text-xl font-bold text-white border-b border-slate-800 flex items-center gap-3">
+      {/* 1. Header Logo - Điều chỉnh màu text và border theo role */}
+      <div
+        className={`p-6 text-xl font-bold flex items-center gap-3 border-b 
+        ${isUser ? "text-white border-indigo-800" : "text-slate-800 border-slate-100"}`}
+      >
         <div
-          className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow-lg 
-      ${role === "Normal User Account" ? "bg-emerald-500" : "bg-blue-600"}`}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow-lg text-white
+          ${isUser ? "bg-emerald-500" : "bg-blue-600"}`}
         >
           V
         </div>
-        {role === "Normal User Account" ? "Portal Bệnh Nhân" : "Vaccine System"}
+        {isUser ? "Portal Bệnh Nhân" : "Vaccine Admin"}
       </div>
 
-      {/* 3. Hiển thị Menu đã được lọc */}
+      {/* 2. Menu - Tùy biến màu sắc Active và Hover cho từng Role */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {filteredMenu.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
+              `flex items-center gap-3 p-3 rounded-xl transition-all duration-200 font-medium ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
-                  : "hover:bg-slate-800 hover:text-white"
+                  ? isUser
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" // Active User
+                    : "bg-blue-50 text-blue-600 shadow-sm" // Active Admin (Sáng)
+                  : isUser
+                    ? "text-indigo-200 hover:bg-white/10 hover:text-white" // Hover User
+                    : "text-slate-500 hover:bg-slate-50 hover:text-blue-600" // Hover Admin
               }`
             }
           >
             {item.icon}
-            <span className="font-medium">{item.label}</span>
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
 
-      {/* Bottom Action: Logout */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/50">
+      {/* 3. Bottom Action - Điều chỉnh border và bg */}
+      <div
+        className={`p-4 border-t ${isUser ? "border-indigo-800 bg-indigo-950/30" : "border-slate-100 bg-slate-50/50"}`}
+      >
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 p-3 w-full rounded-lg text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+          className={`flex items-center gap-3 p-3 w-full rounded-xl transition-colors font-medium
+            ${isUser ? "text-indigo-300 hover:bg-rose-500/20 hover:text-rose-400" : "text-slate-500 hover:bg-rose-50 hover:text-rose-600"}`}
         >
           <LogOut size={20} />
-          <span className="font-medium">Đăng xuất</span>
+          <span>Đăng xuất</span>
         </button>
       </div>
     </aside>

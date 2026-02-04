@@ -33,4 +33,9 @@ public interface ChiTietDangKyTiemRepository extends JpaRepository<ChiTietDangKy
 
     boolean existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiem(UUID patientId, UUID scheduleId);
 
+    // Tìm ds đăng ký của bệnh nhân dựa trên mã bệnh nhân
+    List<ChiTietDangKyTiem> findByBenhNhan_MaBenhNhanOrderByLichTiemChung_NgayTiemDesc(UUID maBenhNhan);
+
+    boolean existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiemAndTrangThaiNot(UUID patientId, UUID scheduleId, String status);
+
 }
