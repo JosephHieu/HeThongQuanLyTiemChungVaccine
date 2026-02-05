@@ -4,7 +4,6 @@ import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.VaccinationRegistrationRequest;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.request.VaccineSearchRequest;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationHistoryResponse;
-import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.RegistrationResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.dto.response.VaccineInfoResponse;
 import com.josephhieu.vaccinebackend.modules.vaccination.service.VaccineService;
 import jakarta.validation.Valid;

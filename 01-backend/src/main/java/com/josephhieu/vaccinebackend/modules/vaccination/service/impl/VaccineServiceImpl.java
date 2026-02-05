@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,78 +52,94 @@ public class VaccineServiceImpl implements VaccineService {
     @Override
     @Transactional
     public void registerVaccination(VaccinationRegistrationRequest request) {
-
-       // 1. Xác định "Ai" đang đăng ký
+        // 1. Xác định "Ai" đang đăng ký
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         BenhNhan patient = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // 2. Kiểm tra lịch tiêm chủng
-        LichTiemChung schedule = lichTiemChungRepository.findById(request.getMaLichTiemChung())
-                .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_FOUND));
+        LichTiemChung schedule = null;
+        LoVacXin batch = null;
+        java.time.LocalDate ngayHenTiem = request.getThoiGianCanTiem();
 
-        // 3. Kiểm tra trùng lặp: Người này đã đăng ký lịch này chưa?
+        // 2. Xử lý phân luồng dữ liệu
+        if (request.getMaLichTiemChung() != null) {
+            // TRƯỜNG HỢP A: Đăng ký theo lịch trung tâm
+            schedule = lichTiemChungRepository.findById(request.getMaLichTiemChung())
+                    .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+            batch = schedule.getLoVacXin();
+            ngayHenTiem = schedule.getNgayTiem(); // Lấy ngày từ lịch
+
+            // Kiểm tra số lượng người đăng ký của lịch đó
+            long registeredCount = lichTiemChungRepository.countRegisteredPatients(schedule.getMaLichTiem());
+            if (registeredCount >= schedule.getSoLuongNguoiTiem()) {
+                throw new AppException(ErrorCode.SCHEDULE_FULL);
+            }
+        } else {
+            // TRƯỜNG HỢP B: Đăng ký lẻ từ Tra cứu vắc-xin
+            if (request.getMaLoVacXin() == null) {
+                throw new AppException(ErrorCode.INVALID_INFO); // Thiếu mã lô
+            }
+            batch = loVacXinRepository.findById(request.getMaLoVacXin())
+                    .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND));
+
+            // ngayHenTiem đã lấy từ request.getThoiGianCanTiem() ở trên
+        }
+
+        // 3. Kiểm tra chung cho cả 2 trường hợp
+        if (batch == null || batch.getSoLuong() <= 0) {
+            throw new AppException(ErrorCode.VACCINE_OUT_OF_STOCK);
+        }
+
+        // 4. Kiểm tra trùng lặp (Tùy chỉnh logic kiểm tra của bạn)
+        // Ví dụ: Không cho phép đăng ký cùng 1 lô vắc-xin mà chưa tiêm xong
         boolean isAlreadyRegistered = chiTietDangKyTiemRepository
-                .existsByBenhNhan_MaBenhNhanAndLichTiemChung_MaLichTiemAndTrangThaiNot(
+                .existsByBenhNhan_MaBenhNhanAndLoVacXin_MaLoAndTrangThai(
                         patient.getMaBenhNhan(),
-                        schedule.getMaLichTiem(),
-                        "CANCELED"
+                        batch.getMaLo(),
+                        "REGISTERED"
                 );
 
         if (isAlreadyRegistered) {
             throw new AppException(ErrorCode.ALREADY_REGISTERED);
         }
 
-        // 4. Kiểm tra số lượng: Lịch còn chỗ không?
-        long registeredCount = lichTiemChungRepository.countRegisteredPatients(schedule.getMaLichTiem());
-        if (registeredCount >= schedule.getSoLuongNguoiTiem()) {
-            throw new AppException(ErrorCode.SCHEDULE_FULL);
-        }
-
-        // 5. LẤY LÔ VẮC-XIN TRỰC TIẾP TỪ LỊCH TIÊM
-        // (Vì Admin đã gán lô cho lịch rồi, không cần tìm lô khác nữa)
-        LoVacXin batch = schedule.getLoVacXin();
-        if (batch == null || batch.getSoLuong() <= 0) {
-            throw new AppException(ErrorCode.VACCINE_OUT_OF_STOCK);
-        }
-
-        // Bước 5.1: Cập nhật số lượng trong kho (Nếu muốn trừ kho ngay khi đăng ký)
+        // 5. Trừ kho và Lưu bản ghi
         batch.setSoLuong(batch.getSoLuong() - 1);
         loVacXinRepository.save(batch);
 
-        // 6. Tạo bản ghi đăng ký
         ChiTietDangKyTiem registration = ChiTietDangKyTiem.builder()
                 .benhNhan(patient)
                 .loVacXin(batch)
-                .lichTiemChung(schedule)
-                .thoiGianCanTiem(schedule.getNgayTiem())
+                .lichTiemChung(schedule) // Có thể null nếu đăng ký lẻ
+                .thoiGianCanTiem(ngayHenTiem)
                 .ghiChu(request.getGhiChu())
                 .trangThai("REGISTERED")
                 .build();
 
         chiTietDangKyTiemRepository.save(registration);
 
-        log.info("Đăng ký thành công: Bệnh nhân {} đăng ký lịch ngày {} tại {}",
-                patient.getTenBenhNhan(), schedule.getNgayTiem(), schedule.getDiaDiem());
+        log.info("Đăng ký thành công: Bệnh nhân {} - Vắc xin: {} - Ngày hẹn: {}",
+                patient.getTenBenhNhan(), batch.getVacXin().getTenVacXin(), ngayHenTiem);
     }
 
     @Override
     public List<RegistrationHistoryResponse> getMyRegistrations() {
-
-        // 1. Lấy thông tin người dùng hiện tại
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         BenhNhan patient = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // 2. Lấy danh sách đăng ký từ repository
-        return chiTietDangKyTiemRepository.findByBenhNhan_MaBenhNhanOrderByLichTiemChung_NgayTiemDesc(patient.getMaBenhNhan())
+        // LƯU Ý: Nên dùng phương thức sắp xếp theo ThoiGianCanTiemDesc
+        // vì không phải bản ghi nào cũng có LichTiemChung
+        return chiTietDangKyTiemRepository.findByBenhNhan_MaBenhNhanOrderByThoiGianCanTiemDesc(patient.getMaBenhNhan())
                 .stream()
                 .map(item -> {
-                    // Kiểm tra an toàn cho LichTiemChung
-                    String ngayTiem = "N/A";
-                    String thoiGian = "N/A";
-                    String diaDiem = "Chưa xác định";
+                    // Mặc định lấy ngày từ trường thoiGianCanTiem (luôn có dữ liệu)
+                    String ngayTiem = item.getThoiGianCanTiem() != null ? item.getThoiGianCanTiem().toString() : "N/A";
+                    String thoiGian = "Trong giờ hành chính"; // Mặc định cho đăng ký lẻ
+                    String diaDiem = "Trung tâm tiêm chủng";
 
+                    // Nếu có lịch trung tâm thì ghi đè thông tin chi tiết của lịch đó
                     if (item.getLichTiemChung() != null) {
                         ngayTiem = item.getLichTiemChung().getNgayTiem().toString();
                         thoiGian = item.getLichTiemChung().getThoiGianChung();
@@ -131,8 +148,7 @@ public class VaccineServiceImpl implements VaccineService {
 
                     return RegistrationHistoryResponse.builder()
                             .maDangKy(item.getMaChiTietDKTiem())
-                            .tenVacXin(item.getLoVacXin() != null && item.getLoVacXin().getVacXin() != null
-                                    ? item.getLoVacXin().getVacXin().getTenVacXin() : "Vắc-xin đã bị xóa")
+                            .tenVacXin(item.getLoVacXin() != null ? item.getLoVacXin().getVacXin().getTenVacXin() : "N/A")
                             .soLo(item.getLoVacXin() != null ? item.getLoVacXin().getSoLo() : "N/A")
                             .ngayTiem(ngayTiem)
                             .thoiGian(thoiGian)

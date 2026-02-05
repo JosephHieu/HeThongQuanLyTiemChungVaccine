@@ -19,16 +19,17 @@ public interface VacXinRepository extends JpaRepository<VacXin, UUID> {
 
     @Query("SELECT new com.josephhieu.vaccinebackend.modules.vaccination.dto.response.VaccineInfoResponse(" +
             "v.maVacXin, " +
-            "MAX(l.soLo), " +
+            "l.maLo, " +        // Lấy mã UUID thực sự của lô
+            "l.soLo, " +        // Lấy số lô cụ thể
             "v.tenVacXin, " +
             "v.phongNguaBenh, " +
-            "CAST(SUM(COALESCE(l.soLuong, 0)) AS integer), " +
-            "v.doTuoiTiemChung, " + // Đảm bảo thứ tự này khớp với DTO
+            "l.soLuong, " +      // Lấy số lượng của riêng lô đó
+            "v.doTuoiTiemChung, " +
             "v.donGia) " +
             "FROM VacXin v " +
-            "LEFT JOIN LoVacXin l ON v = l.vacXin " +
+            "JOIN LoVacXin l ON v = l.vacXin " + // Dùng JOIN thay vì LEFT JOIN để chỉ hiện vắc-xin có hàng
             "WHERE (:keyword IS NULL OR LOWER(v.tenVacXin) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(v.phongNguaBenh) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "GROUP BY v.maVacXin, v.tenVacXin, v.phongNguaBenh, v.doTuoiTiemChung, v.donGia")
+            "AND l.soLuong > 0") // Chỉ hiện những lô còn hàng
     Page<VaccineInfoResponse> searchVaccines(@Param("keyword") String keyword, Pageable pageable);
 }

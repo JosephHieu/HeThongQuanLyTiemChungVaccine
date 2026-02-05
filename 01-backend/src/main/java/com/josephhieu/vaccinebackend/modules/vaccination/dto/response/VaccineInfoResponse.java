@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VaccineInfoResponse {
     private UUID maVacXin;        // 1. UUID
+    private UUID maLo;
     private String soLo;
     private String tenVacXin;     // 2. String
     private String phongNguaBenh; // 3. String (Khớp với v.phongNguaBenh trong Query)

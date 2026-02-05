@@ -40,4 +40,17 @@ public interface ChiTietDangKyTiemRepository extends JpaRepository<ChiTietDangKy
 
     List<ChiTietDangKyTiem> findByBenhNhan_MaBenhNhanAndTrangThai(UUID maBN, String trangThai);
 
+    /**
+     * Kiểm tra trùng lặp dựa trên Lô vắc-xin (Dùng cho luồng Tra cứu/Tiêm lẻ)
+     * Vì đăng ký từ tra cứu không có MaLichTiem, ta phải check theo MaLo.
+     */
+    boolean existsByBenhNhan_MaBenhNhanAndLoVacXin_MaLoAndTrangThai(UUID patientId, UUID batchId, String status);
+
+    /**
+     * Tìm ds đăng ký của bệnh nhân.
+     * SỬA LẠI: Sắp xếp theo thoiGianCanTiem thay vì LichTiemChung_NgayTiem
+     * để tránh lỗi NullPointer hoặc mất dữ liệu khi tiêm lẻ.
+     */
+    List<ChiTietDangKyTiem> findByBenhNhan_MaBenhNhanOrderByThoiGianCanTiemDesc(UUID maBenhNhan);
+
 }

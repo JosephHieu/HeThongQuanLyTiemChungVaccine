@@ -20,6 +20,7 @@ public enum ErrorCode {
     MISSING_INFO(1008, "Vui lòng nhập đầy đủ thông tin", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1009, "Sai username / password", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1010, "Bạn không có quyền truy cập chức năng này", HttpStatus.FORBIDDEN),
+    INVALID_INFO(1011, "Thông tin yêu cầu không hợp lệ", HttpStatus.BAD_REQUEST),
 
     // INVENTORY ERRORS (1100 - 1199)
     INVENTORY_NOT_FOUND(1101, "Lô vắc-xin không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),

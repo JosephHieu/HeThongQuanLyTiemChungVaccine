@@ -14,11 +14,16 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VaccinationRegistrationRequest {
 
-    @NotNull(message = "Vui lòng chọn vắc-xin cần tiêm")
-    private UUID maVacXin;
+    // 1. Dùng maLoVacXin để khớp với Entity LoVacXin
+    @NotNull(message = "MISSING_INFO")
+    private UUID maLoVacXin;
 
-    @NotNull(message = "Vui lòng chọn lịch tiêm chủng")
+    // 2. Cho phép null vì Tra cứu vắc-xin sẽ không có lịch tiêm
     private UUID maLichTiemChung;
+
+    // 3. Bắt buộc phải có ngày để hệ thống biết khi nào bệnh nhân đến
+    @NotNull(message = "MISSING_INFO")
+    private java.time.LocalDate thoiGianCanTiem;
 
     private String ghiChu;
 }
