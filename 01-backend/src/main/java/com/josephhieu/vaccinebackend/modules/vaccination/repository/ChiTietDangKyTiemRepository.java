@@ -27,6 +27,7 @@ public interface ChiTietDangKyTiemRepository extends JpaRepository<ChiTietDangKy
     @Query("SELECT ct FROM ChiTietDangKyTiem ct " +
             "LEFT JOIN HoSoBenhAn hs ON hs.chiTietDangKyTiem.maChiTietDKTiem = ct.maChiTietDKTiem " +
             "WHERE ct.benhNhan.maBenhNhan = :maBN " +
+            "AND ct.trangThai = 'REGISTERED' " + // THÊM DÒNG NÀY: Chỉ lấy trạng thái đang chờ
             "AND hs.maHoSoBenhAn IS NULL " +
             "ORDER BY ct.thoiGianCanTiem ASC")
     List<ChiTietDangKyTiem> findPendingAppointments(@Param("maBN") UUID maBN);

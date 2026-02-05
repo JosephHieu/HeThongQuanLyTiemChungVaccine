@@ -1,6 +1,7 @@
 package com.josephhieu.vaccinebackend.modules.medical.entity;
 
 import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
+import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
 import com.josephhieu.vaccinebackend.modules.vaccination.entity.ChiTietDangKyTiem;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,4 +38,8 @@ public class HoSoBenhAn {
 
     @Column(name = "ThoiGianTiem")
     private LocalDateTime thoiGianTiem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaNhanVien")
+    private NhanVien nhanVienThucHien;
 }

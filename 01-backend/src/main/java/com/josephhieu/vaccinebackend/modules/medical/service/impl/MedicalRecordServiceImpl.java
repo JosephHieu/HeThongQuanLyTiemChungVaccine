@@ -3,7 +3,9 @@ package com.josephhieu.vaccinebackend.modules.medical.service.impl;
 import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
 import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
+import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
 import com.josephhieu.vaccinebackend.modules.identity.repository.BenhNhanRepository;
+import com.josephhieu.vaccinebackend.modules.identity.repository.NhanVienRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
 import com.josephhieu.vaccinebackend.modules.inventory.repository.LoVacXinRepository;
 import com.josephhieu.vaccinebackend.modules.medical.dto.PendingRegistrationDTO;
@@ -36,6 +38,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final HoSoBenhAnRepository hoSoBenhAnRepository;
     private final ChiTietDangKyTiemRepository chiTietDangKyTiemRepository;
     private final LoVacXinRepository loVacXinRepository;
+    private final NhanVienRepository nhanVienRepository;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -96,48 +99,48 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     @Transactional
     public void confirmInjection(UUID maDangKy, String phanUngSauTiem, String customTacDung) {
+        // 1. Lấy thông tin nhân viên từ Token
+        String username = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication().getName();
+
+        NhanVien staff = nhanVienRepository.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // 2. Kiểm tra bản ghi đăng ký
         ChiTietDangKyTiem registration = chiTietDangKyTiemRepository.findById(maDangKy)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
 
-        // Kiểm tra nếu không phải trạng thái REGISTERED thì không cho tiêm
-        if (!ChiTietDangKyTiem.STATUS_REGISTERED.equals(registration.getTrangThai())) {
-            if (ChiTietDangKyTiem.STATUS_COMPLETED.equals(registration.getTrangThai())) {
-                throw new AppException(ErrorCode.VACCINATION_ALREADY_COMPLETED);
-            }
-            throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
+        // 3. Kiểm tra trạng thái (Tránh tiêm 2 lần cho 1 mã đăng ký)
+        if (ChiTietDangKyTiem.STATUS_COMPLETED.equals(registration.getTrangThai())) {
+            throw new AppException(ErrorCode.VACCINATION_ALREADY_COMPLETED);
         }
 
-        LoVacXin lo = registration.getLoVacXin();
-        if (lo == null || lo.getSoLuong() <= 0) {
-            throw new AppException(ErrorCode.OUT_OF_STOCK); // Bây giờ đã có trong Enum
+        if (!ChiTietDangKyTiem.STATUS_REGISTERED.equals(registration.getTrangThai())) {
+            throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
         }
-        lo.setSoLuong(lo.getSoLuong() - 1);
-        loVacXinRepository.save(lo);
 
         // 4. Cập nhật trạng thái Đăng ký sang COMPLETED
         registration.setTrangThai(ChiTietDangKyTiem.STATUS_COMPLETED);
         chiTietDangKyTiemRepository.save(registration);
 
-        // 5. Tạo hồ sơ bệnh án (HoSoBenhAn)
-        // Tùy chỉnh thoiGianTacDung: Nếu không truyền từ UI, lấy mặc định từ tên Vacxin
+        // 5. Tạo hồ sơ bệnh án
         String tacDung = (customTacDung != null && !customTacDung.isEmpty())
                 ? customTacDung
                 : "Theo phác đồ " + registration.getLoVacXin().getVacXin().getTenVacXin();
 
         HoSoBenhAn record = HoSoBenhAn.builder()
                 .chiTietDangKyTiem(registration)
+                .nhanVienThucHien(staff) // Đã có người tiêm
                 .thoiGianTiem(LocalDateTime.now())
                 .phanUngSauTiem(phanUngSauTiem != null ? phanUngSauTiem : "Bình thường")
                 .thoiGianTacDung(tacDung)
-                .hoaDon(lo.getHoaDon()) // Thừa hưởng hóa đơn từ lô vắc-xin nếu có
+                .hoaDon(registration.getLoVacXin().getHoaDon())
                 .build();
 
         hoSoBenhAnRepository.save(record);
 
-        log.info("Bệnh nhân {} đã tiêm xong mũi {}. Kho còn lại: {}",
-                registration.getBenhNhan().getTenBenhNhan(),
-                lo.getVacXin().getTenVacXin(),
-                lo.getSoLuong());
+        log.info("Nhân viên {} xác nhận tiêm hoàn tất cho Bệnh nhân {}",
+                staff.getTenNhanVien(), registration.getBenhNhan().getTenBenhNhan());
     }
     /**
      * Helper Method: Chuyển đổi các Entity rời rạc thành DTO tổng hợp.

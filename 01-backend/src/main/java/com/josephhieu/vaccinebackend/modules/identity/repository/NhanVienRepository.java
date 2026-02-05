@@ -16,6 +16,8 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, UUID> {
 
     Optional<NhanVien> findByTaiKhoan(TaiKhoan taiKhoan);
 
+    Optional<NhanVien> findByTaiKhoan_TenDangNhap(String username);
+
     /**
      * Truy vấn tìm nhân viên dựa trên tên quyền hạn gắn với tài khoản của họ.
      * Luồng: NhanVien -> TaiKhoan -> ChiTietPhanQuyen -> PhanQuyen
