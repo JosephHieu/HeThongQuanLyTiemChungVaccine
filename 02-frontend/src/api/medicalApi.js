@@ -64,6 +64,34 @@ const medicalApi = {
   getMyHistory: () => {
     return axiosClient.get(`/v1/medical/my-history`);
   },
+
+  // --- PHẦN PHẢN HỒI (FEEDBACK) ---
+
+  /**
+   * Gửi phản hồi tình trạng sức khỏe sau khi tiêm
+   * (ĐÂY LÀ HÀM BẠN ĐANG THIẾU)
+   */
+  sendFeedback: (data) => {
+    return axiosClient.post("/v1/medical/feedback", data);
+  },
+
+  /**
+   * Lấy danh sách lịch sử các phản hồi đã gửi
+   */
+  getMyFeedbackHistory: () => {
+    return axiosClient.get("/v1/medical/feedback/my-history");
+  },
+
+  // ========================================================================
+  // PHẦN 9.5.2: LỊCH TIÊM TRUNG TÂM & ĐĂNG KÝ
+  // ========================================================================
+  getCenterSchedules: () => {
+    return axiosClient.get("/v1/medical/schedules/center");
+  },
+
+  registerVaccination: (data) => {
+    return axiosClient.post("/v1/medical/registrations", data);
+  },
 };
 
 export default medicalApi;

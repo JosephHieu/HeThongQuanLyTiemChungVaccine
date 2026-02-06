@@ -1,4 +1,4 @@
-package com.josephhieu.vaccinebackend.modules.finance.entity;
+package com.josephhieu.vaccinebackend.modules.medical.entity;
 
 import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
 import jakarta.persistence.*;
@@ -42,4 +42,14 @@ public class PhanHoi {
 
     @Column(name = "DiaDiemTiem", length = 255)
     private String diaDiemTiem;
+
+    @Column(name = "TrangThai")
+    private Integer trangThai = 0;
+
+    /**
+     Quy ước gợi ý:
+        0: Mới gửi (New)
+        1: Đã tiếp nhận/Đang xử lý (In Progress)
+        2: Đã giải quyết (Resolved)
+    **/
 }

@@ -1,4 +1,4 @@
-package com.josephhieu.vaccinebackend.modules.finance.entity;
+package com.josephhieu.vaccinebackend.modules.medical.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
