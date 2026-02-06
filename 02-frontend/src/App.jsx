@@ -26,6 +26,7 @@ import MyRegistrations from "./pages/VaccinePortal/MyRegistration";
 import ProfilePage from "./pages/VaccinePortal/ProfilePage";
 import FeedbackPage from "./pages/VaccinePortal/FeedBackPage";
 import EpidemicManagement from "./pages/Epidemic/EpidemicManagement";
+import EpidemicPortal from "./pages/VaccinePortal/EpidemicPortal";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -66,8 +67,8 @@ function App() {
           {/* Các trang chức năng của bệnh nhân */}
           <Route path="my-registrations" element={<MyRegistrations />} />
           <Route path="profile" element={<ProfilePage />} />
-
           <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="epidemics" element={<EpidemicPortal />} />
         </Route>
 
         {/* --- PHÂN HỆ QUẢN TRỊ / ADMIN (Giữ nguyên code cũ của bạn) --- */}

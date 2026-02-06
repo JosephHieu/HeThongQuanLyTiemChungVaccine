@@ -107,6 +107,12 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       roles: ["Normal User Account"],
     },
     {
+      path: "/user/epidemics",
+      icon: <ShieldAlert size={20} />,
+      label: "Tình hình dịch bệnh",
+      roles: ["Normal User Account"],
+    },
+    {
       path: "/user/schedules", // Chức năng 9.5.2
       icon: <CalendarDays size={20} />,
       label: "Lịch tiêm trung tâm",
