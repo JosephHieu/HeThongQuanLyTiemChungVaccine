@@ -18,6 +18,7 @@ import {
   ClipboardList,
   UserCircle,
   MessageSquare,
+  ShieldAlert,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth"; // Import hook phân quyền
 
@@ -64,6 +65,12 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       path: "/admin/moderator",
       icon: <ShieldCheck size={20} />,
       label: "Điều phối",
+      roles: ["Administrator", "Nhân viên y tế"],
+    },
+    {
+      path: "/admin/epidemics",
+      icon: <ShieldAlert size={20} />,
+      label: "Dịch bệnh",
       roles: ["Administrator", "Nhân viên y tế"],
     },
     {

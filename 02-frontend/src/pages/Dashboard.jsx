@@ -7,7 +7,8 @@ import {
   Users,
   Calendar,
   MessageSquare,
-  UserCog, // Import thêm icon này
+  UserCog,
+  ShieldAlert,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
@@ -69,6 +70,15 @@ const Dashboard = () => {
       desc: "Xem phản hồi và giải đáp thắc mắc từ người dân.",
       path: "/admin/support",
       roles: ["Administrator", "Hỗ trợ khách hàng"],
+    },
+    // 7. QUẢN LÝ DỊCH BỆNH (MỚI THÊM)
+    {
+      title: "Khảo sát dịch bệnh",
+      icon: <ShieldAlert />,
+      color: "bg-orange-600",
+      desc: "Ghi nhận tình hình dịch tễ, cập nhật số ca nhiễm và ổ dịch địa phương.",
+      path: "/admin/epidemics", // Đường dẫn bạn sẽ cấu hình trong App.jsx
+      roles: ["Administrator", "Nhân viên y tế"],
     },
   ];
 

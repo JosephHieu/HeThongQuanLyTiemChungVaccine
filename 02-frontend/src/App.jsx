@@ -25,6 +25,7 @@ import SchedulePortal from "./pages/VaccinePortal/SchedulePortal";
 import MyRegistrations from "./pages/VaccinePortal/MyRegistration";
 import ProfilePage from "./pages/VaccinePortal/ProfilePage";
 import FeedbackPage from "./pages/VaccinePortal/FeedBackPage";
+import EpidemicManagement from "./pages/Epidemic/EpidemicManagement";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -161,7 +162,19 @@ function App() {
             }
           />
 
-          {/* 7. Thông tin chung: Tất cả nhân viên đều xem được */}
+          {/* 7. Khảo sát dịch bệnh: Admin và Nhân viên y tế (MỚI THÊM) */}
+          <Route
+            path="epidemics"
+            element={
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Nhân viên y tế"]}
+              >
+                <EpidemicManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 8. Thông tin chung: Tất cả nhân viên đều xem được */}
           <Route
             path="about"
             element={<Placeholder title="Thông tin hệ thống" />}
