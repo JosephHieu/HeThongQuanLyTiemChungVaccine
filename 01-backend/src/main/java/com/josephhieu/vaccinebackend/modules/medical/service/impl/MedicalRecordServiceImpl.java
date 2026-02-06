@@ -11,7 +11,10 @@ import com.josephhieu.vaccinebackend.modules.inventory.repository.LoVacXinReposi
 import com.josephhieu.vaccinebackend.modules.medical.dto.PendingRegistrationDTO;
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.PrescribeRequest;
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.UpdatePatientRequest;
+import com.josephhieu.vaccinebackend.modules.medical.dto.request.UpdateProfileRequest;
 import com.josephhieu.vaccinebackend.modules.medical.dto.response.MedicalRecordResponse;
+import com.josephhieu.vaccinebackend.modules.medical.dto.response.PatientProfileResponse;
+import com.josephhieu.vaccinebackend.modules.medical.dto.response.VaccinationHistoryResponse;
 import com.josephhieu.vaccinebackend.modules.medical.entity.HoSoBenhAn;
 import com.josephhieu.vaccinebackend.modules.medical.repository.HoSoBenhAnRepository;
 import com.josephhieu.vaccinebackend.modules.medical.service.MedicalRecordService;
@@ -19,6 +22,7 @@ import com.josephhieu.vaccinebackend.modules.vaccination.entity.ChiTietDangKyTie
 import com.josephhieu.vaccinebackend.modules.vaccination.repository.ChiTietDangKyTiemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,6 +146,100 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         log.info("Nhân viên {} xác nhận tiêm hoàn tất cho Bệnh nhân {}",
                 staff.getTenNhanVien(), registration.getBenhNhan().getTenBenhNhan());
     }
+
+    /**
+     * Truy xuất hồ sơ cá nhân của người dùng đang đăng nhập.
+     * Danh tính được xác thực dựa trên Token (Username) trong SecurityContext.
+     * * @return PatientProfileResponse chứa thông tin hành chính của bệnh nhân.
+     * @throws AppException nếu không tìm thấy thông tin người dùng.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PatientProfileResponse getMyProfile() {
+
+        // 1. Xác định danh tính người dùng từ Security Context (Token)
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 2. Truy vấn thông tin bệnh nhân dựa trên tài khoản đăng nhập
+        BenhNhan bn = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // 3. Chuyển đổi sang DTO để trả về Frontend
+        return PatientProfileResponse.builder()
+                .maBenhNhan(bn.getMaBenhNhan())
+                .hoTen(bn.getTenBenhNhan())
+                .ngaySinh(bn.getNgaySinh())
+                .gioiTinh(bn.getGioiTinh())
+                .diaChi(bn.getDiaChi())
+                .soDienThoai(bn.getSdt())
+                .nguoiGiamHo(bn.getNguoiGiamHo())
+                .tenDangNhap(username)
+                .build();
+    }
+
+    /**
+     * Cập nhật thông tin cá nhân dành cho phân hệ Bệnh nhân (Self-service).
+     * Chỉ cho phép cập nhật các trường thông tin hành chính cơ bản.
+     * * @param request DTO chứa các thông tin thay đổi từ Frontend.
+     * @return PatientProfileResponse Thông tin hồ sơ sau khi cập nhật thành công.
+     */
+    @Override
+    @Transactional
+    public PatientProfileResponse updateMyProfile(UpdateProfileRequest request) {
+
+        String  username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        BenhNhan bn = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        bn.setTenBenhNhan(request.getHoTen());
+        bn.setNgaySinh(request.getNgaySinh());
+        bn.setGioiTinh(request.getGioiTinh());
+        bn.setDiaChi(request.getDiaChi());
+        bn.setSdt(request.getSoDienThoai());
+        bn.setNguoiGiamHo(request.getNguoiGiamHo());
+
+        benhNhanRepository.save(bn);
+        log.info("Bệnh nhân {} đã tự cập nhật hồ sơ cá nhân", username);
+
+        return getMyProfile();
+    }
+
+    /**
+     * Truy xuất toàn bộ lịch sử tiêm chủng của chính bệnh nhân đang đăng nhập.
+     * Dữ liệu được lấy từ bảng HoSoBenhAn và định dạng lại để hiển thị lên bảng (Table).
+     * * @return List<VaccinationHistoryResponse> danh sách các mũi tiêm đã hoàn thành.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<VaccinationHistoryResponse> getMyVaccinationHistory() {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        BenhNhan bn = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Lấy toàn bộ lịch sử tiêm chủng từ Database
+        List<HoSoBenhAn> history = hoSoBenhAnRepository.findHistoryByPatient(bn.getMaBenhNhan());
+
+        // Chuyển đổi danh sách Entity sang danh sách DTO phẳng hóa
+        return history.stream()
+                .map(item -> VaccinationHistoryResponse.builder()
+                        .thoiGian(item.getThoiGianTiem().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")))
+                        .diaDiem(item.getChiTietDangKyTiem().getLichTiemChung() != null
+                        ? item.getChiTietDangKyTiem().getLichTiemChung().getDiaDiem()
+                                : "Trung tâm tiêm chủng dịch vụ")
+                        .tenVacXin(item.getChiTietDangKyTiem().getLoVacXin().getVacXin().getTenVacXin())
+                        .loaiVacXin(item.getChiTietDangKyTiem().getLoVacXin().getVacXin().getPhongNguaBenh())
+                        .lieuLuong("01 liều")
+                        .nguoiTiem(item.getNhanVienThucHien() != null
+                        ? item.getNhanVienThucHien().getTenNhanVien()
+                                : "Nhân viên y tế")
+                        .ketQua(item.getPhanUngSauTiem())
+                        .build())
+                .toList();
+    }
+
     /**
      * Helper Method: Chuyển đổi các Entity rời rạc thành DTO tổng hợp.
      */

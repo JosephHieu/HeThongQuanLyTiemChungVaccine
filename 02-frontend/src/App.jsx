@@ -23,6 +23,7 @@ import VaccinePortal from "./pages/VaccinePortal/VaccinePortal";
 import UserLayout from "./layouts/UserLayout";
 import SchedulePortal from "./pages/VaccinePortal/SchedulePortal";
 import MyRegistrations from "./pages/VaccinePortal/MyRegistration";
+import ProfilePage from "./pages/VaccinePortal/ProfilePage";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -62,10 +63,7 @@ function App() {
 
           {/* Các trang khác dùng tạm Placeholder */}
           <Route path="my-registrations" element={<MyRegistrations />} />
-          <Route
-            path="profile"
-            element={<Placeholder title="Hồ sơ cá nhân" />}
-          />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* --- PHÂN HỆ QUẢN TRỊ / ADMIN (Giữ nguyên code cũ của bạn) --- */}

@@ -2,8 +2,12 @@ package com.josephhieu.vaccinebackend.modules.medical.service;
 
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.PrescribeRequest;
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.UpdatePatientRequest;
+import com.josephhieu.vaccinebackend.modules.medical.dto.request.UpdateProfileRequest;
 import com.josephhieu.vaccinebackend.modules.medical.dto.response.MedicalRecordResponse;
+import com.josephhieu.vaccinebackend.modules.medical.dto.response.PatientProfileResponse;
+import com.josephhieu.vaccinebackend.modules.medical.dto.response.VaccinationHistoryResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -41,4 +45,22 @@ public interface MedicalRecordService {
      * @param phanUng Tình trạng phản ứng sau tiêm.
      */
     void confirmInjection(UUID maDangKy, String phanUng, String customTacDung);
+
+    /**
+     * Lấy thông tin hồ sơ cá nhân của chính người dùng đang đăng nhập.
+     * Identity được xác định qua Security Context (Token).
+     */
+    PatientProfileResponse getMyProfile();
+
+    /**
+     * Cho phép bệnh nhân tự cập nhật thông tin cá nhân của mình.
+     * @param request DTO chứa các thông tin thay đổi.
+     */
+    PatientProfileResponse updateMyProfile(UpdateProfileRequest request);
+
+    /**
+     * Lấy toàn bộ lịch sử các mũi đã tiêm thành công của bệnh nhân.
+     * Dữ liệu trả về để hiển thị lên bảng lịch sử ở trang Profile.
+     */
+    List<VaccinationHistoryResponse> getMyVaccinationHistory();
 }
