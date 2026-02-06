@@ -184,7 +184,7 @@ const FeedbackPage = () => {
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                Người tiêm
+                Nhân viên phụ trách tiêm
               </label>
               <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-600 flex items-center gap-2">
                 <User size={16} className="text-indigo-500" />{" "}

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,4 +33,7 @@ public interface VacXinRepository extends JpaRepository<VacXin, UUID> {
             "OR LOWER(v.phongNguaBenh) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND l.soLuong > 0") // Chỉ hiện những lô còn hàng
     Page<VaccineInfoResponse> searchVaccines(@Param("keyword") String keyword, Pageable pageable);
+
+    // Tìm các vắc-xin mà cột PhongNguaBenh có chứa từ khóa (tên dịch bệnh)
+    List<VacXin> findByPhongNguaBenhContainingIgnoreCase(String tenBenh);
 }
