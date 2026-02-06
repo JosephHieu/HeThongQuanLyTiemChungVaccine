@@ -12,6 +12,7 @@ import {
   X,
   Info,
   Wind,
+  StickyNote,
 } from "lucide-react";
 import epidemicApi from "../../api/epidemicApi";
 import toast from "react-hot-toast";
@@ -29,7 +30,7 @@ const EpidemicManagement = () => {
     tacHaiSucKhoe: "",
     soNguoiBiNhiem: 0,
     diaChi: "",
-    ghiChu: "",
+    ghiChu: "", // Đã có sẵn trong state của bạn
     thoiDiemKhaoSat: new Date().toISOString().split("T")[0],
   });
 
@@ -49,12 +50,13 @@ const EpidemicManagement = () => {
     loadData();
   }, []);
 
-  // --- LOGIC TÌM KIẾM ---
+  // --- LOGIC TÌM KIẾM (Cập nhật bao gồm cả Ghi chú) ---
   const filteredEpidemics = epidemics.filter((item) => {
     const query = searchQuery.toLowerCase();
     return (
       item.tenDichBenh.toLowerCase().includes(query) ||
       item.diaChi.toLowerCase().includes(query) ||
+      (item.ghiChu && item.ghiChu.toLowerCase().includes(query)) || // Thêm tìm kiếm theo ghi chú
       (item.tenNhanVienKhaoSat &&
         item.tenNhanVienKhaoSat.toLowerCase().includes(query))
     );
@@ -67,6 +69,7 @@ const EpidemicManagement = () => {
       setFormData({
         ...item,
         thoiDiemKhaoSat: `${y}-${m}-${d}`,
+        ghiChu: item.ghiChu || "", // Đảm bảo ghi chú không bị null
       });
     } else {
       setEditingId(null);
@@ -135,16 +138,16 @@ const EpidemicManagement = () => {
       </div>
 
       {/* Toolbar Tìm kiếm */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-        <div className="relative flex-1">
+      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="relative w-full">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             size={18}
           />
           <input
             type="text"
-            placeholder="Tìm kiếm theo địa chỉ, tên bệnh hoặc người khảo sát..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-2 focus:ring-orange-500/20"
+            placeholder="Tìm theo địa chỉ, tên bệnh, ghi chú hoặc người khảo sát..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:ring-2 focus:ring-orange-500/20 font-medium"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -165,7 +168,7 @@ const EpidemicManagement = () => {
               <th className="p-4 text-[10px] font-black text-slate-400 uppercase text-center">
                 Số ca nhiễm
               </th>
-              <th className="p-4 text-[10px] font-black text-slate-400 uppercase">
+              <th className="p-4 text-[10px] font-black text-slate-400 uppercase text-center">
                 Người khảo sát
               </th>
               <th className="p-4 text-[10px] font-black text-slate-400 uppercase text-right">
@@ -178,82 +181,83 @@ const EpidemicManagement = () => {
               <tr>
                 <td
                   colSpan="5"
-                  className="p-10 text-center text-slate-400 font-medium"
+                  className="p-10 text-center text-slate-400 font-medium italic"
                 >
-                  Đang tải dữ liệu...
+                  Đang tải dữ liệu y tế...
                 </td>
               </tr>
-            ) : filteredEpidemics.length === 0 ? ( // Sửa từ epidemics sang filteredEpidemics
+            ) : filteredEpidemics.length === 0 ? (
               <tr>
                 <td
                   colSpan="5"
                   className="p-10 text-center text-slate-400 font-medium"
                 >
-                  Không tìm thấy kết quả phù hợp.
+                  Không tìm thấy kết quả phù hợp cho "{searchQuery}"
                 </td>
               </tr>
             ) : (
-              filteredEpidemics.map(
-                (
-                  item, // Sửa từ epidemics sang filteredEpidemics
-                ) => (
-                  <tr
-                    key={item.maDichBenh}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="p-4 max-w-xs">
-                      <p className="font-black text-slate-800 uppercase text-sm">
-                        {item.tenDichBenh}
+              filteredEpidemics.map((item) => (
+                <tr
+                  key={item.maDichBenh}
+                  className="hover:bg-slate-50/50 transition-colors"
+                >
+                  <td className="p-4 max-w-sm">
+                    <p className="font-black text-slate-800 uppercase text-sm mb-1">
+                      {item.tenDichBenh}
+                    </p>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                        <Wind size={10} className="text-blue-400" /> Lây qua:{" "}
+                        {item.duongLayNhiem}
                       </p>
-                      <div className="mt-1 space-y-0.5">
-                        <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
-                          <Wind size={10} className="text-blue-400" /> Lây qua:{" "}
-                          {item.duongLayNhiem}
+                      <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                        <AlertCircle size={10} className="text-amber-500" /> Tác
+                        hại: {item.tacHaiSucKhoe}
+                      </p>
+                      {/* HIỂN THỊ GHI CHÚ TẠI ĐÂY */}
+                      {item.ghiChu && (
+                        <p className="text-[10px] text-slate-400 font-bold flex items-start gap-1 mt-1 border-t border-slate-100 pt-1 italic">
+                          <StickyNote size={10} className="mt-0.5" />{" "}
+                          {item.ghiChu}
                         </p>
-                        <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
-                          <AlertCircle size={10} className="text-amber-500" />{" "}
-                          Tác hại: {item.tacHaiSucKhoe}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1 text-xs font-bold text-slate-600">
-                        <MapPin size={12} className="text-rose-500" />{" "}
-                        {item.diaChi}
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold mt-1">
-                        <Calendar size={10} /> {item.thoiDiemKhaoSat}
-                      </div>
-                    </td>
-                    <td className="p-4 text-center">
-                      <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full font-black text-xs">
-                        {item.soNguoiBiNhiem} ca
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <p className="text-xs font-bold text-slate-600 italic uppercase">
-                          {item.tenNhanVienKhaoSat || "Staff"}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="p-4 text-right space-x-2">
-                      <button
-                        onClick={() => openModal(item)}
-                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.maDichBenh)}
-                        className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ),
-              )
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-1 text-xs font-bold text-slate-600">
+                      <MapPin size={12} className="text-rose-500" />{" "}
+                      {item.diaChi}
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold mt-1">
+                      <Calendar size={10} /> {item.thoiDiemKhaoSat}
+                    </div>
+                  </td>
+                  <td className="p-4 text-center">
+                    <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full font-black text-xs italic">
+                      {item.soNguoiBiNhiem} ca
+                    </span>
+                  </td>
+                  <td className="p-4 text-center">
+                    <p className="text-[10px] font-black text-slate-600 uppercase italic">
+                      {item.tenNhanVienKhaoSat || "Hệ thống"}
+                    </p>
+                  </td>
+                  <td className="p-4 text-right space-x-2">
+                    <button
+                      onClick={() => openModal(item)}
+                      className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.maDichBenh)}
+                      className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
@@ -261,7 +265,7 @@ const EpidemicManagement = () => {
 
       {/* Modal Form Thêm/Sửa */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in zoom-in-95 duration-300">
           <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden relative">
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
@@ -269,15 +273,15 @@ const EpidemicManagement = () => {
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-slate-200 rounded-full transition-all"
+                className="p-2 hover:bg-slate-200 rounded-full transition-all text-slate-400"
               >
-                <X size={24} className="text-slate-400" />
+                <X size={24} />
               </button>
             </div>
 
             <form
               onSubmit={handleSubmit}
-              className="p-8 grid grid-cols-2 gap-6"
+              className="p-8 grid grid-cols-2 gap-6 max-h-[75vh] overflow-y-auto"
             >
               <div className="col-span-2 space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
@@ -341,7 +345,6 @@ const EpidemicManagement = () => {
                 />
               </div>
 
-              {/* Tách biệt hoàn toàn hai ô TextArea */}
               <div className="col-span-2 space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
                   Đường lây nhiễm
@@ -349,7 +352,6 @@ const EpidemicManagement = () => {
                 <textarea
                   rows="2"
                   className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold outline-none focus:border-orange-500 resize-none"
-                  placeholder="Ví dụ: Qua đường hô hấp, tiếp xúc trực tiếp..."
                   value={formData.duongLayNhiem}
                   onChange={(e) =>
                     setFormData({ ...formData, duongLayNhiem: e.target.value })
@@ -364,10 +366,25 @@ const EpidemicManagement = () => {
                 <textarea
                   rows="2"
                   className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold outline-none focus:border-orange-500 resize-none"
-                  placeholder="Ví dụ: Gây sốt cao, tổn thương phổi, suy giảm miễn dịch..."
                   value={formData.tacHaiSucKhoe}
                   onChange={(e) =>
                     setFormData({ ...formData, tacHaiSucKhoe: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* BỔ SUNG Ô GHI CHÚ TRONG FORM */}
+              <div className="col-span-2 space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Ghi chú thêm
+                </label>
+                <textarea
+                  rows="2"
+                  className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold outline-none focus:border-orange-500 resize-none italic"
+                  placeholder="Nhập ghi chú hoặc các lưu ý đặc biệt tại đây..."
+                  value={formData.ghiChu}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ghiChu: e.target.value })
                   }
                 />
               </div>
