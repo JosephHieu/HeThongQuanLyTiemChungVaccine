@@ -37,6 +37,8 @@ public enum ErrorCode {
     PRESCRIPTION_INVALID(1202, "Thông tin kê đơn không hợp lệ", HttpStatus.BAD_REQUEST),
     HISTORY_NOT_FOUND(1203, "Không tìm thấy lịch sử tiêm chủng của bệnh nhân", HttpStatus.NOT_FOUND),
     EPIDEMIC_NOT_FOUND(1204, "Không tìm thấy thông tin dịch bệnh yêu cầu", HttpStatus.NOT_FOUND),
+    FEEDBACK_NOT_FOUND(1205, "Không tìm thấy thông tin phản hồi trong hệ thống", HttpStatus.NOT_FOUND),
+    FEEDBACK_TYPE_NOT_FOUND(1206, "Loại phản hồi không hợp lệ hoặc không tồn tại", HttpStatus.BAD_REQUEST),
 
     // VACCINATION ERRORS (1300-1399)
     VACCINE_OUT_OF_STOCK(1301, "Vắc-xin này hiện đã hết hàng trong kho", HttpStatus.BAD_REQUEST),

@@ -3,8 +3,10 @@ package com.josephhieu.vaccinebackend.modules.medical.entity;
 import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -45,6 +47,10 @@ public class PhanHoi {
 
     @Column(name = "TrangThai")
     private Integer trangThai = 0;
+
+    @CreationTimestamp
+    @Column(name = "NgayTao", updatable = false)
+    private LocalDateTime ngayTao;
 
     /**
      Quy ước gợi ý:

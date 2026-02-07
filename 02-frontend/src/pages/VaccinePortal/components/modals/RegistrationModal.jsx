@@ -11,10 +11,21 @@ const RegistrationModal = ({ schedule, onClose, onSuccess }) => {
 
     try {
       const requestData = {
+        // 1. Đổi maVacXin thành maLoVacXin (Lấy ID lô từ schedule)
+        // Lưu ý: Kiểm tra xem object 'schedule' của bạn trường ID lô tên là gì (maLo hay maLoVacXin)
+        maLoVacXin: schedule.maLoVacXin || schedule.maLo,
+
+        // 2. maLichTiemChung (Có thể gửi hoặc null, ở đây ta gửi cho chắc)
         maLichTiemChung: schedule.maLichTiemChung,
-        maVacXin: schedule.maVacXin,
+
+        // 3. THÊM TRƯỜNG NÀY (Bắt buộc theo DTO)
+        // Lấy ngày tiêm từ lịch để Backend biết bệnh nhân đăng ký ngày nào
+        thoiGianCanTiem: schedule.ngayTiem,
+
         ghiChu: "Đăng ký trực tuyến qua SchedulePortal",
       };
+
+      console.log("Dữ liệu chuẩn bị gửi đi:", requestData);
 
       await userVaccineApi.registerVaccination(requestData);
 
@@ -22,9 +33,7 @@ const RegistrationModal = ({ schedule, onClose, onSuccess }) => {
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
-      const errorMessage =
-        error.message || "Đăng ký thất bại. Vui lòng thử lại sau!";
-      toast.error(errorMessage);
+      toast.error(error.message || "Đăng ký thất bại!");
     } finally {
       setLoading(false);
     }
