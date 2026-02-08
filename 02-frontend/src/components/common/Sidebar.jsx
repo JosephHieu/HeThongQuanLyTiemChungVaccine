@@ -62,6 +62,12 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       roles: ["Administrator"],
     },
     {
+      path: "/admin/feedbacks",
+      icon: <MessageSquare size={20} />, // Icon tin nhắn
+      label: "Quản lý phản hồi",
+      roles: ["Administrator", "Hỗ trợ khách hàng"],
+    },
+    {
       path: "/admin/moderator",
       icon: <ShieldCheck size={20} />,
       label: "Điều phối",
@@ -134,6 +140,12 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       path: "/user/feedback",
       icon: <MessageSquare size={20} />,
       label: "Phản hồi sau tiêm",
+      roles: ["Normal User Account"],
+    },
+    {
+      path: "/user/high-level-feedback",
+      icon: <MessageSquare size={20} />,
+      label: "Phản hồi cấp cao",
       roles: ["Normal User Account"],
     },
   ];

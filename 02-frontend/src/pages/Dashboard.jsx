@@ -68,7 +68,7 @@ const Dashboard = () => {
       icon: <MessageSquare />,
       color: "bg-cyan-500",
       desc: "Xem phản hồi và giải đáp thắc mắc từ người dân.",
-      path: "/admin/support",
+      path: "/admin/feedbacks",
       roles: ["Administrator", "Hỗ trợ khách hàng"],
     },
     // 7. QUẢN LÝ DỊCH BỆNH (MỚI THÊM)

@@ -27,6 +27,8 @@ import ProfilePage from "./pages/VaccinePortal/ProfilePage";
 import FeedbackPage from "./pages/VaccinePortal/FeedBackPage";
 import EpidemicManagement from "./pages/Epidemic/EpidemicManagement";
 import EpidemicPortal from "./pages/VaccinePortal/EpidemicPortal";
+import HighLevelFeedback from "./pages/VaccinePortal/HighLevelFeedback";
+import AdminFeedbackManagement from "./pages/Medical/AdminFeedbackManagement";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -68,6 +70,7 @@ function App() {
           <Route path="my-registrations" element={<MyRegistrations />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="high-level-feedback" element={<HighLevelFeedback />} />
           <Route path="epidemics" element={<EpidemicPortal />} />
         </Route>
 
@@ -153,12 +156,12 @@ function App() {
 
           {/* 6. Hỗ trợ & Feedback: Admin và nhân viên hỗ trợ */}
           <Route
-            path="support"
+            path="feedbacks"
             element={
               <ProtectedRoute
                 allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
               >
-                <Placeholder title="Chăm sóc khách hàng" />
+                <AdminFeedbackManagement />
               </ProtectedRoute>
             }
           />
