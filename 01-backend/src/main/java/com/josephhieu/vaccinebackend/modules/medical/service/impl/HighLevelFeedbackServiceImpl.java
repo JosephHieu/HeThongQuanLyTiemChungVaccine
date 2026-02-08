@@ -164,6 +164,7 @@ public class HighLevelFeedbackServiceImpl implements HighLevelFeedbackService {
                 .noiDung(ph.getNoiDung())
                 .trangThai(ph.getTrangThai())
                 .tenBenhNhan(ph.getBenhNhan().getTenBenhNhan())
+                .emailBenhNhan(ph.getBenhNhan().getTaiKhoan().getEmail())
                 .sdtBenhNhan(ph.getBenhNhan().getSdt())
                 .thoiGianGui(ph.getNgayTao() != null
                         ? ph.getNgayTao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))

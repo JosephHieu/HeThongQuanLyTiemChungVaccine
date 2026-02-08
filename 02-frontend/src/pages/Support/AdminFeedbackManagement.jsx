@@ -191,6 +191,7 @@ const AdminFeedbackManagement = () => {
               ) : (
                 filteredData.map((item) => {
                   const status = getStatusInfo(item.trangThai);
+                  // console.log("Dữ liệu phản hồi:", item);
                   return (
                     <tr
                       key={item.maPhanHoi}
@@ -206,7 +207,7 @@ const AdminFeedbackManagement = () => {
                               )
                             } // Truyền email qua URL
                             className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Nhắc lịch cho bệnh nhân này"
+                            title="Phản hồi cho bệnh nhân này"
                           >
                             <SendHorizontal size={18} />
                           </button>

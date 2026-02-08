@@ -26,7 +26,7 @@ public class HighLevelFeedbackResponse {
     // Thông tin người gửi
     private String tenBenhNhan;
     private String sdtBenhNhan;
-
+    private String emailBenhNhan;
     // Thời gian phản hồi (Format: dd/MM/yyyy HH:mm)
     private String thoiGianGui;
 }

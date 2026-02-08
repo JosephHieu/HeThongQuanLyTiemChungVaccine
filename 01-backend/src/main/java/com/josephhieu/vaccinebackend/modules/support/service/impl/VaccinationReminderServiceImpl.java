@@ -67,28 +67,25 @@ public class VaccinationReminderServiceImpl implements VaccinationReminderServic
 
     @Override
     public void sendReminderEmail(VaccinationReminderRequest request) {
-        // 1. Kiểm tra dữ liệu trước khi gửi
+        // 1. Kiểm tra bệnh nhân tồn tại
         BenhNhan bn = benhNhanRepository.findByTaiKhoan_Email(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         var patientData = this.getPatientDataByEmail(request.getEmail());
-
-        // Nếu không có lịch dự kiến, có thể chặn không cho gửi để tránh spam email trống
-        if (patientData.getLichDuKien().isEmpty()) {
-            throw new AppException(ErrorCode.REMINDER_DATA_EMPTY);
-        }
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(request.getEmail());
-            helper.setSubject(request.getTieuDe() != null ? request.getTieuDe() : "Nhắc lịch tiêm chủng - Trung tâm JosephHieu");
+            helper.setSubject(request.getTieuDe() != null ? request.getTieuDe() : "Thông tin từ Trung tâm tiêm chủng JosephHieu");
 
+            // Truyền thêm dữ liệu vào buildHtmlContent
             String htmlContent = buildHtmlContent(bn, patientData.getLichDuKien(), request.getLoiNhan());
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
+            log.info("Đã gửi email tư vấn thành công tới: {}", request.getEmail());
 
         } catch (Exception e) {
             log.error("Lỗi hệ thống gửi mail: {}", e.getMessage());
@@ -97,44 +94,54 @@ public class VaccinationReminderServiceImpl implements VaccinationReminderServic
     }
 
     private String buildHtmlContent(BenhNhan bn, List<VaccinationReminderResponse.UpcomingSchedule> upcomingList, String loiNhan) {
-        StringBuilder tableRows = new StringBuilder();
-        for (int i = 0; i < upcomingList.size(); i++) {
-            var item = upcomingList.get(i);
-            tableRows.append("<tr>")
-                    .append("<td style='padding: 10px; border-bottom: 1px solid #eee; text-align: center;'>").append(i + 1).append("</td>")
-                    .append("<td style='padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #e11d48;'>").append(item.getNgayDuKien()).append("</td>")
-                    .append("<td style='padding: 10px; border-bottom: 1px solid #eee;'>").append(item.getTenVacXin()).append("</td>")
-                    .append("<td style='padding: 10px; border-bottom: 1px solid #eee; color: #059669; font-weight: bold;'>")
-                    .append(String.format("%,.0f VNĐ", item.getGiaTienDuKien())).append("</td>")
-                    .append("</tr>");
+        StringBuilder tableContent = new StringBuilder();
+
+        // KIỂM TRA NẾU CÓ LỊCH DỰ KIẾN THÌ MỚI TẠO BẢNG
+        if (upcomingList != null && !upcomingList.isEmpty()) {
+            tableContent.append("<h3 style='color: #1e293b; border-left: 4px solid #059669; padding-left: 10px;'>Lịch tiêm dự kiến:</h3>")
+                    .append("<table style='width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;'>")
+                    .append("  <thead>")
+                    .append("    <tr style='background-color: #f8fafc;'>")
+                    .append("      <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>STT</th>")
+                    .append("      <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>Ngày tiêm</th>")
+                    .append("      <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>Vắc xin</th>")
+                    .append("      <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>Giá dự kiến</th>")
+                    .append("    </tr>")
+                    .append("  </thead>")
+                    .append("  <tbody>");
+
+            for (int i = 0; i < upcomingList.size(); i++) {
+                var item = upcomingList.get(i);
+                tableContent.append("<tr>")
+                        .append("<td style='padding: 10px; border-bottom: 1px solid #eee; text-align: center;'>").append(i + 1).append("</td>")
+                        .append("<td style='padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; color: #e11d48;'>").append(item.getNgayDuKien()).append("</td>")
+                        .append("<td style='padding: 10px; border-bottom: 1px solid #eee;'>").append(item.getTenVacXin()).append("</td>")
+                        .append("<td style='padding: 10px; border-bottom: 1px solid #eee; color: #059669; font-weight: bold;'>")
+                        .append(String.format("%,.0f VNĐ", item.getGiaTienDuKien())).append("</td>")
+                        .append("</tr>");
+            }
+            tableContent.append("</tbody></table>");
+        } else {
+            // NẾU KHÔNG CÓ LỊCH THÌ HIỆN THÔNG BÁO NHẸ NHÀNG
+            tableContent.append("<div style='padding: 20px; background-color: #f8fafc; border-radius: 5px; text-align: center; color: #64748b; font-style: italic; border: 1px dashed #cbd5e1;'>")
+                    .append("Hiện tại bạn đã hoàn thành các mũi tiêm trong lộ trình dự kiến. Đừng quên theo dõi sức khỏe và liên hệ chúng tôi nếu cần tư vấn thêm.")
+                    .append("</div>");
         }
 
         return "<div style='font-family: Arial, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;'>"
                 + "  <div style='background-color: #059669; color: white; padding: 20px; text-align: center;'>"
-                + "    <h2 style='margin: 0; text-transform: uppercase;'>Nhắc lịch tiêm chủng</h2>"
+                + "    <h2 style='margin: 0; text-transform: uppercase;'>Thông tin Tiêm chủng</h2>"
                 + "  </div>"
                 + "  <div style='padding: 20px;'>"
                 + "    <p>Chào <strong>" + bn.getTenBenhNhan() + "</strong>,</p>"
-                + "    <p>" + (loiNhan != null ? loiNhan : "Trung tâm tiêm chủng gửi bạn thông tin các mũi tiêm dự kiến sắp tới. Vui lòng sắp xếp thời gian để đảm bảo hiệu quả phòng bệnh tốt nhất.") + "</p>"
-                + "    <h3 style='color: #1e293b; border-left: 4px solid #059669; padding-left: 10px;'>Lịch tiêm dự kiến:</h3>"
-                + "    <table style='width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;'>"
-                + "      <thead>"
-                + "        <tr style='background-color: #f8fafc;'>"
-                + "          <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>STT</th>"
-                + "          <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>Ngày tiêm</th>"
-                + "          <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>Vắc xin</th>"
-                + "          <th style='padding: 10px; border-bottom: 2px solid #cbd5e1;'>Giá dự kiến</th>"
-                + "        </tr>"
-                + "      </thead>"
-                + "      <tbody>" + tableRows.toString() + "</tbody>"
-                + "    </table>"
+                + "    <p>" + (loiNhan != null && !loiNhan.isBlank() ? loiNhan : "Trung tâm tiêm chủng JosephHieu gửi lời chào và lời chúc sức khỏe đến bạn.") + "</p>"
+                +      tableContent.toString()
                 + "    <div style='margin-top: 30px; text-align: center;'>"
-                + "      <a href='http://localhost:3000/login' style='background-color: #1e4e8c; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;'>ĐĂNG NHẬP PORTAL</a>"
+                + "      <a href='http://localhost:3000/login' style='background-color: #1e4e8c; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;'>ĐĂNG NHẬP HỆ THỐNG</a>"
                 + "    </div>"
                 + "  </div>"
                 + "  <div style='background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #64748b;'>"
-                + "    <p style='margin: 0;'>Đây là email tự động từ hệ thống quản lý tiêm chủng.</p>"
-                + "    <p style='margin: 5px 0;'>Địa chỉ: 123 Đường ABC, Quận X, Thành phố Y</p>"
+                + "    <p style='margin: 0;'>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi.</p>"
                 + "  </div>"
                 + "</div>";
     }
