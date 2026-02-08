@@ -53,6 +53,11 @@ public enum ErrorCode {
     INVALID_REGISTRATION_STATUS(1310, "Trạng thái đăng ký không hợp lệ để thực hiện thao tác này", HttpStatus.BAD_REQUEST),
     VACCINATION_ALREADY_COMPLETED(1311, "Mũi tiêm này đã được xác nhận hoàn thành trước đó", HttpStatus.BAD_REQUEST),
     OUT_OF_STOCK(1312, "Số lượng vắc-xin trong lô đã hết, không thể thực hiện tiêm", HttpStatus.BAD_REQUEST),
+
+    // SUPPORT & NOTIFICATION ERRORS (1400 - 1499)
+    EMAIL_SEND_FAILED(1401, "Gửi email nhắc lịch thất bại, vui lòng kiểm tra cấu hình SMTP", HttpStatus.INTERNAL_SERVER_ERROR),
+    PATIENT_HAS_NO_EMAIL(1402, "Bệnh nhân này hiện chưa có địa chỉ email trong hồ sơ", HttpStatus.BAD_REQUEST),
+    REMINDER_DATA_EMPTY(1403, "Bệnh nhân không có lịch tiêm dự kiến nào để nhắc nhở", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

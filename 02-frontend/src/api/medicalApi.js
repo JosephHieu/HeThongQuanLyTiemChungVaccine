@@ -119,34 +119,6 @@ const medicalApi = {
   },
 
   // ========================================================================
-  // PHÂN HỆ QUẢN TRỊ (ADMINISTRATOR ONLY)
-  // ========================================================================
-
-  /**
-   * Admin lấy tất cả phản hồi cấp cao của toàn hệ thống
-   */
-  adminGetAllHighLevelFeedbacks: () => {
-    return axiosClient.get("/v1/medical/high-level-feedback/admin/all");
-  },
-
-  /**
-   * Admin cập nhật trạng thái xử lý (Tiếp nhận/Đã giải quyết)
-   * Sử dụng Query Parameter ?status=...
-   */
-  adminUpdateHighLevelStatus: (id, status) => {
-    return axiosClient.put(
-      `/v1/medical/high-level-feedback/admin/${id}/status?status=${status}`,
-    );
-  },
-
-  /**
-   * Admin xóa phản hồi không phù hợp
-   */
-  adminDeleteHighLevelFeedback: (id) => {
-    return axiosClient.delete(`/v1/medical/high-level-feedback/admin/${id}`);
-  },
-
-  // ========================================================================
   // PHẦN 9.5.2: LỊCH TIÊM TRUNG TÂM & ĐĂNG KÝ
   // ========================================================================
   getCenterSchedules: () => {

@@ -28,7 +28,8 @@ import FeedbackPage from "./pages/VaccinePortal/FeedBackPage";
 import EpidemicManagement from "./pages/Epidemic/EpidemicManagement";
 import EpidemicPortal from "./pages/VaccinePortal/EpidemicPortal";
 import HighLevelFeedback from "./pages/VaccinePortal/HighLevelFeedback";
-import AdminFeedbackManagement from "./pages/Medical/AdminFeedbackManagement";
+import AdminFeedbackManagement from "./pages/Support/AdminFeedbackManagement";
+import VaccinationReminder from "./pages/Support/VaccinationReminder";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -162,6 +163,18 @@ function App() {
                 allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
               >
                 <AdminFeedbackManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* BỔ SUNG 9.6.1: Nhắc lịch tiêm chủng (Support Module) */}
+          <Route
+            path="reminders" // Khớp với path "/admin/reminders" trong Sidebar
+            element={
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
+              >
+                <VaccinationReminder />
               </ProtectedRoute>
             }
           />
