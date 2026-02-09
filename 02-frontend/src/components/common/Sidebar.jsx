@@ -18,6 +18,8 @@ import {
   ClipboardList,
   UserCircle,
   MessageSquare,
+  Wallet,
+  BellRing,
   ShieldAlert,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth"; // Import hook phân quyền
@@ -68,6 +70,12 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       roles: ["Administrator", "Hỗ trợ khách hàng"],
     },
     {
+      path: "/admin/reminders",
+      icon: <BellRing size={20} />,
+      label: "Nhắc lịch tiêm",
+      roles: ["Administrator", "Hỗ trợ khách hàng"],
+    },
+    {
       path: "/admin/moderator",
       icon: <ShieldCheck size={20} />,
       label: "Điều phối",
@@ -81,17 +89,10 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     },
     {
       path: "/admin/reports",
-      icon: <FileBarChart size={20} />,
+      icon: <Wallet size={20} />,
       label: "Báo cáo",
       roles: ["Administrator", "Tài chính"],
     },
-    // BỔ SUNG: Hỗ trợ (Khớp với path 'support' trong App.jsx)
-    // {
-    //   path: "/admin/support",
-    //   icon: <Users size={20} />,
-    //   label: "Hỗ trợ",
-    //   roles: ["Administrator", "Hỗ trợ khách hàng"],
-    // },
     {
       path: "/admin/about",
       icon: <Info size={20} />,

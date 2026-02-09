@@ -30,6 +30,7 @@ import EpidemicPortal from "./pages/VaccinePortal/EpidemicPortal";
 import HighLevelFeedback from "./pages/VaccinePortal/HighLevelFeedback";
 import AdminFeedbackManagement from "./pages/Support/AdminFeedbackManagement";
 import VaccinationReminder from "./pages/Support/VaccinationReminder";
+import FinancialManagement from "./pages/Finance/FinancialManagement";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -138,7 +139,7 @@ function App() {
             path="reports"
             element={
               <ProtectedRoute allowedRoles={["Administrator", "Tài chính"]}>
-                <Placeholder title="Báo cáo & Tài chính" />
+                <FinancialManagement />
               </ProtectedRoute>
             }
           />
