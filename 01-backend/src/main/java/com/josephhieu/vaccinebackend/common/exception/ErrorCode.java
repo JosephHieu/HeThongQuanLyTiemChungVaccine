@@ -58,6 +58,15 @@ public enum ErrorCode {
     EMAIL_SEND_FAILED(1401, "Gửi email nhắc lịch thất bại, vui lòng kiểm tra cấu hình SMTP", HttpStatus.INTERNAL_SERVER_ERROR),
     PATIENT_HAS_NO_EMAIL(1402, "Bệnh nhân này hiện chưa có địa chỉ email trong hồ sơ", HttpStatus.BAD_REQUEST),
     REMINDER_DATA_EMPTY(1403, "Bệnh nhân không có lịch tiêm dự kiến nào để nhắc nhở", HttpStatus.BAD_REQUEST),
+
+    // FINANCE & INVOICE ERRORS (1500 - 1599)
+    INVOICE_NOT_FOUND(1501, "Không tìm thấy hóa đơn yêu cầu", HttpStatus.NOT_FOUND),
+    INVOICE_ALREADY_PAID(1502, "Hóa đơn này đã được thanh toán trước đó", HttpStatus.BAD_REQUEST),
+    INVOICE_NOT_PAID(1503, "Vui lòng hoàn tất thanh toán hóa đơn trước khi thực hiện tiêm", HttpStatus.PAYMENT_REQUIRED),
+    INVOICE_CANCELLED(1504, "Hóa đơn này đã bị hủy, không thể thực hiện giao dịch", HttpStatus.BAD_REQUEST),
+    PAYMENT_METHOD_INVALID(1505, "Phương thức thanh toán không hợp lệ", HttpStatus.BAD_REQUEST),
+    REFUND_FAILED(1506, "Yêu cầu hoàn tiền thất bại, vui lòng kiểm tra lại trạng thái giao dịch", HttpStatus.INTERNAL_SERVER_ERROR),
+    TOTAL_PRICE_MISMATCH(1507, "Tổng tiền hóa đơn không khớp với giá trị vắc-xin niêm yết", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

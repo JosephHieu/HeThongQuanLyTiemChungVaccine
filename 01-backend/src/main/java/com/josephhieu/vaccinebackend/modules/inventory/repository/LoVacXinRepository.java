@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -47,5 +48,24 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
     Long getTotalAvailableDoses();
 
     Optional<LoVacXin> findFirstByVacXin_MaVacXinAndSoLuongGreaterThanOrderByNgayNhanAsc(UUID maVacXin, Integer minSoLuong);
+
+    // 1. Tính tổng giá trị vốn hàng tồn kho hiện tại
+    // Công thức: sum (soLuong \times giaNhap)
+    @Query("SELECT COALESCE(SUM(l.soLuong * l.giaNhap), 0) FROM LoVacXin l WHERE l.soLuong > 0")    BigDecimal getTotalInventoryValue();
+
+    // 2. Lấy giá nhập trung bình của một loại vắc-xin (Để hỗ trợ đặt giá bán)
+    @Query("SELECT AVG(l.giaNhap) FROM LoVacXin l WHERE l.vacXin.maVacXin = :vaccineId")
+    BigDecimal getAverageImportPrice(@Param("vaccineId") UUID vaccineId);
+
+    // 3. Tìm lô có giá nhập cao nhất/thấp nhất của 1 loại vắc-xin
+    List<LoVacXin> findByVacXinMaVacXinOrderByGiaNhapDesc(UUID maVacXin);
+
+    /**
+     * Kiểm tra xem có bất kỳ lô vắc-xin nào đang liên kết với mã vắc-xin này không.
+     * Sử dụng để ngăn chặn việc xóa vắc-xin đang có dữ liệu tồn kho.
+     * * @param maVacXin ID của vắc-xin cần kiểm tra
+     * @return true nếu tồn tại ít nhất 1 lô hàng, ngược lại false
+     */
+    boolean existsByVacXin_MaVacXin(UUID maVacXin);
 
 }
