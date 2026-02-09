@@ -19,4 +19,6 @@ public class BatchSummaryResponse {
     private String tenVacXin;
     private Integer soLuongTon;
     private BigDecimal donGia;
+    private BigDecimal giaNhap;
+    private BigDecimal giaBan;
 }

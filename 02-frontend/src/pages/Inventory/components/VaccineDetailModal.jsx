@@ -11,6 +11,9 @@ import {
   Package,
   Barcode,
   StickyNote,
+  CircleDollarSign, // Cho giá nhập
+  TrendingUp, // Cho giá bán
+  Wallet, // Cho tổng giá trị
 } from "lucide-react";
 
 const VaccineDetailModal = ({ isOpen, data, onClose }) => {
@@ -25,6 +28,14 @@ const VaccineDetailModal = ({ isOpen, data, onClose }) => {
       month: "2-digit",
       year: "numeric",
     });
+  };
+
+  const formatCurrency = (amount) => {
+    if (amount === undefined || amount === null) return "---";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
   };
 
   // Kiểm tra hạn sử dụng (dưới 6 tháng là cảnh báo vàng, hết hạn là đỏ)
@@ -80,6 +91,12 @@ const VaccineDetailModal = ({ isOpen, data, onClose }) => {
     },
   ];
 
+  // 1. Tính toán an toàn trước khi render
+  // Ưu tiên lấy giaBan, nếu không có thì thử lấy donGia, cuối cùng là 0
+  const unitPrice = data.giaBan || data.donGia || 0;
+  const entryPrice = data.giaNhap || 0;
+  const totalValue = (data.soLuong || 0) * unitPrice;
+
   return (
     // Backdrop nền tối
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -105,22 +122,32 @@ const VaccineDetailModal = ({ isOpen, data, onClose }) => {
 
         {/* === BODY: Scrollable Area === */}
         <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar space-y-8">
-          {/* Section 1: Thông tin Lô hàng (Quan trọng nhất) */}
+          {/* Section 1: Thông tin Lô hàng & Tài chính */}
           <section className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
-            <h3 className="text-xs font-black text-blue-800 uppercase tracking-widest mb-4">
-              Thông tin lô hàng
+            <h3 className="text-xs font-black text-blue-800 uppercase tracking-widest mb-4 flex justify-between">
+              <span>Thông tin lô hàng & Tài chính</span>
+              {/* Hiển thị tổng giá trị tồn kho của lô này */}
+              <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-lg border border-blue-100 shadow-sm">
+                <Wallet size={14} className="text-blue-500" />
+                <span className="text-blue-600 font-bold">
+                  Tổng trị giá tồn: {formatCurrency(totalValue)}
+                </span>
+              </div>
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* ID Lô */}
               <DetailItem
                 icon={<Barcode size={20} className="text-slate-400" />}
                 label="Mã định danh (ID)"
                 value={
-                  /* Loại bỏ substring để hiển thị toàn bộ mã */
                   <span className="font-mono text-[11px] break-all leading-relaxed text-slate-600">
                     {data.maLo}
                   </span>
                 }
               />
+
+              {/* Tồn kho */}
               <DetailItem
                 icon={<Package size={20} className="text-blue-500" />}
                 label="Tồn kho hiện tại"
@@ -133,11 +160,42 @@ const VaccineDetailModal = ({ isOpen, data, onClose }) => {
                   </span>
                 }
               />
+
+              {/* GIÁ NHẬP - MỚI */}
+              <DetailItem
+                icon={
+                  <CircleDollarSign size={20} className="text-emerald-500" />
+                }
+                label="Giá nhập vào"
+                value={
+                  <span className="font-bold text-emerald-600">
+                    {formatCurrency(entryPrice)}
+                  </span>
+                }
+              />
+
+              {/* GIÁ BÁN - MỚI */}
+              <DetailItem
+                icon={<TrendingUp size={20} className="text-rose-500" />}
+                label="Giá bán ra"
+                value={
+                  <span className="font-black text-rose-600">
+                    {formatCurrency(unitPrice)}
+                  </span>
+                }
+              />
+              <p className="text-[10px] text-emerald-600 font-bold mt-1">
+                Lợi nhuận: +{formatCurrency(unitPrice - entryPrice)} / liều
+              </p>
+            </div>
+
+            {/* Hạn sử dụng - Chuyển xuống hàng dưới hoặc giữ nguyên tùy layout */}
+            <div className="mt-6 pt-4 border-t border-blue-100/50">
               <DetailItem
                 icon={<CalendarDays size={20} className={expiryColorClass} />}
                 label="Hạn sử dụng"
                 value={
-                  <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
                     <span className={`font-bold ${expiryColorClass}`}>
                       {formatDate(data.hanSuDung)}
                     </span>

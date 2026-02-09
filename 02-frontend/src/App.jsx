@@ -31,6 +31,7 @@ import HighLevelFeedback from "./pages/VaccinePortal/HighLevelFeedback";
 import AdminFeedbackManagement from "./pages/Support/AdminFeedbackManagement";
 import VaccinationReminder from "./pages/Support/VaccinationReminder";
 import FinancialManagement from "./pages/Finance/FinancialManagement";
+import AboutSystem from "./pages/About/AboutSystem";
 
 // Các trang tạm thời cho các chức năng khác
 const Placeholder = ({ title }) => (
@@ -193,10 +194,7 @@ function App() {
           />
 
           {/* 8. Thông tin chung: Tất cả nhân viên đều xem được */}
-          <Route
-            path="about"
-            element={<Placeholder title="Thông tin hệ thống" />}
-          />
+          <Route path="about" element={<AboutSystem />} />
         </Route>
 
         {/* Trang báo lỗi quyền truy cập */}

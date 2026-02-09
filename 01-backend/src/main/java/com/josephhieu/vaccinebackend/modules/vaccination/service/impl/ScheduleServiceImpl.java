@@ -232,6 +232,8 @@ public class ScheduleServiceImpl implements ScheduleService {
                         .soLo(lo.getSoLo())
                         .tenVacXin(lo.getVacXin() != null ? lo.getVacXin().getTenVacXin() : "Không xác định")
                         .soLuongTon(lo.getSoLuong())
+                        .giaNhap(lo.getGiaNhap()) // Lấy từ thực thể LoVacXin
+                        .giaBan(lo.getVacXin() != null ? lo.getVacXin().getDonGia() : BigDecimal.ZERO)
                         .donGia(lo.getVacXin() != null ? lo.getVacXin().getDonGia() : BigDecimal.ZERO)
                         .build())
                 .toList();

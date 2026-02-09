@@ -76,9 +76,8 @@ public class FeedbackServiceImpl implements FeedbackService {
                         .maPhanHoi(ph.getMaPhanHoi())
                         .tenVacXin(ph.getTenVacXin())
                         .noiDung(ph.getNoiDung())
-                        .trangThai(ph.getTrangThai().toString()) // Chuyển sang String để hiển thị
-                        .thoiGianTiem(ph.getThoiGianTiem().toString())
-                        .build())
+                        .trangThai(ph.getTrangThai() != null ? ph.getTrangThai().toString() : "UNKNOWN")
+                        .thoiGianTiem(ph.getThoiGianTiem() != null ? ph.getThoiGianTiem().toString() : "Chưa xác định")                        .build())
                 .collect(Collectors.toList());
     }
 
