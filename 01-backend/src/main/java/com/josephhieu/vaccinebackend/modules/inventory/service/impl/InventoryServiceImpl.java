@@ -75,6 +75,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .giayPhep(request.getGiayPhep())
                 .tinhTrang(request.getSoLuong() > 0 ? "Còn" : "Hết")
                 .ghiChu(request.getGhiChu())
+                .giaNhap(request.getGiaNhap())
                 .build();
 
         return mapToResponse(loVacXinRepository.save(loMoi));
@@ -200,6 +201,8 @@ public class InventoryServiceImpl implements InventoryService {
                 .tinhTrang(lo.getTinhTrang())
                 .nuocSanXuat(lo.getNuocSanXuat())
                 .giayPhep(lo.getGiayPhep())
+                .giaNhap(lo.getGiaNhap())
+                .donGia(lo.getVacXin().getDonGia())
                 .build();
     }
 

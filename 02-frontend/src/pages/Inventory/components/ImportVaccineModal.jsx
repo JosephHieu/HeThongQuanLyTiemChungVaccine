@@ -29,6 +29,7 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
     dieuKienBaoQuan: "",
     doTuoiTiemChung: "",
     donGia: "",
+    giaNhap: "",
     soLuong: "",
     maNhaCungCap: "", // UUID
     phongNguaBenh: "",
@@ -74,6 +75,7 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
       "soLo",
       "soLuong",
       "donGia",
+      "giaNhap",
       "hanSuDung",
       "maNhaCungCap",
     ];
@@ -90,6 +92,7 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
       const payload = {
         ...formData,
         donGia: Number(formData.donGia),
+        giaNhap: Number(formData.giaNhap),
         soLuong: Number(formData.soLuong),
       };
 
@@ -226,6 +229,15 @@ const ImportVaccineModal = ({ isOpen, onClose, onSuccess }) => {
                     <option value="Nhiệt độ phòng">Nhiệt độ phòng</option>
                   </select>
                 </div>
+                <InputField
+                  label="Giá nhập (VNĐ/liều)"
+                  name="giaNhap"
+                  type="number"
+                  placeholder="Giá mua vào..."
+                  required
+                  value={formData.giaNhap}
+                  onChange={handleChange}
+                />
                 <InputField
                   label="Đơn giá (VNĐ/liều)"
                   name="donGia"

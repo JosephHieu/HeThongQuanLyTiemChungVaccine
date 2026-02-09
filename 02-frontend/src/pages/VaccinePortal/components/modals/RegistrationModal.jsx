@@ -77,6 +77,9 @@ const RegistrationModal = ({ schedule, onClose, onSuccess }) => {
                     Số lô
                   </th>
                   <th className="border border-slate-800 p-2 text-center">
+                    Giá tiêm (Dự kiến)
+                  </th>
+                  <th className="border border-slate-800 p-2 text-center">
                     Phòng trị bệnh
                   </th>
                 </tr>
@@ -97,12 +100,24 @@ const RegistrationModal = ({ schedule, onClose, onSuccess }) => {
                   <td className="border border-slate-800 p-2 text-center text-blue-800 font-bold">
                     {schedule.soLo}
                   </td>
+                  {/* HIỂN THỊ GIÁ TIỀN */}
+                  <td className="border border-slate-800 p-2 text-center font-black text-rose-600">
+                    {schedule.donGia
+                      ? `${schedule.donGia.toLocaleString()} VNĐ`
+                      : "Liên hệ trung tâm"}
+                  </td>
                   <td className="border border-slate-800 p-2 uppercase">
                     {schedule.loaiVacXin}
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          {/* THÔNG BÁO VỀ HÓA ĐƠN */}
+          <div className="mb-6 p-3 bg-blue-50 border-l-4 border-blue-500 text-[11px] text-blue-700 italic">
+            * Hệ thống sẽ tự động tạo <b>Hóa đơn chờ thanh toán</b> sau khi bạn
+            xác nhận. Vui lòng hoàn tất thanh toán tại quầy trước khi vào tiêm.
           </div>
 
           {/* Nút bấm: flex-col trên mobile (dọc), sm:flex-row trên PC (ngang) */}

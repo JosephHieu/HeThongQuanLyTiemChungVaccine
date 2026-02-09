@@ -20,6 +20,11 @@ public interface ChiTietDangKyTiemRepository extends JpaRepository<ChiTietDangKy
 
     Page<ChiTietDangKyTiem> findByLichTiemChung_NgayTiem(LocalDate ngayTiem, Pageable pageable);
 
+    @Query("SELECT ct FROM ChiTietDangKyTiem ct " +
+            "WHERE (ct.lichTiemChung.ngayTiem = :ngay) " +
+            "OR (ct.thoiGianCanTiem = :ngay AND ct.lichTiemChung IS NULL)")
+    Page<ChiTietDangKyTiem> findAllRegistrationsByDate(@Param("ngay") LocalDate ngay, Pageable pageable);
+
     /**
      * Tìm các mũi tiêm ĐÃ ĐĂNG KÝ/KÊ ĐƠN nhưng CHƯA TIÊM
      * (Nghĩa là không tồn tại trong bảng HOSOBENHAN)

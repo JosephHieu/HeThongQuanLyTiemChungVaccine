@@ -41,20 +41,23 @@ const ScheduleManagement = () => {
     setLoading(true);
     const dateStr = format(date, "yyyy-MM-dd");
     try {
-      const [schedule, regData] = await Promise.all([
+      const [schedule, regPageResponse] = await Promise.all([
         vaccinationApi.getScheduleByDate(dateStr, shift),
         vaccinationApi.getRegistrations(dateStr),
       ]);
 
+      // 1. schedule bây giờ chính là Object LichTiemChung
       setScheduleData(schedule);
-      // Nếu giống cấu trúc vắc-xin trước đó, nó sẽ là regData.result
-      const actualRegistrations = regData.result || regData.data?.result || [];
 
+      // 2. regPageResponse chính là PageResponse { data: [...], totalPages: 5 }
+      const actualRegistrations = regPageResponse?.data || [];
+
+      console.log("Check dữ liệu bệnh nhân:", actualRegistrations); // Xem log này để chắc chắn
       setRegistrations(actualRegistrations);
     } catch (error) {
       console.error("Error fetching data:", error);
       setScheduleData(null);
-      setRegistrations([]); // Reset về mảng rỗng nếu lỗi
+      setRegistrations([]);
     } finally {
       setLoading(false);
     }
@@ -250,7 +253,7 @@ const ScheduleManagement = () => {
             {/* CỘT PHẢI: FORM & BẢNG BỆNH NHÂN */}
             <main className="lg:col-span-8 space-y-6">
               <ScheduleForm
-                key={`${selectedDate.toISOString()}-${selectedShift}`}
+                // key={`${selectedDate.toISOString()}-${selectedShift}`}
                 initialData={scheduleData}
                 selectedDate={selectedDate}
                 onSave={handleSave}

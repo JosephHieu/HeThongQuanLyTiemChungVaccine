@@ -2,6 +2,8 @@ package com.josephhieu.vaccinebackend.modules.vaccination.service.impl;
 
 import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
+import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
+import com.josephhieu.vaccinebackend.modules.finance.repository.HoaDonRepository;
 import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
 import com.josephhieu.vaccinebackend.modules.identity.repository.BenhNhanRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
@@ -27,7 +29,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +45,7 @@ public class VaccineServiceImpl implements VaccineService {
     private final LichTiemChungRepository lichTiemChungRepository;
     private final BenhNhanRepository benhNhanRepository;
     private final LoVacXinRepository loVacXinRepository;
+    private final HoaDonRepository hoaDonRepository;
 
     @Override
     public Page<VaccineInfoResponse> getVaccines(VaccineSearchRequest request) {
@@ -108,9 +113,23 @@ public class VaccineServiceImpl implements VaccineService {
         batch.setSoLuong(batch.getSoLuong() - 1);
         loVacXinRepository.save(batch);
 
+        // 6. Lấy đơn giá bán lẻ từ thực thể Vacin liên kết với lô
+        BigDecimal totalAmount = batch.getVacXin().getDonGia();
+        HoaDon bill = HoaDon.builder()
+                .tongTien(totalAmount)
+                .ngayTao(LocalDateTime.now())
+                .trangThai(0)
+                .loaiHoaDon("XUAT") // Hóa đơn xuất cho bệnh nhân
+                .phuongThucThanhToan("Chưa xác định")
+                .build();
+
+        HoaDon savedBill = hoaDonRepository.save(bill);
+
+        // 7. CẬP NHẬT: Gắn hóa đơn vào bản ghi đăng ký
         ChiTietDangKyTiem registration = ChiTietDangKyTiem.builder()
                 .benhNhan(patient)
                 .loVacXin(batch)
+                .hoaDon(savedBill)
                 .lichTiemChung(schedule) // Có thể null nếu đăng ký lẻ
                 .thoiGianCanTiem(ngayHenTiem)
                 .ghiChu(request.getGhiChu())
@@ -181,6 +200,16 @@ public class VaccineServiceImpl implements VaccineService {
         // 4. Cập nhật trạng thái
         registration.setTrangThai("CANCELED");
         chiTietDangKyTiemRepository.save(registration);
+
+        // 4.5 CẬP NHẬT: Xử lý hóa đơn đi kèm
+        if (registration.getHoaDon() != null) {
+            HoaDon bill = registration.getHoaDon();
+            // Chỉ hủy nếu hóa đơn chưa được thanh toán (trangThai == 0)
+            if (bill.getTrangThai() == 0) {
+                bill.setTrangThai(2); // 2: Đã hủy
+                hoaDonRepository.save(bill);
+            }
+        }
 
         // 5. Hoàn lại vắc-xin vào kho
         LoVacXin batch = registration.getLoVacXin();

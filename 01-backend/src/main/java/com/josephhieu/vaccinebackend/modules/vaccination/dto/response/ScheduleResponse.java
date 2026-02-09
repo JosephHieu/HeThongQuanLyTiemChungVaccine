@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +33,8 @@ public class ScheduleResponse {
     private String diaDiem;
     private String ghiChu;
     private String loaiVacXin;
+
+    private BigDecimal donGia;
 
     /**
      * Thông tin tóm tắt của các bác sĩ tham gia.

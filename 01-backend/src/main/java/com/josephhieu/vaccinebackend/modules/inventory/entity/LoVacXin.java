@@ -4,6 +4,7 @@ import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -52,4 +53,7 @@ public class LoVacXin {
 
     @Column(name = "GhiChu", columnDefinition = "TEXT")
     private String ghiChu;
+
+    @Column(name = "GiaNhap", precision = 18, scale = 2)
+    private BigDecimal giaNhap;
 }

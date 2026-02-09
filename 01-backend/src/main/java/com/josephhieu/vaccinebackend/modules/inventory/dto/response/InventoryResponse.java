@@ -20,12 +20,14 @@ public class InventoryResponse {
 
     private String tenVacXin;
     private String tenLoaiVacXin;
+    private String tenNhaCungCap;
     private String hamLuong;
     private String phongNguaBenh;
     private String doTuoiTiemChung;
 
     private Integer soLuong;
-    private BigDecimal donGia; // Đơn giá vắc-xin
+    private BigDecimal donGia;  // Giá bán ra cho khách (lấy từ VacXin)
+    private BigDecimal giaNhap; // Giá vốn nhập vào (lấy từ LoVacXin)
 
     private LocalDate ngayNhan;
     private LocalDate hanSuDung;

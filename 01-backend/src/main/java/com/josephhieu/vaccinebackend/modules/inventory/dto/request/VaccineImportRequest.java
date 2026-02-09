@@ -56,4 +56,8 @@ public class VaccineImportRequest {
     private String nuocSanXuat;
     private String giayPhep;
     private String ghiChu;
+
+    @NotNull(message = "Giá nhập không được để trống")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Giá nhập phải lớn hơn 0")
+    private BigDecimal giaNhap; // Giá mua từ nhà cung cấp (Giá vốn)
 }

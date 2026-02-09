@@ -54,6 +54,9 @@ const SchedulePortal = () => {
                   <th className="border border-slate-400 p-2 font-bold">
                     Tên Vắc xin
                   </th>
+                  <th className="border border-slate-400 p-2 font-bold text-rose-700">
+                    Giá tiêm
+                  </th>
                   <th className="border border-slate-400 p-2 font-bold">
                     Loại vắc xin
                   </th>
@@ -100,6 +103,12 @@ const SchedulePortal = () => {
                       <td className="border border-slate-400 p-2 font-bold text-blue-900">
                         {item.tenVacXin}
                       </td>
+                      {/* HIỂN THỊ ĐƠN GIÁ */}
+                      <td className="border border-slate-400 p-2 text-right font-black text-rose-600">
+                        {item.donGia
+                          ? `${item.donGia.toLocaleString()} đ`
+                          : "Liên hệ"}
+                      </td>
                       <td className="border border-slate-400 p-2">
                         {item.loaiVacXin}
                       </td>
@@ -136,6 +145,13 @@ const SchedulePortal = () => {
               </tbody>
             </table>
           </div>
+
+          {/* LƯU Ý TÀI CHÍNH DƯỚI BẢNG */}
+          <p className="text-[11px] text-slate-500 italic">
+            * Giá tiêm trên đã bao gồm vắc-xin, phí khám sàng lọc và phí tiêm
+            chủng. Hệ thống sẽ tạo hóa đơn chờ thanh toán sau khi bạn xác nhận
+            đăng ký.
+          </p>
 
           <div className="flex justify-center mt-4">
             <button

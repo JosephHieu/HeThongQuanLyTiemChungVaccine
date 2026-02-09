@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import {
   Save,
   Clock,
@@ -46,15 +47,14 @@ const ScheduleForm = ({
           vaccinationApi.getAvailableBatches(),
         ]);
 
-        // KIỂM TRA TẠI ĐÂY: Thêm .data trước .result nếu bạn chưa có interceptor
-        console.log("Kiểm tra batchRes:", batchRes);
+        // PHẢI LẤY .result THẾ NÀY:
+        const staffs = staffRes.result || staffRes || [];
+        const batchesData = batchRes.result || batchRes || [];
 
-        // Nếu bạn chưa cấu hình axios interceptor để bóc tách data:
-
-        setMedicalStaffs(staffRes || []);
-        setBatches(batchRes || []);
+        setMedicalStaffs(staffs);
+        setBatches(batchesData);
       } catch (error) {
-        console.error("Lỗi tải dữ liệu:", error);
+        toast.error("Lỗi kết nối dữ liệu kho: " + error.message);
       }
     };
     loadData();
@@ -184,8 +184,9 @@ const ScheduleForm = ({
                 batches.length > 0 &&
                 batches.map((b) => (
                   <option key={b.maLo} value={b.maLo}>
-                    {/* Trong log bạn gửi là 'tenVacXin' (chữ X viết hoa) */}
-                    {b.tenVacXin} - Lô: {b.soLo} (Còn {b.soLuongTon} liều)
+                    {b.tenVacXin} - Lô: {b.soLo}(
+                    {b.donGia ? b.donGia.toLocaleString() : 0} đ) - Còn{" "}
+                    {b.soLuongTon} liều
                   </option>
                 ))}
             </select>
@@ -231,6 +232,34 @@ const ScheduleForm = ({
       ${errors.soLuong ? "border-red-200 bg-red-50 text-red-600" : "border-transparent focus:border-blue-100"}`}
               />
               <ErrorMessage message={errors.soLuong} />
+
+              {/* Hiển thị doanh thu dự kiến */}
+              {selectedBatch &&
+                formData.soLuong > 0 &&
+                formData.soLuong <= selectedBatch.soLuongTon && (
+                  <div className="mt-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex justify-between items-center animate-in slide-in-from-top-2">
+                    <div>
+                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                        Doanh thu dự kiến
+                      </p>
+                      <p className="text-lg font-black text-emerald-700">
+                        {/* Thêm check donGia || 0 để an toàn */}
+                        {(
+                          formData.soLuong * (selectedBatch.donGia || 0)
+                        ).toLocaleString()}{" "}
+                        VNĐ
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                        Đơn giá
+                      </p>
+                      <p className="text-sm font-bold text-emerald-600">
+                        {(selectedBatch.donGia || 0).toLocaleString()} đ/liều
+                      </p>
+                    </div>
+                  </div>
+                )}
 
               {/* Hiển thị thanh tiến độ nhỏ để cảnh báo mức độ tồn kho */}
               {selectedBatch && (

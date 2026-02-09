@@ -29,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -199,19 +200,17 @@ public class ScheduleServiceImpl implements ScheduleService {
         int validatePage = (page < 1) ? 0 : page - 1;
         Pageable pageable = PageRequest.of(validatePage, size, Sort.by("thoiGianCanTiem").descending());
 
-        // Gọi Repository đã có của bạn
+        // GỌI QUERY MỚI TẠI ĐÂY
         Page<ChiTietDangKyTiem> registrationPage = chiTietDangKyTiemRepository
-                .findByLichTiemChung_NgayTiem(date, pageable);
+                .findAllRegistrationsByDate(date, pageable);
 
         List<RegistrationResponse> data = registrationPage.getContent().stream()
                 .map(reg -> RegistrationResponse.builder()
                         .maDangKy(reg.getMaChiTietDKTiem())
                         .tenBenhNhan(reg.getBenhNhan().getTenBenhNhan())
                         .soDienThoai(reg.getBenhNhan().getSdt())
-                        // Lấy tên vắc xin từ lô vắc xin mà bệnh nhân đã chọn
                         .tenVacXin(reg.getLoVacXin() != null ?
-                                reg.getLoVacXin().getVacXin().getTenVacXin() : "Chưa chọn")
-                        .ngayDangKy(reg.getThoiGianCanTiem() != null ? reg.getThoiGianCanTiem().atStartOfDay() : null)
+                                reg.getLoVacXin().getVacXin().getTenVacXin() : "N/A")
                         .build())
                 .toList();
 
@@ -233,6 +232,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                         .soLo(lo.getSoLo())
                         .tenVacXin(lo.getVacXin() != null ? lo.getVacXin().getTenVacXin() : "Không xác định")
                         .soLuongTon(lo.getSoLuong())
+                        .donGia(lo.getVacXin() != null ? lo.getVacXin().getDonGia() : BigDecimal.ZERO)
                         .build())
                 .toList();
     }
@@ -262,9 +262,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Kiểm tra NULL an toàn cho Lô vắc xin
         String soLo = "N/A";
         String tenVacXin = "Chưa xác định";
-        String loaiVacXin = "N/A"; // THÊM DÒNG NÀY
+        String loaiVacXin = "N/A";
+        BigDecimal donGia = BigDecimal.ZERO;
         UUID maLo = null;
-        UUID maVacXin = null; // THÊM DÒNG NÀY
+        UUID maVacXin = null;
 
         if (entity.getLoVacXin() != null) {
             maLo = entity.getLoVacXin().getMaLo();
@@ -274,6 +275,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 maVacXin = entity.getLoVacXin().getVacXin().getMaVacXin(); // THÊM DÒNG NÀY: Lấy ID để Frontend gửi lại khi đăng ký
                 tenVacXin = entity.getLoVacXin().getVacXin().getTenVacXin();
                 loaiVacXin = entity.getLoVacXin().getVacXin().getPhongNguaBenh(); // THÊM DÒNG NÀY: Để hiện cột "Loại vắc xin"
+                donGia = entity.getLoVacXin().getVacXin().getDonGia();
             }
         }
 
@@ -293,6 +295,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .soLo(soLo)
                 .tenVacXin(tenVacXin)
                 .loaiVacXin(loaiVacXin) // THÊM DÒNG NÀY: Để UI không bị trống cột Loại vắc xin
+                .donGia(donGia)
                 .ngayTiem(entity.getNgayTiem())
                 .thoiGian(entity.getThoiGianChung())
                 .diaDiem(entity.getDiaDiem())

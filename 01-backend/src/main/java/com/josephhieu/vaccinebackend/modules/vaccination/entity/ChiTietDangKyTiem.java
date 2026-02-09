@@ -1,5 +1,6 @@
 package com.josephhieu.vaccinebackend.modules.vaccination.entity;
 
+import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
 import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
 import jakarta.persistence.*;
@@ -29,6 +30,10 @@ public class ChiTietDangKyTiem {
     @JoinColumn(name = "MaLo")
     private LoVacXin loVacXin;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaHoaDon")
+    private HoaDon hoaDon;
+
     @Column(name = "ThoiGianCanTiem")
     private LocalDate thoiGianCanTiem;
 
@@ -42,7 +47,6 @@ public class ChiTietDangKyTiem {
     @Builder.Default
     @Column(name = "TrangThai", length = 50, nullable = false)
     private String trangThai = "REGISTERED";
-
 
     // Các hằng số để quản lý trạng thái tránh gõ sai chính tả
     public static final String STATUS_REGISTERED = "REGISTERED";
