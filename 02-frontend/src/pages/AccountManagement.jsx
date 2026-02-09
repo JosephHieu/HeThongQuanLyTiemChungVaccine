@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   UserPlus,
   Search,
   Trash2,
@@ -27,6 +29,8 @@ const AccountManagement = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [userToToggle, setUserToToggle] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   // Trạng thái phân trang khớp với PageResponse ở Backend
   const [pagination, setPagination] = useState({
@@ -146,13 +150,28 @@ const AccountManagement = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* HEADER SECTION - Giữ nguyên logic cũ nhưng thêm handle success */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            Quản lý tài khoản
-          </h1>
-          <p className="text-slate-500 text-sm">
-            Hiển thị {pagination.totalElements} tài khoản nhân viên
-          </p>
+        <div className="flex items-center gap-4">
+          {/* NÚT QUAY LẠI */}
+          <button
+            onClick={() => navigate(-1)} // Quay lại trang trước đó
+            className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 
+                 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm group"
+            title="Quay lại"
+          >
+            <ArrowLeft
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+          </button>
+
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">
+              Quản lý tài khoản
+            </h1>
+            <p className="text-slate-500 text-sm">
+              Hiển thị {pagination.totalElements} tài khoản nhân viên
+            </p>
+          </div>
         </div>
         <button
           onClick={() => {

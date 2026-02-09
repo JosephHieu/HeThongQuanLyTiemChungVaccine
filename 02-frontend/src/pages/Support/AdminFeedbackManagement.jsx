@@ -11,6 +11,7 @@ import {
   Search,
   User,
   Phone,
+  ArrowLeft,
 } from "lucide-react";
 
 const AdminFeedbackManagement = () => {
@@ -97,13 +98,27 @@ const AdminFeedbackManagement = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* PAGE HEADER: Đã dọn dẹp, chỉ giữ lại một cái duy nhất */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-            Quản lý Phản hồi cấp cao
-          </h1>
-          <p className="text-slate-500 text-sm">
-            Xử lý các ý kiến đóng góp và khiếu nại từ khách hàng
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 
+                       hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm group"
+            title="Quay lại"
+          >
+            <ArrowLeft
+              size={22}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+          </button>
+
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight uppercase">
+              Quản lý phản hồi cấp cao
+            </h1>
+            <p className="text-slate-500 text-sm">
+              Xử lý các ý kiến đóng góp và khiếu nại từ khách hàng
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">

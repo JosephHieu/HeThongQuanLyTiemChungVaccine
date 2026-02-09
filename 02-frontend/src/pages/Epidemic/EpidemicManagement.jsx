@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Edit,
@@ -13,11 +14,13 @@ import {
   Info,
   Wind,
   StickyNote,
+  ArrowLeft,
 } from "lucide-react";
 import epidemicApi from "../../api/epidemicApi";
 import toast from "react-hot-toast";
 
 const EpidemicManagement = () => {
+  const navigate = useNavigate();
   const [epidemics, setEpidemics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,13 +124,28 @@ const EpidemicManagement = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header & Action */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-slate-800 uppercase flex items-center gap-2">
-            <Activity className="text-orange-600" /> Quản lý khảo sát dịch bệnh
-          </h2>
-          <p className="text-slate-500 text-sm">
-            Cập nhật và theo dõi tình hình dịch tễ tại các địa phương.
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 
+                       hover:bg-slate-50 hover:text-orange-600 transition-all shadow-sm group"
+            title="Quay lại"
+          >
+            <ArrowLeft
+              size={22}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+          </button>
+
+          <div>
+            <h2 className="text-2xl font-black text-slate-800 uppercase flex items-center gap-2">
+              <Activity className="text-orange-600 hidden sm:block" /> Quản lý
+              khảo sát dịch bệnh
+            </h2>
+            <p className="text-slate-500 text-sm">
+              Cập nhật và theo dõi tình hình dịch tễ tại các địa phương.
+            </p>
+          </div>
         </div>
         <button
           onClick={() => openModal()}

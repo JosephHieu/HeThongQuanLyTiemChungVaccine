@@ -5,6 +5,7 @@ import {
   UserPlus,
   FileSignature,
   Syringe,
+  ArrowLeft,
 } from "lucide-react"; // Thêm Syringe
 import ViewTab from "./components/ViewTab";
 import UpdateTab from "./components/UpdateTab";
@@ -12,8 +13,10 @@ import PrescribeTab from "./components/PrescribeTab";
 import VaccinateTab from "./components/VaccinateTab"; // Đảm bảo đã import
 import medicalApi from "../../api/medicalApi";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const MedicalRecord = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("view");
   const [patientId, setPatientId] = useState("");
   const [patientData, setPatientData] = useState(null);
@@ -51,16 +54,30 @@ const MedicalRecord = () => {
       {/* SECTION 1: HEADER & SEARCH */}
       <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-              <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
-                <ClipboardList size={24} />
-              </div>
-              HỒ SƠ BỆNH ÁN
-            </h1>
-            <p className="text-slate-500 text-sm mt-1 font-medium italic">
-              Quản lý và điều phối tiêm chủng
-            </p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 
+                         hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm group"
+              title="Quay lại"
+            >
+              <ArrowLeft
+                size={22}
+                className="group-hover:-translate-x-1 transition-transform"
+              />
+            </button>
+
+            <div>
+              <h1 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-xl hidden sm:block">
+                  <ClipboardList size={24} />
+                </div>
+                HỒ SƠ BỆNH ÁN
+              </h1>
+              <p className="text-slate-500 text-sm mt-1 font-medium italic">
+                Quản lý và điều phối tiêm chủng
+              </p>
+            </div>
           </div>
 
           <form
