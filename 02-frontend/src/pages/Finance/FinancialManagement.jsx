@@ -1,4 +1,4 @@
-import React, { useState, useDeferredValue } from "react";
+import React, { useState, useDeferredValue, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Wallet,
@@ -12,6 +12,7 @@ import {
   Calendar,
   FileText,
 } from "lucide-react";
+import financeApi from "../../api/financeApi";
 
 // Components con
 import VaccinePriceTab from "./components/VaccinePriceTab";
@@ -30,9 +31,30 @@ const FinancialManagement = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const [dateRange, setDateRange] = useState({
-    start: new Date().toISOString().split("T")[0],
+    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      .toISOString()
+      .split("T")[0],
     end: new Date().toISOString().split("T")[0],
   });
+
+  const [summaryData, setSummaryData] = useState({
+    totalRevenueToday: 0,
+    pendingInvoiceCount: 0,
+    inventoryValue: 0,
+  });
+
+  // 3. Effect lấy dữ liệu tổng quan khi vào module hoặc khi có thay đổi quan trọng
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const res = await financeApi.getFinanceSummary();
+        setSummaryData(res);
+      } catch (error) {
+        console.error("Lỗi lấy thống kê tài chính:", error);
+      }
+    };
+    fetchSummary();
+  }, [activeTab]); // Fetch lại khi chuyển tab để đảm bảo số liệu mới nhất
 
   // Xác định text của nút "Tạo mới" dựa trên Tab hiện tại
   const getCreateButtonLabel = () => {
@@ -167,14 +189,18 @@ const FinancialManagement = () => {
             searchTerm={deferredSearchTerm}
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
+            summary={summaryData} // Truyền summary xuống nếu cần hiện giá trị kho
           />
         )}
         {activeTab === "customers" && (
           <CustomerTransactionTab
             searchTerm={deferredSearchTerm}
             dateRange={dateRange}
-            isCreateOpen={isCreateOpen}
-            setIsCreateOpen={setIsCreateOpen}
+            summary={summaryData} // Truyền summary để hiện doanh thu/đơn chờ
+            onActionSuccess={() => {
+              // Refresh summary khi có giao dịch thành công (ví dụ xác nhận thu tiền)
+              financeApi.getFinanceSummary().then(setSummaryData);
+            }}
           />
         )}
         {activeTab === "suppliers" && (

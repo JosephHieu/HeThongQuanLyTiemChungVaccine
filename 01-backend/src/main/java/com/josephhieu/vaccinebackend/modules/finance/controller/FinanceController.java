@@ -3,42 +3,53 @@ package com.josephhieu.vaccinebackend.modules.finance.controller;
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.finance.dto.request.VaccineFullRequest;
+import com.josephhieu.vaccinebackend.modules.finance.dto.response.CustomerTransactionResponse;
+import com.josephhieu.vaccinebackend.modules.finance.dto.response.FinanceSummaryResponse;
 import com.josephhieu.vaccinebackend.modules.finance.dto.response.VaccineFullResponse;
+import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 import com.josephhieu.vaccinebackend.modules.finance.service.FinanceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/finance/vaccines")
+@RequestMapping("/api/finance") // 1. Chuyển về mapping chung của module
 @RequiredArgsConstructor
 public class FinanceController {
 
     private final FinanceService financeService;
 
-    /**
-     * Lấy danh sách quản lý vắc-xin đầy đủ thông tin (Phân trang)
-     */
-    @GetMapping
+    // =========================================================================
+    // PHÂN HỆ 0: TỔNG QUAN (Dành cho các thẻ Summary ở Header)
+    // =========================================================================
+
+    @GetMapping("/summary")
     @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
-    public ApiResponse<PageResponse<VaccineFullResponse>> getList(
+    public ApiResponse<FinanceSummaryResponse> getSummary() {
+        return ApiResponse.<FinanceSummaryResponse>builder()
+                .result(financeService.getFinanceSummary())
+                .build();
+    }
+
+    // =========================================================================
+    // PHÂN HỆ 1: QUẢN LÝ DANH MỤC VẮC XIN (/api/finance/vaccines)
+    // =========================================================================
+
+    @GetMapping("/vaccines")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<PageResponse<VaccineFullResponse>> getVaccineList(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "7") int size, // Mặc định là 7 như bạn muốn
-            @RequestParam(required = false) String search // Thêm tham số này
-    ) {
+            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(required = false) String search) {
         return ApiResponse.<PageResponse<VaccineFullResponse>>builder()
                 .result(financeService.getVaccineManagementList(page, size, search))
                 .build();
     }
 
-    /**
-     * API thêm mới vắc-xin vào danh mục
-     */
-    @PostMapping
+    @PostMapping("/vaccines")
     @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
     public ApiResponse<VaccineFullResponse> create(@RequestBody @Valid VaccineFullRequest request) {
         return ApiResponse.<VaccineFullResponse>builder()
@@ -47,43 +58,65 @@ public class FinanceController {
                 .build();
     }
 
-    /**
-     * API cập nhật toàn diện thông tin vắc-xin
-     */
-    @PutMapping("/{id}")
+    @PutMapping("/vaccines/{id}")
     @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
-    public ApiResponse<VaccineFullResponse> update(
-            @PathVariable UUID id,
-            @RequestBody @Valid VaccineFullRequest request
-    ) {
+    public ApiResponse<VaccineFullResponse> update(@PathVariable UUID id, @RequestBody @Valid VaccineFullRequest request) {
         return ApiResponse.<VaccineFullResponse>builder()
-                .message("Cập nhật thông tin vắc-xin thành công")
+                .message("Cập nhật vắc-xin thành công")
                 .result(financeService.updateVaccine(id, request))
                 .build();
     }
 
-    /**
-     * API xóa vắc-xin (Có ràng buộc kiểm tra lô hàng)
-     */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/vaccines/{id}")
     @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         financeService.deleteVaccine(id);
-        return ApiResponse.<Void>builder()
-                .message("Xóa vắc-xin khỏi danh mục thành công")
+        return ApiResponse.<Void>builder().message("Xóa thành công").build();
+    }
+
+    // =========================================================================
+    // PHÂN HỆ 2: GIAO DỊCH KHÁCH HÀNG (/api/finance/transactions/customers)
+    // =========================================================================
+
+    @GetMapping("/transactions/customers")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<PageResponse<CustomerTransactionResponse>> getCustomerTransactions(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        return ApiResponse.<PageResponse<CustomerTransactionResponse>>builder()
+                .result(financeService.getCustomerTransactions(page, size, search, startDate, endDate))
                 .build();
     }
 
-    /**
-     * API lấy tổng giá trị hàng tồn kho (Dựa trên giá nhập)
-     * Đây là endpoint mà Frontend đang báo lỗi 500 vì thiếu.
-     */
-    @GetMapping("/total-inventory-value")
+    @PostMapping("/transactions/customers/{maHoaDon}/confirm")
     @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
-    public ApiResponse<BigDecimal> getTotalValue() {
-        return ApiResponse.<BigDecimal>builder()
-                .message("Truy xuất tổng giá trị kho thành công")
-                .result(financeService.calculateTotalInventoryValue())
+    public ApiResponse<Void> confirmPayment(@PathVariable UUID maHoaDon, @RequestParam String phuongThuc) {
+        financeService.confirmPayment(maHoaDon, phuongThuc);
+        return ApiResponse.<Void>builder().message("Xác nhận thanh toán thành công").build();
+    }
+
+    @PostMapping("/transactions/customers/{maHoaDon}/cancel")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<Void> cancelTransaction(@PathVariable UUID maHoaDon) {
+        financeService.cancelTransaction(maHoaDon);
+        return ApiResponse.<Void>builder().message("Đã hủy hóa đơn").build();
+    }
+
+    // =========================================================================
+    // PHÂN HỆ 3: NHẬP HÀNG NCC (/api/finance/transactions/suppliers)
+    // =========================================================================
+
+    @GetMapping("/transactions/suppliers")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<PageResponse<HoaDon>> getSupplierTransactions(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search) {
+        return ApiResponse.<PageResponse<HoaDon>>builder()
+                .result(financeService.getSupplierTransactions(page, size, search))
                 .build();
     }
 }

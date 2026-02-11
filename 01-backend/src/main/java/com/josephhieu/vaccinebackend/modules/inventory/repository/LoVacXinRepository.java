@@ -2,9 +2,11 @@ package com.josephhieu.vaccinebackend.modules.inventory.repository;
 
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.LoaiVacXin;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -51,7 +53,8 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
 
     // 1. Tính tổng giá trị vốn hàng tồn kho hiện tại
     // Công thức: sum (soLuong \times giaNhap)
-    @Query("SELECT COALESCE(SUM(l.soLuong * l.giaNhap), 0) FROM LoVacXin l WHERE l.soLuong > 0")    BigDecimal getTotalInventoryValue();
+    @Query("SELECT COALESCE(SUM(l.soLuong * l.giaNhap), 0.0) FROM LoVacXin l WHERE l.soLuong > 0")
+    BigDecimal getTotalInventoryValue();
 
     // 2. Lấy giá nhập trung bình của một loại vắc-xin (Để hỗ trợ đặt giá bán)
     @Query("SELECT AVG(l.giaNhap) FROM LoVacXin l WHERE l.vacXin.maVacXin = :vaccineId")
@@ -67,5 +70,9 @@ public interface LoVacXinRepository extends JpaRepository<LoVacXin, UUID> {
      * @return true nếu tồn tại ít nhất 1 lô hàng, ngược lại false
      */
     boolean existsByVacXin_MaVacXin(UUID maVacXin);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT l FROM LoVacXin l WHERE l.maLo = :id")
+    Optional<LoVacXin> findByIdWithLock(@Param("id") UUID id);
 
 }

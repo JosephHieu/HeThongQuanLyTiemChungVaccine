@@ -54,19 +54,22 @@ const VaccinePriceTab = ({ searchTerm, isCreateOpen, setIsCreateOpen }) => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [priceData, totalValue] = await Promise.all([
+      const [priceData, summaryData] = await Promise.all([
         financeApi.getVaccines(pagination.page, pagination.size, searchTerm),
-        financeApi.getTotalInventoryValue(),
+        financeApi.getFinanceSummary(), // Gọi API tổng quan thay vì gọi lẻ
       ]);
+
       setPrices(priceData.data);
-      setTotalInventoryValue(totalValue);
+      // Lấy đúng trường inventoryValue từ trong Object summary
+      setTotalInventoryValue(summaryData.inventoryValue || 0);
+
       setPagination((prev) => ({
         ...prev,
         totalElements: priceData.totalElements,
         totalPages: priceData.totalPages,
       }));
     } catch (error) {
-      toast.error(error.message || "Lỗi tải dữ liệu");
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -378,8 +381,8 @@ const VaccinePriceTab = ({ searchTerm, isCreateOpen, setIsCreateOpen }) => {
               </FormField>
 
               <FormField label="Điều kiện bảo quản" colSpan="2">
-                <select
-                  required
+                <textarea
+                  rows="2"
                   className="form-input-vax"
                   value={editingVaccine.dieuKienBaoQuan}
                   onChange={(e) =>
@@ -388,14 +391,7 @@ const VaccinePriceTab = ({ searchTerm, isCreateOpen, setIsCreateOpen }) => {
                       dieuKienBaoQuan: e.target.value,
                     })
                   }
-                >
-                  <option value="">-- Chọn điều kiện bảo quản --</option>
-                  <option value="2°C - 8°C (Tiêu chuẩn)">
-                    2°C - 8°C (Tiêu chuẩn)
-                  </option>
-                  <option value="Tủ đông (-20°C)">Tủ đông (-20°C)</option>
-                  <option value="Siêu âm (-70°C)">Siêu âm (-70°C)</option>
-                </select>
+                />
               </FormField>
 
               <div className="md:col-span-2 mt-4">

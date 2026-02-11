@@ -53,6 +53,8 @@ public enum ErrorCode {
     INVALID_REGISTRATION_STATUS(1310, "Trạng thái đăng ký không hợp lệ để thực hiện thao tác này", HttpStatus.BAD_REQUEST),
     VACCINATION_ALREADY_COMPLETED(1311, "Mũi tiêm này đã được xác nhận hoàn thành trước đó", HttpStatus.BAD_REQUEST),
     OUT_OF_STOCK(1312, "Số lượng vắc-xin trong lô đã hết, không thể thực hiện tiêm", HttpStatus.BAD_REQUEST),
+    VACCINE_NOT_FOUND(1313, "Không tìm thấy loại vaccine này", HttpStatus.BAD_REQUEST),
+
 
     // SUPPORT & NOTIFICATION ERRORS (1400 - 1499)
     EMAIL_SEND_FAILED(1401, "Gửi email nhắc lịch thất bại, vui lòng kiểm tra cấu hình SMTP", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -67,6 +69,8 @@ public enum ErrorCode {
     PAYMENT_METHOD_INVALID(1505, "Phương thức thanh toán không hợp lệ", HttpStatus.BAD_REQUEST),
     REFUND_FAILED(1506, "Yêu cầu hoàn tiền thất bại, vui lòng kiểm tra lại trạng thái giao dịch", HttpStatus.INTERNAL_SERVER_ERROR),
     TOTAL_PRICE_MISMATCH(1507, "Tổng tiền hóa đơn không khớp với giá trị vắc-xin niêm yết", HttpStatus.BAD_REQUEST),
+
+    INVOICE_TYPE_MISMATCH(1508, "Thao tác không hợp lệ: Đây không phải là hóa đơn bán hàng cho khách", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatus statusCode) {

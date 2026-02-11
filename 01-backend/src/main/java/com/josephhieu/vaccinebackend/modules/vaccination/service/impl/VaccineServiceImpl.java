@@ -57,89 +57,85 @@ public class VaccineServiceImpl implements VaccineService {
     @Override
     @Transactional
     public void registerVaccination(VaccinationRegistrationRequest request) {
-        // 1. Xác định "Ai" đang đăng ký
+        // 1. Xác định bệnh nhân
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         BenhNhan patient = benhNhanRepository.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         LichTiemChung schedule = null;
         LoVacXin batch = null;
-        java.time.LocalDate ngayHenTiem = request.getThoiGianCanTiem();
+        LocalDate ngayHenTiem = request.getThoiGianCanTiem();
 
-        // 2. Xử lý phân luồng dữ liệu
+        // 2. Phân luồng đăng ký
         if (request.getMaLichTiemChung() != null) {
-            // TRƯỜNG HỢP A: Đăng ký theo lịch trung tâm
             schedule = lichTiemChungRepository.findById(request.getMaLichTiemChung())
                     .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_FOUND));
 
-            batch = schedule.getLoVacXin();
-            ngayHenTiem = schedule.getNgayTiem(); // Lấy ngày từ lịch
+            // CẬP NHẬT: Dùng Repository có @Lock(LockModeType.PESSIMISTIC_WRITE) cho lô vắc xin
+            batch = loVacXinRepository.findByIdWithLock(schedule.getLoVacXin().getMaLo())
+                    .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND));
 
-            // Kiểm tra số lượng người đăng ký của lịch đó
+            ngayHenTiem = schedule.getNgayTiem();
+
             long registeredCount = lichTiemChungRepository.countRegisteredPatients(schedule.getMaLichTiem());
             if (registeredCount >= schedule.getSoLuongNguoiTiem()) {
                 throw new AppException(ErrorCode.SCHEDULE_FULL);
             }
         } else {
-            // TRƯỜNG HỢP B: Đăng ký lẻ từ Tra cứu vắc-xin
-            if (request.getMaLoVacXin() == null) {
-                throw new AppException(ErrorCode.INVALID_INFO); // Thiếu mã lô
-            }
-            batch = loVacXinRepository.findById(request.getMaLoVacXin())
-                    .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND));
+            if (request.getMaLoVacXin() == null) throw new AppException(ErrorCode.INVALID_INFO);
 
-            // ngayHenTiem đã lấy từ request.getThoiGianCanTiem() ở trên
+            // CẬP NHẬT: Khóa lô vắc xin để trừ kho an toàn
+            batch = loVacXinRepository.findByIdWithLock(request.getMaLoVacXin())
+                    .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND));
         }
 
-        // 3. Kiểm tra chung cho cả 2 trường hợp
-        if (batch == null || batch.getSoLuong() <= 0) {
+        // 3. Kiểm tra kho thực tế
+        if (batch.getSoLuong() <= 0) {
             throw new AppException(ErrorCode.VACCINE_OUT_OF_STOCK);
         }
 
-        // 4. Kiểm tra trùng lặp (Tùy chỉnh logic kiểm tra của bạn)
-        // Ví dụ: Không cho phép đăng ký cùng 1 lô vắc-xin mà chưa tiêm xong
+        // 4. Kiểm tra trùng lặp (Cải tiến: Kiểm tra cả trạng thái 'REGISTERED' và 'PENDING_PAYMENT')
+        // Đảm bảo bệnh nhân không đăng ký 2 lần cho cùng 1 đợt tiêm
         boolean isAlreadyRegistered = chiTietDangKyTiemRepository
                 .existsByBenhNhan_MaBenhNhanAndLoVacXin_MaLoAndTrangThai(
-                        patient.getMaBenhNhan(),
-                        batch.getMaLo(),
-                        "REGISTERED"
-                );
+                        patient.getMaBenhNhan(), batch.getMaLo(), "REGISTERED");
 
         if (isAlreadyRegistered) {
             throw new AppException(ErrorCode.ALREADY_REGISTERED);
         }
 
-        // 5. Trừ kho và Lưu bản ghi
+        // 5. Trừ kho an toàn
         batch.setSoLuong(batch.getSoLuong() - 1);
         loVacXinRepository.save(batch);
 
-        // 6. Lấy đơn giá bán lẻ từ thực thể Vacin liên kết với lô
+        if (batch.getVacXin() == null || batch.getVacXin().getDonGia() == null) {
+            throw new AppException(ErrorCode.VACCINE_NOT_FOUND); // Tránh null đơn giá
+        }
+
         BigDecimal totalAmount = batch.getVacXin().getDonGia();
+        // 6. Tạo hóa đơn (Đồng bộ với module Finance)
         HoaDon bill = HoaDon.builder()
                 .tongTien(totalAmount)
                 .ngayTao(LocalDateTime.now())
-                .trangThai(0)
-                .loaiHoaDon("XUAT") // Hóa đơn xuất cho bệnh nhân
+                .trangThai(0) // 0: Chờ thanh toán
+                .loaiHoaDon("XUAT") // Viết hoa toàn bộ để khớp với Query Finance
                 .phuongThucThanhToan("Chưa xác định")
                 .build();
-
         HoaDon savedBill = hoaDonRepository.save(bill);
 
-        // 7. CẬP NHẬT: Gắn hóa đơn vào bản ghi đăng ký
+        // 7. Lưu bản ghi đăng ký
         ChiTietDangKyTiem registration = ChiTietDangKyTiem.builder()
                 .benhNhan(patient)
                 .loVacXin(batch)
                 .hoaDon(savedBill)
-                .lichTiemChung(schedule) // Có thể null nếu đăng ký lẻ
+                .lichTiemChung(schedule)
                 .thoiGianCanTiem(ngayHenTiem)
                 .ghiChu(request.getGhiChu())
                 .trangThai("REGISTERED")
                 .build();
 
         chiTietDangKyTiemRepository.save(registration);
-
-        log.info("Đăng ký thành công: Bệnh nhân {} - Vắc xin: {} - Ngày hẹn: {}",
-                patient.getTenBenhNhan(), batch.getVacXin().getTenVacXin(), ngayHenTiem);
+        log.info("Đăng ký thành công: BN {} - VX {}", patient.getTenBenhNhan(), batch.getVacXin().getTenVacXin());
     }
 
     @Override

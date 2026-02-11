@@ -2,6 +2,7 @@ package com.josephhieu.vaccinebackend.modules.medical.service.impl;
 
 import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
+import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 import com.josephhieu.vaccinebackend.modules.identity.entity.BenhNhan;
 import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
 import com.josephhieu.vaccinebackend.modules.identity.repository.BenhNhanRepository;
@@ -119,6 +120,18 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new AppException(ErrorCode.VACCINATION_ALREADY_COMPLETED);
         }
 
+        // --- CHỐT CHẶN TÀI CHÍNH MỚI ---
+        HoaDon hd = registration.getHoaDon();
+        if (hd == null) {
+            throw new AppException(ErrorCode.INVOICE_NOT_FOUND); // chưa có hóa đơn
+        }
+
+        // Chỉ cho phép tiêm nếu hóa đơn đã được thanh toán (TrangThai = 1)
+        if (hd.getTrangThai() != 1) {
+            throw new AppException(ErrorCode.INVOICE_NOT_PAID); // Lỗi: Vui lòng thanh toán trước khi tiêm!
+        }
+
+
         if (!ChiTietDangKyTiem.STATUS_REGISTERED.equals(registration.getTrangThai())) {
             throw new AppException(ErrorCode.INVALID_REGISTRATION_STATUS);
         }
@@ -138,7 +151,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .thoiGianTiem(LocalDateTime.now())
                 .phanUngSauTiem(phanUngSauTiem != null ? phanUngSauTiem : "Bình thường")
                 .thoiGianTacDung(tacDung)
-                .hoaDon(registration.getLoVacXin().getHoaDon())
+                .hoaDon(registration.getHoaDon())
                 .build();
 
         hoSoBenhAnRepository.save(record);
