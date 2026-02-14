@@ -353,7 +353,7 @@ const SupplierTransactionTab = ({ searchTerm }) => {
                                 </span>
                               </td>
                               <td className="px-6 py-5 text-center font-black text-slate-700">
-                                {lo.soLuong?.toLocaleString()}{" "}
+                                {lo.soLuongNhap?.toLocaleString()}{" "}
                                 <span className="text-[10px] text-slate-400 uppercase">
                                   liều
                                 </span>

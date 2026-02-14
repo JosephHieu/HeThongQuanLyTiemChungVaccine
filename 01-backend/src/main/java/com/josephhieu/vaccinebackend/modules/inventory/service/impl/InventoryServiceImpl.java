@@ -86,6 +86,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .nhaCungCap(ncc)
                 .hoaDon(hoaDonNhap)
                 .soLo(request.getSoLo())
+                .soLuongNhap(request.getSoLuong())
                 .soLuong(request.getSoLuong())
                 .ngayNhan(request.getNgayNhan())
                 .nuocSanXuat(request.getNuocSanXuat())

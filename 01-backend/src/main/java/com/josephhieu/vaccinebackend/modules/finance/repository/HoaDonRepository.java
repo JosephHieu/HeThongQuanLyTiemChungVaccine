@@ -70,7 +70,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, UUID> {
     BigDecimal sumRevenueByPeriod(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     // 4. THỐNG KÊ CHI PHÍ (Tiền chi trả nhà cung cấp)
-    @Query("SELECT SUM(h.tongTien) FROM HoaDon h WHERE h.loaiHoaDon = 'NHAP' AND h.trangThai = 1 AND h.ngayTao BETWEEN :start AND :end")
+    @Query("SELECT SUM(h.tongTien) FROM HoaDon h WHERE h.loaiHoaDon = 'NHAP' AND h.ngayTao BETWEEN :start AND :end")
     BigDecimal sumSpendingByPeriod(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     // 5. ĐẾM HÓA ĐƠN CHỜ (Tách biệt theo loại để Dashboard chính xác hơn)

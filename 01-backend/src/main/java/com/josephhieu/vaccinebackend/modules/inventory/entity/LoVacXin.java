@@ -39,6 +39,9 @@ public class LoVacXin {
     @JsonIgnoreProperties("danhSachLo")
     private HoaDon hoaDon;
 
+    @Column(name = "SoLuongNhap")
+    private Integer soLuongNhap;
+
     @Column(name = "SoLuong")
     private Integer soLuong;
 
