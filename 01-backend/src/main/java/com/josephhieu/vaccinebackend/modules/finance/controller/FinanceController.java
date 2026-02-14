@@ -3,9 +3,7 @@ package com.josephhieu.vaccinebackend.modules.finance.controller;
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.finance.dto.request.VaccineFullRequest;
-import com.josephhieu.vaccinebackend.modules.finance.dto.response.CustomerTransactionResponse;
-import com.josephhieu.vaccinebackend.modules.finance.dto.response.FinanceSummaryResponse;
-import com.josephhieu.vaccinebackend.modules.finance.dto.response.VaccineFullResponse;
+import com.josephhieu.vaccinebackend.modules.finance.dto.response.*;
 import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 import com.josephhieu.vaccinebackend.modules.finance.service.FinanceService;
 import jakarta.validation.Valid;
@@ -31,6 +29,15 @@ public class FinanceController {
     public ApiResponse<FinanceSummaryResponse> getSummary() {
         return ApiResponse.<FinanceSummaryResponse>builder()
                 .result(financeService.getFinanceSummary())
+                .build();
+    }
+
+    // Thống kê riêng cho Tab nhà cung cấp
+    @GetMapping("/summary/suppliers")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<SupplierSummaryResponse> getSupplierSummary() {
+        return ApiResponse.<SupplierSummaryResponse>builder()
+                .result(financeService.getSupplierSummary())
                 .build();
     }
 
@@ -98,25 +105,45 @@ public class FinanceController {
         return ApiResponse.<Void>builder().message("Xác nhận thanh toán thành công").build();
     }
 
-    @PostMapping("/transactions/customers/{maHoaDon}/cancel")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
-    public ApiResponse<Void> cancelTransaction(@PathVariable UUID maHoaDon) {
-        financeService.cancelTransaction(maHoaDon);
-        return ApiResponse.<Void>builder().message("Đã hủy hóa đơn").build();
-    }
-
     // =========================================================================
-    // PHÂN HỆ 3: NHẬP HÀNG NCC (/api/finance/transactions/suppliers)
+    // PHÂN HỆ 3: GIAO DỊCH NHÀ CUNG CẤP (CHI TIỀN)
     // =========================================================================
 
     @GetMapping("/transactions/suppliers")
     @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
-    public ApiResponse<PageResponse<HoaDon>> getSupplierTransactions(
+    public ApiResponse<PageResponse<SupplierTransactionResponse>> getSupplierTransactions(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search) {
-        return ApiResponse.<PageResponse<HoaDon>>builder()
+        // CẬP NHẬT: Trả về DTO SupplierTransactionResponse thay vì Entity HoaDon
+        return ApiResponse.<PageResponse<SupplierTransactionResponse>>builder()
                 .result(financeService.getSupplierTransactions(page, size, search))
                 .build();
+    }
+
+    // MỚI: Lấy chi tiết đơn nhập hàng
+    @GetMapping("/transactions/suppliers/{maHoaDon}")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<HoaDon> getSupplierDetail(@PathVariable UUID maHoaDon) {
+        return ApiResponse.<HoaDon>builder()
+                .result(financeService.getSupplierTransactionDetail(maHoaDon))
+                .build();
+    }
+
+    // MỚI: Xác nhận đã trả tiền cho Nhà cung cấp
+    @PostMapping("/transactions/suppliers/{maHoaDon}/confirm")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<Void> confirmSupplierPayment(
+            @PathVariable UUID maHoaDon,
+            @RequestParam String phuongThuc) {
+        financeService.confirmSupplierPayment(maHoaDon, phuongThuc);
+        return ApiResponse.<Void>builder().message("Xác nhận chi tiền cho NCC thành công").build();
+    }
+
+    @PostMapping("/transactions/{maHoaDon}/cancel")
+    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    public ApiResponse<Void> cancelTransaction(@PathVariable UUID maHoaDon) {
+        financeService.cancelTransaction(maHoaDon);
+        return ApiResponse.<Void>builder().message("Đã hủy hóa đơn").build();
     }
 }

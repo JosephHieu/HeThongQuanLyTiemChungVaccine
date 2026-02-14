@@ -36,7 +36,7 @@ const SupplierTransactionTab = ({ searchTerm, dateRange }) => {
       setTransactions(response.data || []);
       setTotalPages(response.totalPages || 1);
     } catch (error) {
-      toast.error("Lỗi tải lịch sử nhập hàng");
+      toast.error("Lỗi tải lịch sử nhập hàng: " + error.message);
     } finally {
       setLoading(false);
     }

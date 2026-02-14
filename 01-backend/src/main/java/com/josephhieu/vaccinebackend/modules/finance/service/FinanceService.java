@@ -2,9 +2,7 @@ package com.josephhieu.vaccinebackend.modules.finance.service;
 
 import com.josephhieu.vaccinebackend.common.dto.response.PageResponse;
 import com.josephhieu.vaccinebackend.modules.finance.dto.request.VaccineFullRequest;
-import com.josephhieu.vaccinebackend.modules.finance.dto.response.CustomerTransactionResponse;
-import com.josephhieu.vaccinebackend.modules.finance.dto.response.FinanceSummaryResponse;
-import com.josephhieu.vaccinebackend.modules.finance.dto.response.VaccineFullResponse;
+import com.josephhieu.vaccinebackend.modules.finance.dto.response.*;
 import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 
 import java.math.BigDecimal;
@@ -16,62 +14,64 @@ import java.util.UUID;
  */
 public interface FinanceService {
 
-    /**
-     * Truy xuất danh sách vắc-xin đầy đủ phục vụ quản lý danh mục và giá.
-     */
-    PageResponse<VaccineFullResponse> getVaccineManagementList(int page, int size);
-
-    /**
-     * Tạo mới một loại vắc-xin vào hệ thống.
-     */
-    VaccineFullResponse createVaccine(VaccineFullRequest request);
-
-    /**
-     * Cập nhật toàn diện thông tin vắc-xin dựa trên ID.
-     */
-    VaccineFullResponse updateVaccine(UUID id, VaccineFullRequest request);
-
-    /**
-     * Xóa vắc-xin khỏi danh mục (Chỉ cho phép nếu chưa có dữ liệu liên quan).
-     */
-    void deleteVaccine(UUID id);
-
-    /**
-     * Tính toán tổng giá trị tồn kho hiện tại (Dựa trên giá nhập và số lượng).
-     */
-    BigDecimal calculateTotalInventoryValue();
-
-    /**
-     * Lấy chi tiết thông tin vắc-xin theo ID.
-     */
-    VaccineFullResponse getVaccineDetail(UUID id);
+    // =========================================================================
+    // PHÂN HỆ 1: QUẢN LÝ VẮC-XIN (GIỮ NGUYÊN HOẶC TỐI ƯU)
+    // =========================================================================
 
     PageResponse<VaccineFullResponse> getVaccineManagementList(int page, int size, String keyword);
 
-    /**
-     * Lấy danh sách giao dịch khách hàng có phân trang, tìm kiếm và lọc ngày.
-     */
+    VaccineFullResponse createVaccine(VaccineFullRequest request);
+
+    VaccineFullResponse updateVaccine(UUID id, VaccineFullRequest request);
+
+    void deleteVaccine(UUID id);
+
+    VaccineFullResponse getVaccineDetail(UUID id);
+
+    BigDecimal calculateTotalInventoryValue();
+
+
+    // =========================================================================
+    // PHÂN HỆ 2: GIAO DỊCH KHÁCH HÀNG (THU TIỀN)
+    // =========================================================================
+
     PageResponse<CustomerTransactionResponse> getCustomerTransactions(
             int page, int size, String search, String startDate, String endDate);
 
-    /**
-     * Xác nhận thanh toán hóa đơn.
-     */
     void confirmPayment(UUID maHoaDon, String phuongThucThanhToan);
 
+    void cancelTransaction(UUID maHoaDon);
+
+
+    // =========================================================================
+    // PHÂN HỆ 3: GIAO DỊCH NHÀ CUNG CẤP (CHI TIỀN) - CẬP NHẬT MỚI
+    // =========================================================================
+
     /**
-     * Truy xuất danh sách hóa đơn nhập hàng từ nhà cung cấp (Phân trang & Tìm kiếm).
+     * SỬA: Trả về SupplierTransactionResponse thay vì HoaDon để có tên Nhà cung cấp.
      */
-    PageResponse<HoaDon> getSupplierTransactions(
+    PageResponse<SupplierTransactionResponse> getSupplierTransactions(
             int page, int size, String search);
 
     /**
-     * Hủy hóa đơn giao dịch (Chỉ cho phép khi chưa thanh toán).
+     * MỚI: Lấy chi tiết đơn nhập hàng (bao gồm danh sách lô vắc-xin bên trong).
      */
-    void cancelTransaction(UUID maHoaDon);
+    HoaDon getSupplierTransactionDetail(UUID maHoaDon);
 
     /**
-     * Lấy dữ liệu tổng quan tài chính (Doanh thu, số hóa đơn chờ, giá trị kho).
+     * MỚI: Xác nhận đã trả tiền cho Nhà cung cấp.
      */
+    void confirmSupplierPayment(UUID maHoaDon, String phuongThuc);
+
+
+    // =========================================================================
+    // PHÂN HỆ 4: TỔNG QUAN & THỐNG KÊ - CẬP NHẬT MỚI
+    // =========================================================================
+
     FinanceSummaryResponse getFinanceSummary();
+
+    /**
+     * MỚI: Lấy dữ liệu thống kê riêng cho Tab Nhà cung cấp.
+     */
+    SupplierSummaryResponse getSupplierSummary();
 }
