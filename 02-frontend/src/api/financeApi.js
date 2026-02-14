@@ -6,18 +6,25 @@ import axiosClient from "./axiosClient";
  */
 const financeApi = {
   // =========================================================================
-  // 1. TỔNG QUAN & THỐNG KÊ (Dành cho Header Dashboard)
+  // 1. TỔNG QUAN & THỐNG KÊ
   // =========================================================================
 
   /**
-   * Lấy dữ liệu tổng quan (Doanh thu hôm nay, Hóa đơn chờ, Giá trị kho)
+   * Lấy tổng quan Doanh thu (Khách hàng) & Kho
    */
   getFinanceSummary: () => {
     return axiosClient.get("/finance/summary");
   },
 
+  /**
+   * MỚI: Lấy tổng quan Chi phí & Công nợ (Nhà cung cấp)
+   */
+  getSupplierSummary: () => {
+    return axiosClient.get("/finance/summary/suppliers");
+  },
+
   // =========================================================================
-  // 2. QUẢN LÝ DANH MỤC VẮC-XIN (Tab Bảng giá/Danh mục)
+  // 2. QUẢN LÝ DANH MỤC VẮC-XIN
   // =========================================================================
 
   getVaccines: (page = 1, size = 7, search = "") => {
@@ -38,52 +45,59 @@ const financeApi = {
     return axiosClient.delete(`/finance/vaccines/${id}`);
   },
 
-  getTotalInventoryValue: () => {
-    return axiosClient.get("/finance/vaccines");
-  },
-
   // =========================================================================
-  // 3. GIAO DỊCH KHÁCH HÀNG (Tab Giao dịch khách hàng)
+  // 3. GIAO DỊCH KHÁCH HÀNG (THU)
   // =========================================================================
 
-  /**
-   * Truy xuất danh sách giao dịch khách hàng
-   * @param {Object} params - { page, size, search, startDate, endDate }
-   */
   getCustomerTransactions: (params) => {
     return axiosClient.get("/finance/transactions/customers", { params });
   },
 
-  /**
-   * Xác nhận thu tiền khách hàng
-   */
   confirmPayment: (maHoaDon, phuongThuc) => {
     return axiosClient.post(
       `/finance/transactions/customers/${maHoaDon}/confirm`,
-      null,
-      {
-        params: { phuongThuc },
-      },
-    );
-  },
-
-  /**
-   * Hủy hóa đơn giao dịch
-   */
-  cancelTransaction: (maHoaDon) => {
-    return axiosClient.post(
-      `/finance/transactions/customers/${maHoaDon}/cancel`,
+      null, // No body
+      { params: { phuongThuc } }, // Gửi query param ?phuongThuc=...
     );
   },
 
   // =========================================================================
-  // 4. NHẬP HÀNG NCC (Tab Nhập hàng)
+  // 4. NHẬP HÀNG & NHÀ CUNG CẤP (CHI)
   // =========================================================================
 
   getSupplierTransactions: (page = 1, size = 10, search = "") => {
     return axiosClient.get("/finance/transactions/suppliers", {
       params: { page, size, search },
     });
+  },
+
+  /**
+   * MỚI: Lấy chi tiết hóa đơn nhập hàng (để hiện Modal xem chi tiết lô hàng)
+   */
+  getSupplierDetail: (maHoaDon) => {
+    return axiosClient.get(`/finance/transactions/suppliers/${maHoaDon}`);
+  },
+
+  /**
+   * MỚI: Xác nhận đã chi tiền cho Nhà cung cấp
+   */
+  confirmSupplierPayment: (maHoaDon, phuongThuc) => {
+    return axiosClient.post(
+      `/finance/transactions/suppliers/${maHoaDon}/confirm`,
+      null,
+      { params: { phuongThuc } },
+    );
+  },
+
+  // =========================================================================
+  // 5. NGHIỆP VỤ CHUNG
+  // =========================================================================
+
+  /**
+   * Hủy hóa đơn (Dùng chung cho cả Xuất và Nhập nếu chưa thanh toán)
+   */
+  cancelTransaction: (maHoaDon) => {
+    return axiosClient.post(`/finance/transactions/${maHoaDon}/cancel`);
   },
 };
 

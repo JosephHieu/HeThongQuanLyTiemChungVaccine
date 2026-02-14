@@ -1,10 +1,13 @@
 package com.josephhieu.vaccinebackend.modules.finance.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.josephhieu.vaccinebackend.modules.inventory.entity.LoVacXin;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -13,6 +16,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class HoaDon {
 
     @Id
@@ -34,4 +38,8 @@ public class HoaDon {
 
     @Column(name = "LoaiHoaDon")
     private String loaiHoaDon; // "XUAT" (Bán cho khách), "NHAP" (Nhập từ NCC)
+
+    @OneToMany(mappedBy = "hoaDon", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("hoaDon") // Tránh vòng lặp vô hạn khi trả về JSON
+    private List<LoVacXin> danhSachLo;
 }

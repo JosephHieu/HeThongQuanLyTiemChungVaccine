@@ -2,6 +2,8 @@ package com.josephhieu.vaccinebackend.modules.inventory.service.impl;
 
 import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
+import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
+import com.josephhieu.vaccinebackend.modules.finance.repository.HoaDonRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineExportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.request.VaccineImportRequest;
 import com.josephhieu.vaccinebackend.modules.inventory.dto.response.InventoryResponse;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +31,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final LoaiVacXinRepository loaiVacXinRepository;
     private final NhaCungCapRepository nhaCungCapRepository;
     private final PhieuXuatRepository phieuXuatRepository;
+    private final HoaDonRepository hoaDonRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,12 +48,12 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public InventoryResponse importVaccine(VaccineImportRequest request) {
 
-        // Kiểm tra số lô trùng lặp
+        // 1. Kiểm tra số lô trùng lặp
         if (loVacXinRepository.existsBySoLo(request.getSoLo())) {
             throw new AppException(ErrorCode.BATCH_ALREADY_EXISTS);
         }
 
-        // 1. Kiểm tra/Cập nhật danh mục Vắc-xin gốc
+        // 2. Kiểm tra/Tạo danh mục vắc-xin gốc
         VacXin vacXin = vacXinRepository.findByTenVacXin(request.getTenVacXin())
                 .map(existingVacxin -> {
                     // Nếu đã tồn tại, hãy cập nhật các thông tin y tế mới từ form
@@ -60,14 +64,27 @@ public class InventoryServiceImpl implements InventoryService {
                 })
                 .orElseGet(() -> createNewVaccineCategory(request)); // Nếu chưa có thì mới tạo mới
 
-        // 2. Kiểm tra Nhà cung cấp
+        // 3. Kiểm tra Nhà cung cấp
         NhaCungCap ncc = nhaCungCapRepository.findById(request.getMaNhaCungCap())
                 .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_FOUND));
+
+        // 4. --- BƯỚC QUAN TRỌNG: TẠO HÓA ĐƠN TÀI CHÍNH ---
+        BigDecimal tongTienHienTai = request.getGiaNhap().multiply(BigDecimal.valueOf(request.getSoLuong()));
+
+        HoaDon hoaDonNhap = HoaDon.builder()
+                .tongTien(tongTienHienTai)
+                .ngayTao(LocalDateTime.now())
+                .trangThai(0) // Chờ thanh toán cho NCC
+                .loaiHoaDon("Nhap")
+                .build();
+
+        hoaDonNhap = hoaDonRepository.save(hoaDonNhap);
 
         // 3. Khởi tạo lô hàng mới (Transaction Record)
         LoVacXin loMoi = LoVacXin.builder()
                 .vacXin(vacXin)
                 .nhaCungCap(ncc)
+                .hoaDon(hoaDonNhap)
                 .soLo(request.getSoLo())
                 .soLuong(request.getSoLuong())
                 .ngayNhan(request.getNgayNhan())

@@ -1,5 +1,6 @@
 package com.josephhieu.vaccinebackend.modules.inventory.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.josephhieu.vaccinebackend.modules.finance.entity.HoaDon;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class LoVacXin {
 
     @Id
@@ -34,6 +36,7 @@ public class LoVacXin {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaHoaDon")
+    @JsonIgnoreProperties("danhSachLo")
     private HoaDon hoaDon;
 
     @Column(name = "SoLuong")

@@ -240,16 +240,20 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     @Transactional(readOnly = true)
     public SupplierSummaryResponse getSupplierSummary() {
+        // Lấy ngày đầu tháng này
         LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endOfMonth = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
-        BigDecimal spending = hoaDonRepository.sumSpendingByPeriod(startOfMonth, endOfMonth);
-        long debtCount = hoaDonRepository.countByTrangThaiAndLoaiHoaDon(0, TYPE_NHAP);
+        // 1. Tính tổng chi (Hóa đơn NHAP đã thanh toán - trạng thái 1)
+        BigDecimal totalSpending = hoaDonRepository.sumSpendingByPeriod(startOfMonth, now);
+
+        // 2. Đếm số hóa đơn chưa thanh toán cho NCC (Công nợ - trạng thái 0)
+        long pendingInvoices = hoaDonRepository.countByTrangThaiAndLoaiHoaDon(0, "NHAP");
 
         return SupplierSummaryResponse.builder()
-                .totalSpendingThisMonth(spending != null ? spending : BigDecimal.ZERO)
-                .spendingTrend("+15%") // Có thể tính toán thêm nếu cần
-                .overdueInvoices(debtCount)
+                .totalSpendingThisMonth(totalSpending != null ? totalSpending : BigDecimal.ZERO)
+                .spendingTrend("+12%") // Bạn có thể viết logic tính % so với tháng trước ở đây
+                .overdueInvoices(pendingInvoices)
                 .build();
     }
 
