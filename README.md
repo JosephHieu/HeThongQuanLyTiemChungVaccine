@@ -1,30 +1,36 @@
 # 💉 VaxTrack Pro - Hệ thống Quản lý Tiêm chủng & Tài chính Tập trung
-**VaxTrack Pro** là giải pháp quản trị tổng thể cho các trung tâm tiêm chủng, tích hợp từ quy trình tiếp đón bệnh nhân, tư vấn, tiêm chủng cho đến quản lý kho vắc-xin và dòng tiền tài chính. Hệ thống đảm bảo tính nhất quán tuyệt đối giữa dữ liệu vật tư và dữ liệu kế toán.
+**VaxTrack Pro** là giải pháp quản trị tổng thể cho các trung tâm y tế dự phòng, được thiết kế theo chuẩn SRS v3.0. Hệ thống giải quyết bài toán cấp thiết trong việc bảo vệ cộng đồng khỏi dịch bệnh thông qua quản lý tiêm chủng, cơ sở vật chất và tài chính minh bạch.
 
-## 🌟 Tính năng cốt lõi
-**1. Quản lý Kho & Chuỗi cung ứng**
+## 👥 Hệ thống Phân quyền (Role-Based Access Control)
 
-- **Nhập kho tự động hóa:** Tích hợp quy trình tạo HOADON nhập hàng ngay khi thêm LOVACXIN mới.
+Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 nhóm chính với 6 vai trò cụ thể:
 
-- **Theo dõi Lô hàng (Batch Tracking):** Quản lý chi tiết số lượng nhập ban đầu (SoLuongNhap) và tồn kho thực tế (SoLuong) để phục vụ kiểm kê.
+- **Administrator:** Toàn quyền quản trị hệ thống, quản lý tài khoản và phân quyền.
+- **Moderator (Nhóm điều hành):**
+  - **Quản lý kho:** Theo dõi tình hình vắc-xin, thực hiện nhập/xuất kho.
+  - **Nhân viên tài chính:** Quản lý giá, thu chi, đối soát giao dịch khách hàng và nhà cung cấp.
+  - **Nhân viên y tế:** Trực tiếp khám, cập nhật hồ sơ bệnh án và kê đơn.
+  - **Hỗ trợ khách hàng:** Tư vấn, giải đáp thắc mắc và nhắc lịch tiêm chủng qua Email/SMS.
+  - **Normal User (Khách hàng):** Tra cứu thông tin vắc-xin, đăng ký tiêm phòng trực tuyến và theo dõi hồ sơ cá nhân
 
-- **Hỗ trợ FEFO:** Ưu tiên xuất các lô hàng sắp hết hạn dựa trên dữ liệu HanSuDung.
+## 🌟 Tính năng cốt lõi theo quy trình SRS
 
-**2. Phân hệ Tài chính & Giao dịch**
+### 1. Quản lý Kho & Logistics
 
-- **Đa dạng luồng tiền:** Phân tách rõ ràng giữa hóa đơn khách hàng (XUAT) và hóa đơn nhà cung cấp (NHAP).
+- **Xem tình hình kho:** Tra cứu đa năng theo tên, loại vắc-xin, nơi sản xuất hoặc độ tuổi.
+- **Nhập kho tự động:** Tự động tạo hóa đơn tài chính ngay khi thêm lô mới.
+- **Xuất kho:** Kiểm soát số lượng xuất thực tế, đảm bảo không xuất quá số lượng tồn.
 
-- **Chi tiết Giao dịch:** Modal hiển thị thông tin chuyên sâu, cho phép đối soát đơn giá vốn, thành tiền và thông tin lô hàng ngay trên phiếu chi.
+### 2. Quy trình Y tế Khép kín (E2E)
 
-- **Dashboard Tài chính:** Tổng hợp doanh thu, vốn đầu tư và giá trị tài sản kho theo thời gian thực.
+- **Hồ sơ bệnh án điện tử:** Lưu vết toàn bộ lịch sử tiêm, phản ứng sau tiêm và thời gian tác dụng của vắc-xin.
+- **Kê đơn & Hẹn tiêm:** Hỗ trợ bác sĩ kê đơn và lập lịch tiêm nhắc lại cho bệnh nhân.
+- **Tư vấn khách hàng:** Hệ thống giải đáp thắc mắc và FAQ tự động cho người dùng.
 
-**3. Quy trình Tiêm chủng Khép kín (E2E)**
+### 3. Quản trị Tài chính & Giao dịch 
 
-- **Quản lý Bệnh nhân:** Lưu trữ hồ sơ bệnh án, lịch sử tiêm chủng và phản hồi sau tiêm.
-
-- **Hệ thống Tư vấn:** Quản lý lượt tư vấn và hỗ trợ bác sĩ đưa ra phác đồ tiêm phù hợp.
-
-- **Quản trị Nhân sự:** Phân quyền chi tiết (PHANQUYEN) cho nhân viên y tế và nhân viên kho/kế toán.
+- **Quản lý thu chi:** Thống kê định kỳ doanh thu từ khách hàng và công nợ nhà cung cấp.
+- **Biên lai điện tử:** Xuất biên lai giao dịch ngay sau khi hoàn tất quy trình tiêm.
 
 ## 📊 Thiết kế Cơ sở dữ liệu (Database Schema)
 Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Schema) tối ưu, đảm bảo tính toàn vẹn dữ liệu cho hơn 15 thực thể chính.
@@ -60,7 +66,7 @@ Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Sc
 
 ## 🚀 Hướng dẫn cài đặt & Thiết lập Database
 
-Dự án đã bao gồm file db-project-script.sql chứa đầy đủ cấu trúc bảng và dữ liệu mẫu để bạn có thể chạy thử Dashboard ngay lập tức.
+Dự án cung cấp file db-project-script.sql chứa đầy đủ cấu trúc và dữ liệu mẫu.
 
 **1. Thiết lập Database**
 
@@ -84,4 +90,5 @@ spring.datasource.password=your_password
 
 
   
+
 
