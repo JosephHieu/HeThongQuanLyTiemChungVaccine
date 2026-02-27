@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
 
                         // Quyền Nhân viên y tế
-                        .requestMatchers("/api/medical/**").hasAnyAuthority("Administrator", "Nhân viên y tế")
+                        .requestMatchers("/api/v1/medical/**").hasAnyAuthority("Administrator", "Nhân viên y tế")
 
                         // Quyền Tài chính
                         .requestMatchers("/api/finance/**").hasAnyAuthority("Administrator", "Tài chính")
