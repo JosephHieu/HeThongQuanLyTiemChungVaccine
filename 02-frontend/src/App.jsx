@@ -201,8 +201,17 @@ function App() {
         <Route
           path="/unauthorized"
           element={
-            <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-red-500">
-              Bạn không có quyền truy cập vào phân hệ này!
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+              <h1 className="text-4xl font-bold text-slate-800 mb-2">403</h1>
+              <p className="text-lg text-red-500 font-medium mb-6">
+                Bạn không có quyền truy cập vào phân hệ này!
+              </p>
+              <button
+                onClick={() => (window.location.href = "/")}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Quay về trang chủ
+              </button>
             </div>
           }
         />
