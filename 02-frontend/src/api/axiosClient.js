@@ -1,38 +1,43 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080/api",
+  // Sử dụng biến môi trường để linh hoạt giữa dev và production
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1",
   headers: { "Content-Type": "application/json" },
 });
 
-// Tự động đính kèm Token vào Header trước khi gửi request
-axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// [Request Interceptor]
+axiosClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
+// [Response Interceptor]
 axiosClient.interceptors.response.use(
   (response) => {
-    // Nếu Backend trả về ApiResponse chuẩn, ta chỉ lấy phần 'result' để UI dễ dùng
-    if (response.data && response.data.result !== undefined) {
-      return response.data.result;
-    }
-    return response.data;
+    // Chỉ trả về phần 'result' nếu có
+    return response.data?.result ?? response.data;
   },
   (error) => {
-    // Tận dụng mã lỗi và message từ AppException/GlobalExceptionHandler
-
     const backendError = error.response?.data;
+    const status = error.response?.status;
 
-    // Nếu có cấu trúc ApiResponse (code, message), thì trả về nó
-    if (backendError) {
-      return Promise.reject(backendError);
+    // 1. Xử lý lỗi Unauthorized (Token hết hạn hoặc không hợp lệ)
+    if (status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login"; // Hoặc dùng navigate nếu có context
     }
 
-    return Promise.reject({ message: "Lỗi kết nối hệ thống" });
+    // 2. Trả về cấu trúc lỗi từ Backend hoặc lỗi mặc định
+    return Promise.reject(
+      backendError || { message: "Lỗi kết nối hệ thống", code: 9999 },
+    );
   },
 );
 

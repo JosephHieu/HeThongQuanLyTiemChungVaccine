@@ -8,6 +8,8 @@ import com.josephhieu.vaccinebackend.modules.medical.service.HighLevelFeedbackSe
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +17,13 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Controller cung cấp các điểm cuối (endpoints) cho chức năng Phản hồi cấp cao.
- * Đảm bảo phân quyền nghiêm ngặt giữa Bệnh nhân và Quản trị viên hệ thống.
- * * @author Joseph Hieu
+ * Controller quản trị các phản hồi cấp cao và kênh tương tác trực tiếp với Ban quản trị.
+ * <p>
+ * Đảm bảo quy trình xử lý khiếu nại, góp ý chuyên sâu được thực hiện minh bạch
+ * thông qua cơ chế phân quyền nghiêm ngặt giữa Bệnh nhân và Administrator.
+ * </p>
+ *
+ * @author Joseph Hieu
  * @version 1.0
  */
 @RestController
@@ -29,95 +35,124 @@ public class HighLevelFeedbackController {
     private final HighLevelFeedbackService highLevelFeedbackService;
 
     // ========================================================================
-    // DÀNH CHO BỆNH NHÂN (NORMAL USER)
+    // PHÂN HỆ DÀNH CHO BỆNH NHÂN (USER OPERATIONS)
     // ========================================================================
 
     /**
-     * Gửi một phản hồi mới tới ban quản trị.
-     * Chỉ dành cho người dùng có vai trò 'Normal User Account'.
+     * Gửi yêu cầu phản hồi hoặc khiếu nại mới tới Ban quản trị hệ thống.
+     *
+     * @param request Nội dung chi tiết của phản hồi.
+     * @return {@link ResponseEntity} với mã 201 (Created) xác nhận yêu cầu đã được tiếp nhận.
      */
     @PostMapping
     @PreAuthorize("hasRole('Normal User Account')")
-    public ApiResponse<Void> sendFeedback(@RequestBody @Valid HighLevelFeedbackRequest request) {
-        log.info("API: Tiếp nhận yêu cầu gửi phản hồi mới từ người dùng.");
+    public ResponseEntity<ApiResponse<Void>> sendFeedback(@RequestBody @Valid HighLevelFeedbackRequest request) {
+        log.info("Khách hàng đang khởi tạo một phản hồi cấp cao mới.");
         highLevelFeedbackService.sendFeedback(request);
-        return ApiResponse.<Void>builder()
-                .message("Phản hồi của bạn đã được gửi tới Administrator thành công!")
-                .build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(null, "Phản hồi của bạn đã được gửi tới Administrator thành công!"));
     }
 
     /**
-     * Tra cứu lịch sử các phản hồi cá nhân đã gửi.
+     * Tra cứu lịch sử toàn bộ các khiếu nại/phản hồi mà cá nhân người dùng đã gửi.
+     *
+     * @return {@link ResponseEntity} chứa danh sách phản hồi cá nhân.
      */
     @GetMapping("/my-history")
     @PreAuthorize("hasRole('Normal User Account')")
-    public ApiResponse<List<HighLevelFeedbackResponse>> getMyHistory() {
-        log.info("API: Truy xuất lịch sử phản hồi cá nhân.");
-        return ApiResponse.<List<HighLevelFeedbackResponse>>builder()
-                .result(highLevelFeedbackService.getMyFeedbackHistory())
-                .build();
+    public ResponseEntity<ApiResponse<List<HighLevelFeedbackResponse>>> getMyHistory() {
+        log.info("Người dùng thực hiện tra cứu lịch sử phản hồi cá nhân.");
+        List<HighLevelFeedbackResponse> result = highLevelFeedbackService.getMyFeedbackHistory();
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
+    /**
+     * Cập nhật nội dung phản hồi đã gửi (khi yêu cầu đang trong trạng thái chờ xử lý).
+     *
+     * @param id Mã định danh phản hồi cần chỉnh sửa.
+     * @param request Nội dung cập nhật mới.
+     * @return {@link ResponseEntity} xác nhận thao tác thành công.
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('Normal User Account')")
-    public ApiResponse<Void> updateFeedback(@PathVariable UUID id, @RequestBody @Valid HighLevelFeedbackRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateFeedback(@PathVariable UUID id, @RequestBody @Valid HighLevelFeedbackRequest request) {
+        log.info("Người dùng cập nhật nội dung phản hồi ID: {}", id);
         highLevelFeedbackService.updateFeedback(id, request);
-        return ApiResponse.<Void>builder().message("Cập nhật phản hồi thành công!").build();
+        return ResponseEntity.ok(ApiResponse.success(null, "Cập nhật phản hồi thành công!"));
     }
 
+    /**
+     * Gỡ bỏ hoàn toàn phản hồi cá nhân khỏi hệ thống.
+     *
+     * @param id Mã định danh của phản hồi.
+     * @return {@link ResponseEntity} xác nhận đã xóa dữ liệu.
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('Normal User Account')")
-    public ApiResponse<Void> deleteMyFeedback(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteMyFeedback(@PathVariable UUID id) {
+        log.warn("Người dùng yêu cầu xóa phản hồi cá nhân ID: {}", id);
         highLevelFeedbackService.deleteMyFeedback(id);
-        return ApiResponse.<Void>builder().message("Đã xóa phản hồi.").build();
+        return ResponseEntity.ok(ApiResponse.success(null, "Đã xóa phản hồi."));
     }
 
     // ========================================================================
-    // DÀNH CHO QUẢN TRỊ VIÊN (ADMINISTRATOR)
+    // PHÂN HỆ DÀNH CHO QUẢN TRỊ VIÊN (ADMIN OPERATIONS)
     // ========================================================================
 
     /**
-     * Lấy danh sách toàn bộ phản hồi trong hệ thống để xử lý.
-     * Chỉ dành cho Administrator.
+     * Truy xuất toàn bộ phản hồi từ tất cả người dùng trong hệ thống để quản lý tập trung.
+     *
+     * @return {@link ResponseEntity} danh sách tổng hợp dành cho Administrator.
      */
     @GetMapping("/admin/all")
     @PreAuthorize("hasRole('Administrator')")
-    public ApiResponse<List<HighLevelFeedbackResponse>> getAllForAdmin() {
-        log.info("API: Administrator đang truy cập danh sách phản hồi tổng hợp.");
-        return ApiResponse.<List<HighLevelFeedbackResponse>>builder()
-                .result(highLevelFeedbackService.getAllFeedbackForAdmin())
-                .build();
+    public ResponseEntity<ApiResponse<List<HighLevelFeedbackResponse>>> getAllForAdmin() {
+        log.info("Quản trị viên đang truy cập danh sách phản hồi tổng hợp toàn hệ thống.");
+        List<HighLevelFeedbackResponse> result = highLevelFeedbackService.getAllFeedbackForAdmin();
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     /**
-     * Cập nhật trạng thái xử lý cho phản hồi (Ví dụ: Tiếp nhận, Đã giải quyết).
-     * * @param id Mã định danh phản hồi.
-     * @param status Trạng thái mới (0, 1, 2).
+     * Cập nhật trạng thái xử lý cho phản hồi (Ví dụ: Chờ xử lý, Đang giải quyết, Hoàn tất).
+     *
+     * @param id Mã định danh của phản hồi cần điều chỉnh.
+     * @param status Mã trạng thái mới (0, 1, 2).
+     * @return {@link ResponseEntity} thông báo cập nhật thành công.
      */
     @PutMapping("/admin/{id}/status")
     @PreAuthorize("hasRole('Administrator')")
-    public ApiResponse<Void> updateStatus(
+    public ResponseEntity<ApiResponse<Void>> updateStatus(
             @PathVariable UUID id,
             @RequestParam Integer status) {
-        log.info("API: Cập nhật trạng thái phản hồi ID: {} sang mức: {}", id, status);
+        log.info("Administrator thay đổi trạng thái phản hồi ID: {} sang mức: {}", id, status);
         highLevelFeedbackService.updateStatus(id, status);
-        return ApiResponse.<Void>builder()
-                .message("Đã cập nhật trạng thái phản hồi thành công.")
-                .build();
+        return ResponseEntity.ok(ApiResponse.success(null, "Đã cập nhật trạng thái phản hồi thành công."));
     }
 
+    /**
+     * Administrator thực hiện xóa vĩnh viễn một bản ghi phản hồi khỏi cơ sở dữ liệu.
+     *
+     * @param id Mã phản hồi cần xóa.
+     * @return {@link ResponseEntity} xác nhận xóa bởi quyền quản trị.
+     */
     @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('Administrator')")
-    public ApiResponse<Void> deleteByAdmin(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteByAdmin(@PathVariable UUID id) {
+        log.warn("Lệnh xóa bản ghi bởi Administrator đối với phản hồi ID: {}", id);
         highLevelFeedbackService.deleteFeedbackByAdmin(id);
-        return ApiResponse.<Void>builder().message("Admin đã xóa bản ghi phản hồi.").build();
+        return ResponseEntity.ok(ApiResponse.success(null, "Admin đã xóa bản ghi phản hồi thành công."));
     }
 
+    /**
+     * Lấy danh mục các loại phản hồi được hỗ trợ trên hệ thống.
+     * Phục vụ cho việc đổ dữ liệu vào các ô chọn (Dropdown) trên giao diện.
+     *
+     * @return {@link ResponseEntity} danh sách các đối tượng {@link LoaiPhanHoi}.
+     */
     @GetMapping("/types")
-    public ApiResponse<List<LoaiPhanHoi>> getFeedbackTypes() {
-        return ApiResponse.<List<LoaiPhanHoi>>builder()
-                .result(highLevelFeedbackService.getFeedbackTypes())
-                .message("Lấy danh sách Loại phản hồi thành công")
-                .build();
+    public ResponseEntity<ApiResponse<List<LoaiPhanHoi>>> getFeedbackTypes() {
+        log.info("Truy xuất danh mục phân loại phản hồi.");
+        List<LoaiPhanHoi> result = highLevelFeedbackService.getFeedbackTypes();
+        return ResponseEntity.ok(ApiResponse.success(result, "Lấy danh sách Loại phản hồi thành công."));
     }
 }

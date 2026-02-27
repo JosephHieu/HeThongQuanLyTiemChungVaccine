@@ -2,132 +2,80 @@ import axiosClient from "./axiosClient";
 
 const medicalApi = {
   // ========================================================================
-  // PHÂN HỆ NHÂN VIÊN (STAFF PORTAL) - Cần truyền ID bệnh nhân
+  // PHÂN HỆ NHÂN VIÊN (STAFF PORTAL)
   // ========================================================================
-  /**
-   * Truy xuất hồ sơ bệnh án tổng hợp theo ID bệnh nhân
-   * @param {string} id - UUID của bệnh nhân
-   * @returns MedicalRecordResponse (Đã được interceptor bóc tách lấy .result)
-   */
-  getRecord: (id) => {
-    return axiosClient.get(`/v1/medical/records/${id}`);
-  },
 
-  /**
-   * Cập nhật thông tin hành chính bệnh nhân
-   * @param {string} id - UUID của bệnh nhân
-   * @param {Object} data - Dữ liệu từ UpdatePatientRequest
-   */
-  updateInfo: (id, data) => {
-    return axiosClient.put(`/v1/medical/records/${id}`, data);
-  },
+  getRecord: (id) => axiosClient.get(`/medical/records/${id}`),
+
+  updateInfo: (id, data) => axiosClient.put(`/medical/records/${id}`, data),
 
   /**
    * Kê đơn/Chỉ định tiêm chủng mới
-   * @param {string} id - UUID của bệnh nhân
-   * @param {Object} data - Dữ liệu từ PrescribeRequest (maLoVacXin, thoiGianCanTiem)
    */
-  prescribe: (id, data) => {
-    return axiosClient.post(`/v1/medical/records/${id}/prescribe`, data);
-  },
+  prescribe: (id, data) =>
+    axiosClient.post(`/medical/records/${id}/prescribe`, data),
 
+  /**
+   * Xác nhận đã tiêm thực tế (Staff xác nhận cho bệnh nhân)
+   */
   confirmInjection: (maDangKy, data) => {
-    const url = `/v1/medical/records/confirm-injection/${maDangKy}`;
-    return axiosClient.post(url, data);
+    return axiosClient.post(
+      `/medical/records/confirm-injection/${maDangKy}`,
+      data,
+    );
   },
 
   // ========================================================================
-  // PHÂN HỆ BỆNH NHÂN (PATIENT PORTAL) - Lấy danh tính từ Token
+  // PHÂN HỆ BỆNH NHÂN (PATIENT PORTAL)
   // ========================================================================
 
+  getMyProfile: () => axiosClient.get("/medical/my-profile"),
+
+  updateMyProfile: (data) => axiosClient.put("/medical/my-profile", data),
+
   /**
-   * Lấy hồ sơ cá nhân của chính người dùng đang đăng nhập
-   * @returns PatientProfileResponse
+   * Lấy lịch sử tiêm chủng cá nhân
    */
-  getMyProfile: () => {
-    return axiosClient.get(`/v1/medical/my-profile`);
+  getMyHistory: (params) => axiosClient.get("/medical/my-history", { params }),
+
+  // --- PHẢN HỒI SAU TIÊM (FEEDBACK THÔNG THƯỜNG) ---
+
+  sendFeedback: (data) => axiosClient.post("/medical/feedback", data),
+
+  getMyFeedbackHistory: (params) =>
+    axiosClient.get("/medical/feedback/my-history", { params }),
+
+  // --- PHẢN HỒI CẤP CAO (HIGH-LEVEL FEEDBACK) ---
+
+  getHighLevelFeedbackTypes: () =>
+    axiosClient.get("/medical/high-level-feedback/types"),
+
+  sendHighLevelFeedback: (data) =>
+    axiosClient.post("/medical/high-level-feedback", data),
+
+  getHighLevelFeedbackHistory: (params) => {
+    return axiosClient.get("/medical/high-level-feedback/my-history", {
+      params,
+    });
   },
 
-  /**
-   * Cập nhật thông tin cá nhân của bệnh nhân
-   * @param {Object} data - Dữ liệu từ UpdateProfileRequest
-   * @returns PatientProfileResponse (Thông tin mới sau cập nhật)
-   */
-  updateMyProfile: (data) => {
-    return axiosClient.put(`/v1/medical/my-profile`, data);
-  },
-
-  /**
-   * Lấy lịch sử tiêm chủng cá nhân cho bảng lịch sử
-   * @returns List<VaccinationHistoryResponse>
-   */
-  getMyHistory: () => {
-    return axiosClient.get(`/v1/medical/my-history`);
-  },
-
-  // --- PHẦN PHẢN HỒI SAU TIÊM (FEEDBACK THÔNG THƯỜNG - 9.5.4) ---
-
-  /**
-   * Gửi phản hồi tình trạng sức khỏe sau khi tiêm
-   */
-  sendFeedback: (data) => {
-    return axiosClient.post("/v1/medical/feedback", data);
-  },
-
-  /**
-   * Lấy danh sách lịch sử các phản hồi đã gửi
-   */
-  getMyFeedbackHistory: () => {
-    return axiosClient.get("/v1/medical/feedback/my-history");
-  },
-
-  // --- PHẦN PHẢN HỒI CẤP CAO (HIGH-LEVEL FEEDBACK - 9.5.6) ---
-
-  /**
-   * Lấy danh mục các loại phản hồi (Khen ngợi, Phàn nàn...) từ DB
-   */
-  getHighLevelFeedbackTypes: () => {
-    return axiosClient.get("/v1/medical/high-level-feedback/types");
-  },
-
-  /**
-   * Gửi phản hồi trực tiếp tới Administrator
-   */
-  sendHighLevelFeedback: (data) => {
-    return axiosClient.post("/v1/medical/high-level-feedback", data);
-  },
-
-  /**
-   * Xem lịch sử phản hồi gửi Admin của cá nhân
-   */
-  getHighLevelFeedbackHistory: () => {
-    return axiosClient.get("/v1/medical/high-level-feedback/my-history");
-  },
-
-  /**
-   * Cập nhật phản hồi (Khi trạng thái còn là 0)
-   */
   updateHighLevelFeedback: (id, data) => {
-    return axiosClient.put(`/v1/medical/high-level-feedback/${id}`, data);
+    return axiosClient.put(`/medical/high-level-feedback/${id}`, data);
   },
 
-  /**
-   * Xóa phản hồi (Khi trạng thái còn là 0)
-   */
   deleteHighLevelFeedback: (id) => {
-    return axiosClient.delete(`/v1/medical/high-level-feedback/${id}`);
+    return axiosClient.delete(`/medical/high-level-feedback/${id}`);
   },
 
   // ========================================================================
-  // PHẦN 9.5.2: LỊCH TIÊM TRUNG TÂM & ĐĂNG KÝ
+  // LỊCH TIÊM TRUNG TÂM & ĐĂNG KÝ
   // ========================================================================
-  getCenterSchedules: () => {
-    return axiosClient.get("/v1/medical/schedules/center");
-  },
 
-  registerVaccination: (data) => {
-    return axiosClient.post("/v1/medical/registrations", data);
-  },
+  getCenterSchedules: (params) =>
+    axiosClient.get("/medical/schedules/center", { params }),
+
+  registerVaccination: (data) =>
+    axiosClient.post("/medical/registrations", data),
 };
 
 export default medicalApi;

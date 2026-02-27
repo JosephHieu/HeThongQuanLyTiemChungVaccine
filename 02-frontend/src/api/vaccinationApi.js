@@ -1,90 +1,75 @@
 import axiosClient from "./axiosClient";
 
 const vaccinationApi = {
+  // =========================================================================
+  // 1. QUẢN LÝ LỊCH TIÊM (SCHEDULES)
+  // =========================================================================
+
   /**
-   * Lấy chi tiết lịch tiêm theo một ngày cụ thể
-   * @param {string} date - Định dạng YYYY-MM-DD
+   * Lấy chi tiết lịch tiêm theo ngày và ca (Sáng/Chiều)
+   * @param {Object} params - { date: 'YYYY-MM-DD', shift: 'MORNING'|'AFTERNOON' }
    */
-  getScheduleByDate: (date, shift) => {
-    return axiosClient.get("/v1/vaccination/schedules/by-date", {
-      params: { date: date, shift: shift },
-    });
+  getScheduleByDate: (params) => {
+    return axiosClient.get("/vaccination/schedules/by-date", { params });
   },
 
   /**
-   * Lấy danh sách các ngày có lịch tiêm trong tháng (để hiện dấu chấm xanh)
-   * @param {string} start - Ngày bắt đầu tháng (YYYY-MM-DD)
-   * @param {string} end - Ngày kết thúc tháng (YYYY-MM-DD)
+   * Lấy danh sách ngày có lịch để hiển thị dấu chấm trên Calendar
    */
   getActiveDates: (start, end) => {
-    return axiosClient.get("/v1/vaccination/schedules/active-dates", {
+    return axiosClient.get("/vaccination/schedules/active-dates", {
       params: { start, end },
     });
   },
 
-  /**
-   * Tạo mới một lịch tiêm chủng
-   * @param {Object} data - Dữ liệu từ ScheduleCreationRequest
-   */
-  createSchedule: (data) => {
-    return axiosClient.post("/v1/vaccination/schedules", data);
-  },
-
-  /**
-   * Cập nhật lịch tiêm chủng hiện có
-   * @param {string} id - UUID của lịch tiêm
-   * @param {Object} data - Dữ liệu cập nhật
-   */
-  updateSchedule: (id, data) => {
-    return axiosClient.put(`/v1/vaccination/schedules/${id}`, data);
-  },
-
-  /**
-   * Xóa một lịch tiêm chủng
-   * @param {string} id - UUID của lịch tiêm
-   */
-  deleteSchedule: (id) => {
-    return axiosClient.delete(`/v1/vaccination/schedules/${id}`);
-  },
-
-  /**
-   * Lấy toàn bộ danh sách lịch tiêm (phân trang & tìm kiếm)
-   */
-  getAllSchedules: (params) => {
-    return axiosClient.get("/v1/vaccination/schedules", {
+  getAllSchedules: (params = { page: 0, size: 10 }) => {
+    return axiosClient.get("/vaccination/schedules", {
       params: {
-        page: params.page || 1,
-        size: params.size || 10,
-        search: params.search || "",
-        start: params.start || "",
-        end: params.end || "",
+        ...params,
+        search: params.search || undefined,
+        start: params.start || undefined,
+        end: params.end || undefined,
       },
     });
   },
 
-  /**
-   * Lấy danh sách bác sĩ (Module Identity)
-   * Backend: @RequestMapping("/api/users") -> @GetMapping("/medical-staffs")
-   */
-  getDoctors: () => {
-    return axiosClient.get("/users/medical-staffs");
-  },
+  createSchedule: (data) => axiosClient.post("/vaccination/schedules", data),
+
+  updateSchedule: (id, data) =>
+    axiosClient.put(`/vaccination/schedules/${id}`, data),
+
+  deleteSchedule: (id) => axiosClient.delete(`/vaccination/schedules/${id}`),
+
+  // =========================================================================
+  // 2. NGHIỆP VỤ ĐĂNG KÝ & THỰC THI (OPERATIONS)
+  // =========================================================================
 
   /**
-   * Lấy danh sách bệnh nhân đăng ký cho một lịch tiêm
-   * Backend: @RequestMapping("api/v1/vaccination/schedules") -> @GetMapping("/{id}/registrations")
+   * Lấy danh sách bệnh nhân dựa trên ngày tiêm (dùng cho màn hình Check-in tại quầy)
    */
-  getRegistrations: (date, page = 1, size = 10) => {
-    // Gọi tới endpoint mới dùng query param thay vì path variable
-    return axiosClient.get("/v1/vaccination/schedules/registrations-by-date", {
-      params: { date, page, size },
+  getRegistrations: (params = { page: 0, size: 10 }) => {
+    return axiosClient.get("/vaccination/schedules/registrations-by-date", {
+      params: {
+        ...params,
+        date: params.date || undefined,
+      },
     });
   },
 
-  // Lấy danh sách lô vắc xin để chọn
-  getAvailableBatches: () => {
-    return axiosClient.get("/v1/vaccination/schedules/available-batches");
-  },
+  // =========================================================================
+  // 3. DỮ LIỆU BỔ TRỢ (DROPDOWNS / MODALS)
+  // =========================================================================
+
+  /**
+   * Lấy danh sách bác sĩ/nhân viên y tế để gán vào lịch tiêm
+   */
+  getDoctors: () => axiosClient.get("/users/medical-staffs"),
+
+  /**
+   * Lấy danh sách các lô vắc xin còn hạn và còn hàng để xếp lịch
+   */
+  getAvailableBatches: () =>
+    axiosClient.get("/vaccination/schedules/available-batches"),
 };
 
 export default vaccinationApi;

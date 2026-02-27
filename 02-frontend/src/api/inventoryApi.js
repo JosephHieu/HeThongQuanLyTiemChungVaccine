@@ -3,67 +3,51 @@ import axiosClient from "./axiosClient";
 const inventoryApi = {
   /**
    * Lấy danh sách tồn kho có phân trang và tìm kiếm
-   * @param {string} criteria - Tiêu chí lọc (name, type, origin)
-   * @param {string} search - Từ khóa tìm kiếm
-   * @param {number} page - Trang hiện tại
-   * @param {number} size - Số lượng bản ghi mỗi trang
+   * @param {Object} params - { criteria, search, page, size }
    */
-  getInventory: (criteria, search, page = 0, size = 10) => {
-    return axiosClient.get("/v1/inventory", {
-      params: { criteria, search, page, size },
-    });
+  getInventory: (params = { page: 0, size: 10 }) => {
+    // Đã bỏ /v1
+    return axiosClient.get("/inventory", { params });
   },
 
   /**
    * Nhập lô vắc-xin mới
-   * @param {Object} data - Dữ liệu từ VaccineImportRequest
    */
   importVaccine: (data) => {
-    return axiosClient.post("/v1/inventory/import", data);
+    return axiosClient.post("/inventory/import", data);
   },
 
   /**
    * Xuất vắc-xin điều phối
-   * @param {Object} data - Dữ liệu từ VaccineExportRequest (maLo, soLuongXuat)
    */
   exportVaccine: (data) => {
-    return axiosClient.post("/v1/inventory/export", data);
+    return axiosClient.post("/inventory/export", data);
   },
 
   /**
    * Xem chi tiết một lô vắc-xin
-   * @param {string} maLo - UUID của lô hàng
    */
   getBatchDetail: (maLo) => {
-    return axiosClient.get(`/v1/inventory/${maLo}`);
+    return axiosClient.get(`/inventory/${maLo}`);
   },
 
   /**
-   * Lấy tất cả nhà cung cấp (để chọn khi nhập kho)
+   * Lấy danh sách danh mục (Dropdowns)
    */
-  getAllSuppliers: () => {
-    return axiosClient.get("/v1/inventory/suppliers");
-  },
+  getAllSuppliers: () => axiosClient.get("/inventory/suppliers"),
+  getAllVaccineTypes: () => axiosClient.get("/inventory/vaccine-types"),
 
   /**
-   * Lấy tất cả loại vắc-xin (để chọn khi nhập kho)
+   * Thống kê
    */
-  getAllVaccineTypes: () => {
-    return axiosClient.get("/v1/inventory/vaccine-types");
-  },
-
-  /**
-   * Lấy tổng số liều trong kho
-   */
-  getTotalDoses: () => axiosClient.get("/v1/inventory/stats/total-doses"),
+  getTotalDoses: () => axiosClient.get("/inventory/stats/total-doses"),
 
   /**
    * Lấy lịch sử phiếu xuất kho
+   * @param {Object} params - { page, size, startDate, endDate }
    */
-  getExportHistory: (page = 0, size = 10, startDate, endDate) => {
-    return axiosClient.get(`/v1/inventory/export-history`, {
-      params: { page, size, startDate, endDate },
-    });
+  getExportHistory: (params = { page: 0, size: 10 }) => {
+    return axiosClient.get("/inventory/export-history", { params });
   },
 };
 

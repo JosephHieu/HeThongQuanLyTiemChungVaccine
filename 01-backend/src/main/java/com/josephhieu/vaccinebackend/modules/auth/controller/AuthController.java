@@ -1,23 +1,29 @@
 package com.josephhieu.vaccinebackend.modules.auth.controller;
 
+import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
 import com.josephhieu.vaccinebackend.modules.auth.dto.request.LoginRequest;
 import com.josephhieu.vaccinebackend.modules.auth.dto.request.RegisterRequest;
-import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
-import com.josephhieu.vaccinebackend.modules.identity.dto.response.UserResponse;
 import com.josephhieu.vaccinebackend.modules.auth.service.AuthService;
+import com.josephhieu.vaccinebackend.modules.identity.dto.response.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller xử lý các tiến trình xác thực hệ thống.
- * Bao gồm các chức năng: Đăng ký tài khoản và Đăng nhập.
- * * @author Joseph Hieu
+ * Controller chịu trách nhiệm quản lý quy trình xác thực và định danh (Authentication & Identity).
+ * <p>
+ * Cung cấp các điểm cuối (endpoints) cho việc ghi danh người dùng mới và thiết lập
+ * phiên làm việc thông qua cơ chế cấp phát mã thông báo (Token-based Authentication).
+ * </p>
+ *
+ * @author Joseph Hieu
  * @version 1.0
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -26,40 +32,39 @@ public class AuthController {
     private final AuthService authService;
 
     /**
-     * API tiếp nhận yêu cầu đăng ký tài khoản mới.
-     * Dữ liệu được kiểm tra hợp lệ trước khi chuyển xuống tầng Service.
+     * Tiếp nhận yêu cầu đăng ký tài khoản mới cho bệnh nhân hoặc người dùng hệ thống.
+     * <p>
+     * Quy trình bao gồm việc kiểm tra tính hợp lệ của thông tin, mã hóa mật khẩu
+     * và khởi tạo hồ sơ người dùng cơ bản.
+     * </p>
      *
-     * @param request Thông tin đăng ký từ người dùng.
-     * @return ApiResponse chứa thông tin tài khoản sau khi tạo thành công.
+     * @param request Chứa thông tin đăng ký (Username, Password, Email...).
+     * @return {@link ResponseEntity} với mã 201 (Created) và thông tin tài khoản vừa khởi tạo.
      */
     @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> register(@RequestBody @Valid RegisterRequest request) {
+        log.info("Khởi tạo tiến trình đăng ký tài khoản cho định danh: {}", request.getTenDangNhap());
+        UserResponse result = authService.register(request);
 
-        log.info("Nhận yêu cầu đăng ký cho user: {}", request.getTenDangNhap());
-
-        return ApiResponse.<UserResponse>builder()
-                .message("Đăng ký tài khoản thành công.")
-                .result(authService.register(request))
-                .build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(result, "Đăng ký tài khoản thành công."));
     }
 
     /**
-     * API tiếp nhận yêu cầu đăng nhập hệ thống.
-     * Trả về thông tin người dùng kèm danh sách quyền (Roles) để phân quyền Actor. [cite: 72]
+     * Thực hiện xác thực danh tính người dùng và thiết lập phiên làm việc.
+     * <p>
+     * Khi xác thực thành công, hệ thống trả về thông tin người dùng kèm theo quyền hạn (Roles)
+     * và mã truy cập để thực hiện các yêu cầu tiếp theo.
+     * </p>
      *
-     * @param request Thông tin đăng nhập (Username/Password).
-     * @return ApiResponse chứa thông tin định danh và quyền hạn của người dùng.
+     * @param request Thông tin định danh (Username/Password).
+     * @return {@link ResponseEntity} chứa thông tin định danh và quyền hạn của người dùng.
      */
     @PostMapping("/login")
-    public ApiResponse<UserResponse> login(@RequestBody @Valid LoginRequest request) {
-
-        log.info("Nhận yêu cầu đăng nhập từ user: {}", request.getTenDangNhap());
-
+    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody @Valid LoginRequest request) {
+        log.info("Xử lý yêu cầu đăng nhập cho tài khoản: {}", request.getTenDangNhap());
         UserResponse result = authService.login(request);
 
-        return ApiResponse.<UserResponse>builder()
-                .message("Đăng nhập thành công.")
-                .result(result)
-                .build();
+        return ResponseEntity.ok(ApiResponse.success(result, "Đăng nhập hệ thống thành công."));
     }
 }
