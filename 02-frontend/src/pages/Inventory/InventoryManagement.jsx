@@ -43,7 +43,7 @@ const InventoryManagement = () => {
       const res = await inventoryApi.getTotalDoses();
       setTotalDoses(res);
     } catch (error) {
-      console.error("Lỗi tải thống kê liều: " + error);
+      console.error("Lỗi tải thống kê liều: " + error.message);
     }
   };
 
@@ -51,18 +51,18 @@ const InventoryManagement = () => {
   const fetchInventory = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await inventoryApi.getInventory(
-        searchCriteria,
-        activeSearch,
-        page,
-        10,
-      );
+      const data = await inventoryApi.getInventory({
+        criteria: searchCriteria,
+        search: activeSearch,
+        page: page,
+        size: 10,
+      });
       // Backend trả về object Page: { content, totalPages, totalElements, ... }
       setInventory(data.content || []);
       setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalElements || 0);
     } catch (error) {
-      toast.error(error || "Không thể tải dữ liệu kho");
+      toast.error(error.message || "Không thể tải dữ liệu kho");
     } finally {
       setLoading(false);
     }

@@ -8,7 +8,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "LICHTIEMCHUNG")
+@Table(name = "LICHTIEMCHUNG", uniqueConstraints = {
+        @UniqueConstraint(name = "UC_Ngay_Ca", columnNames = {"NgayTiem", "ThoiGianChung"})
+})
 @Getter @Setter
 @Builder
 @NoArgsConstructor

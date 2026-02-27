@@ -45,7 +45,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận yêu cầu đã được tiếp nhận.
      */
     @PostMapping
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<Void>> sendFeedback(@RequestBody @Valid HighLevelFeedbackRequest request) {
         log.info("Khách hàng đang khởi tạo một phản hồi cấp cao mới.");
         highLevelFeedbackService.sendFeedback(request);
@@ -59,7 +59,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} chứa danh sách phản hồi cá nhân.
      */
     @GetMapping("/my-history")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<List<HighLevelFeedbackResponse>>> getMyHistory() {
         log.info("Người dùng thực hiện tra cứu lịch sử phản hồi cá nhân.");
         List<HighLevelFeedbackResponse> result = highLevelFeedbackService.getMyFeedbackHistory();
@@ -74,7 +74,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} xác nhận thao tác thành công.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<Void>> updateFeedback(@PathVariable UUID id, @RequestBody @Valid HighLevelFeedbackRequest request) {
         log.info("Người dùng cập nhật nội dung phản hồi ID: {}", id);
         highLevelFeedbackService.updateFeedback(id, request);
@@ -88,7 +88,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} xác nhận đã xóa dữ liệu.
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<Void>> deleteMyFeedback(@PathVariable UUID id) {
         log.warn("Người dùng yêu cầu xóa phản hồi cá nhân ID: {}", id);
         highLevelFeedbackService.deleteMyFeedback(id);
@@ -105,7 +105,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} danh sách tổng hợp dành cho Administrator.
      */
     @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('Administrator')")
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<List<HighLevelFeedbackResponse>>> getAllForAdmin() {
         log.info("Quản trị viên đang truy cập danh sách phản hồi tổng hợp toàn hệ thống.");
         List<HighLevelFeedbackResponse> result = highLevelFeedbackService.getAllFeedbackForAdmin();
@@ -120,7 +120,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} thông báo cập nhật thành công.
      */
     @PutMapping("/admin/{id}/status")
-    @PreAuthorize("hasRole('Administrator')")
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<Void>> updateStatus(
             @PathVariable UUID id,
             @RequestParam Integer status) {
@@ -136,7 +136,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} xác nhận xóa bởi quyền quản trị.
      */
     @DeleteMapping("/admin/{id}")
-    @PreAuthorize("hasRole('Administrator')")
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<Void>> deleteByAdmin(@PathVariable UUID id) {
         log.warn("Lệnh xóa bản ghi bởi Administrator đối với phản hồi ID: {}", id);
         highLevelFeedbackService.deleteFeedbackByAdmin(id);
@@ -150,6 +150,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} danh sách các đối tượng {@link LoaiPhanHoi}.
      */
     @GetMapping("/types")
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<List<LoaiPhanHoi>>> getFeedbackTypes() {
         log.info("Truy xuất danh mục phân loại phản hồi.");
         List<LoaiPhanHoi> result = highLevelFeedbackService.getFeedbackTypes();

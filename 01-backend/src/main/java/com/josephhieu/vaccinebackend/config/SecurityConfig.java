@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -43,25 +45,33 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()) // Đăng ký bộ xác thực
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Cho phép truy cập công khai các API xác thực
+                        .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        // Quyền tối cao của Admin
-                        .requestMatchers("/api/admin/**", "/api/roles/**", "/api/users/**").hasAuthority("Administrator")
+                        // QUYỀN ADMIN: Quản lý người dùng, vai trò
+                        .requestMatchers("/api/v1/admin/**", "/api/v1/roles/**", "/api/v1/users/**").hasAuthority("Administrator")
 
-                        // Quyền Quản lý kho
-                        .requestMatchers("/api/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
+                        // QUYỀN KHO: Quản lý vắc-xin, lô hàng
+                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
 
-                        // Quyền Nhân viên y tế
-                        .requestMatchers("/api/v1/medical/**").hasAnyAuthority("Administrator", "Nhân viên y tế")
+                        // QUYỀN Y TẾ: Hồ sơ bệnh án, ĐIỀU PHỐI LỊCH TIÊM (Đã bổ sung vaccination/**)
+                        .requestMatchers("/api/v1/medical/feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
+                        .requestMatchers("/api/v1/medical/my-profile", "/api/v1/medical/my-history").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
+                        .requestMatchers("/api/v1/medical/high-level-feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
+                        .requestMatchers("/api/v1/medical/epidemics/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
+                        .requestMatchers("/api/v1/vaccination/schedules/opening").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
+                        .requestMatchers("/api/v1/medical/**", "/api/v1/vaccination/**").hasAnyAuthority("Administrator", "Nhân viên y tế")
 
-                        // Quyền Tài chính
-                        .requestMatchers("/api/finance/**").hasAnyAuthority("Administrator", "Tài chính")
+                        // QUYỀN TÀI CHÍNH: (Đã thêm v1)
+                        .requestMatchers("/api/v1/finance/**").hasAnyAuthority("Administrator", "Tài chính")
 
-                        // Quyền Hỗ trợ khách hàng
-                        .requestMatchers("/api/support/**").hasAnyAuthority("Administrator", "Hỗ trợ khách hàng")
+                        // QUYỀN HỖ TRỢ: Nhắc lịch, phản hồi
+                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("Administrator", "Hỗ trợ khách hàng")
 
-                        // Quyền cho người dùng (Normal User Account)
-                        .requestMatchers("/api/patients/me/**", "/api/vaccinations/**").hasAuthority("Normal User Account")                        .anyRequest().authenticated()
+                        // QUYỀN BỆNH NHÂN: (Đã thêm v1)
+                        .requestMatchers("/api/v1/patients/me/**", "/api/v1/vaccinations/**").hasAuthority("Normal User Account")
+
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

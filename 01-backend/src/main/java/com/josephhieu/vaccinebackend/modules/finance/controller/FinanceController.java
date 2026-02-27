@@ -45,7 +45,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} chứa các chỉ số tài chính tổng hợp.
      */
     @GetMapping("/summary")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<FinanceSummaryResponse>> getSummary() {
         log.info("Yêu cầu truy xuất báo cáo tổng quan tài chính hệ thống.");
         return ResponseEntity.ok(ApiResponse.success(financeService.getFinanceSummary()));
@@ -57,7 +57,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} tóm tắt tình hình tài chính phía đối tác.
      */
     @GetMapping("/summary/suppliers")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<SupplierSummaryResponse>> getSupplierSummary() {
         log.info("Yêu cầu truy xuất tóm tắt giao dịch nhà cung cấp.");
         return ResponseEntity.ok(ApiResponse.success(financeService.getSupplierSummary()));
@@ -76,7 +76,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} trang dữ liệu danh mục vắc-xin.
      */
     @GetMapping("/vaccines")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<PageResponse<VaccineFullResponse>>> getVaccineList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "7") int size,
@@ -92,7 +92,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} với mã 201 (Created) và dữ liệu vắc-xin vừa tạo.
      */
     @PostMapping("/vaccines")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<VaccineFullResponse>> create(@RequestBody @Valid VaccineFullRequest request) {
         log.info("Thêm mới vắc-xin vào danh mục kinh doanh: {}", request.getTenVacXin());
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -107,7 +107,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} dữ liệu sau khi chỉnh sửa.
      */
     @PutMapping("/vaccines/{id}")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<VaccineFullResponse>> update(@PathVariable UUID id, @RequestBody @Valid VaccineFullRequest request) {
         log.info("Cập nhật thông tin tài chính cho vắc-xin ID: {}", id);
         return ResponseEntity.ok(ApiResponse.success(financeService.updateVaccine(id, request), "Cập nhật vắc-xin thành công"));
@@ -120,7 +120,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} xác nhận thao tác thành công.
      */
     @DeleteMapping("/vaccines/{id}")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         log.warn("Thực hiện lệnh xóa vắc-xin khỏi danh mục kinh doanh ID: {}", id);
         financeService.deleteVaccine(id);
@@ -139,7 +139,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} danh sách giao dịch khách hàng phân trang.
      */
     @GetMapping("/transactions/customers")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<PageResponse<CustomerTransactionResponse>>> getCustomerTransactions(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -159,7 +159,7 @@ public class FinanceController {
      * @return {@link ResponseEntity} thông báo trạng thái.
      */
     @PostMapping("/transactions/customers/{maHoaDon}/confirm")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<Void>> confirmPayment(@PathVariable UUID maHoaDon, @RequestParam String phuongThuc) {
         log.info("Xác nhận thanh toán cho hóa đơn khách hàng: {}", maHoaDon);
         financeService.confirmPayment(maHoaDon, phuongThuc);
@@ -174,7 +174,7 @@ public class FinanceController {
      * Lấy danh sách các hóa đơn nhập hàng từ Nhà cung cấp.
      */
     @GetMapping("/transactions/suppliers")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<PageResponse<SupplierTransactionResponse>>> getSupplierTransactions(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -187,7 +187,7 @@ public class FinanceController {
      * Xem chi tiết nội dung một hóa đơn nhập hàng bao gồm danh sách lô vắc-xin đi kèm.
      */
     @GetMapping("/transactions/suppliers/{maHoaDon}")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<HoaDon>> getSupplierDetail(@PathVariable UUID maHoaDon) {
         log.info("Truy vấn chi tiết hóa đơn nhập kho: {}", maHoaDon);
         return ResponseEntity.ok(ApiResponse.success(financeService.getSupplierTransactionDetail(maHoaDon)));
@@ -197,7 +197,7 @@ public class FinanceController {
      * Xác nhận đã thực hiện chi tiền trả cho Nhà cung cấp đối với các lô hàng đã nhập kho.
      */
     @PostMapping("/transactions/suppliers/{maHoaDon}/confirm")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<Void>> confirmSupplierPayment(
             @PathVariable UUID maHoaDon,
             @RequestParam String phuongThuc) {
@@ -210,7 +210,7 @@ public class FinanceController {
      * Thực hiện hủy hóa đơn trong trường hợp sai sót hoặc giao dịch không thành công.
      */
     @PostMapping("/transactions/{maHoaDon}/cancel")
-    @PreAuthorize("hasAnyRole('Administrator', 'Tài chính')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Tài chính')")
     public ResponseEntity<ApiResponse<Void>> cancelTransaction(@PathVariable UUID maHoaDon) {
         log.warn("Yêu cầu hủy hóa đơn hệ thống: {}", maHoaDon);
         financeService.cancelTransaction(maHoaDon);

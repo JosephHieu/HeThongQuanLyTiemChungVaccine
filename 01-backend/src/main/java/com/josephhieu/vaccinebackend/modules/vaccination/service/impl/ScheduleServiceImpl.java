@@ -48,6 +48,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Transactional
     public ScheduleResponse createScheduleService(ScheduleCreationRequest request) {
 
+        // Kiểm tra trùn lịch
+        boolean exists = lichTiemChungRepository.existsByNgayTiemAndThoiGianChung(
+                request.getNgayTiem(), request.getThoiGian());
+
+        if (exists) {
+            throw new AppException(ErrorCode.SCHEDULE_ALREADY_EXISTS);
+        }
+
         LoVacXin loVacXin = loVacXinRepository.findById(request.getMaLo())
                 .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND)); //
 

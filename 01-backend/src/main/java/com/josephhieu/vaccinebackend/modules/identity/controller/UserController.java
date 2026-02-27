@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class UserController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận tài khoản đã được thiết lập.
      */
     @PostMapping("/create")
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody @Valid UserCreationRequest request) {
         log.info("Khởi tạo tài khoản người dùng mới: {}", request.getTenDangNhap());
         UserResponse result = userService.createNewUser(request);
@@ -67,6 +69,7 @@ public class UserController {
      * @return {@link ResponseEntity} chứa trang dữ liệu người dùng kết quả.
      */
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getAllUsers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -87,6 +90,7 @@ public class UserController {
      * @return {@link ResponseEntity} chứa thông tin người dùng sau khi chỉnh sửa.
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable UUID id, @RequestBody @Valid UserCreationRequest request) {
         log.info("Cập nhật thông tin tài khoản ID: {}", id);
         UserResponse result = userService.updateUser(id, request);
@@ -104,6 +108,7 @@ public class UserController {
      * @return {@link ResponseEntity} danh sách nhân sự y tế phù hợp.
      */
     @GetMapping("/medical-staffs")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<List<StaffSummaryResponse>>> getMedicalStaffs() {
         log.info("Truy vấn danh sách nhân viên y tế phục vụ công tác điều phối lịch trực.");
         List<StaffSummaryResponse> result = userService.getStaffsByRole("Nhân viên y tế");
@@ -122,6 +127,7 @@ public class UserController {
      * @return {@link ResponseEntity} thông báo kết quả thao tác.
      */
     @PatchMapping("/{id}/toggle-status")
+    @PreAuthorize("hasAnyAuthority('Administrator')")
     public ResponseEntity<ApiResponse<String>> toggleStatus(@PathVariable UUID id) {
         log.warn("Thay đổi trạng thái hoạt động của tài khoản ID: {}", id);
         userService.toggleLock(id);

@@ -43,7 +43,7 @@ public class FeedbackController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận phản hồi đã được ghi nhận.
      */
     @PostMapping
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<Void>> sendFeedback(@RequestBody @Valid FeedbackRequest request) {
         log.info("Tiếp nhận phản hồi mới từ bệnh nhân.");
         feedbackService.sendFeedback(request);
@@ -61,7 +61,7 @@ public class FeedbackController {
      * @return {@link ResponseEntity} chứa lịch sử phản hồi cá nhân.
      */
     @GetMapping("/my-history")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<List<FeedbackResponse>>> getMyFeedbacks() {
         log.info("Truy xuất lịch sử phản hồi của người dùng hiện tại.");
         List<FeedbackResponse> result = feedbackService.getMyFeedbacks();

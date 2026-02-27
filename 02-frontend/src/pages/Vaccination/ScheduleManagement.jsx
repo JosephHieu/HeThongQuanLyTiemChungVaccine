@@ -42,8 +42,8 @@ const ScheduleManagement = () => {
     const dateStr = format(date, "yyyy-MM-dd");
     try {
       const [schedule, regPageResponse] = await Promise.all([
-        vaccinationApi.getScheduleByDate(dateStr, shift),
-        vaccinationApi.getRegistrations(dateStr),
+        vaccinationApi.getScheduleByDate({ date: dateStr, shift: shift }),
+        vaccinationApi.getRegistrations({ date: dateStr }),
       ]);
 
       // 1. schedule bây giờ chính là Object LichTiemChung
@@ -56,6 +56,7 @@ const ScheduleManagement = () => {
       setRegistrations(actualRegistrations);
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error(error.message || "Đã có lỗi xảy ra");
       setScheduleData(null);
       setRegistrations([]);
     } finally {
@@ -113,13 +114,12 @@ const ScheduleManagement = () => {
         success: (res) => {
           // res ở đây chính là ApiResponse { code, result, message } từ Backend
           setRefreshTrigger((prev) => prev + 1);
-          fetchData(selectedDate);
+          fetchData(selectedDate, selectedShift);
           return <b>{res.message || "Lưu lịch thành công!"}</b>;
         },
         error: (err) => {
           // Lấy message lỗi từ ErrorCode backend trả về
-          const errorMsg = err.response?.data?.message || "Lỗi thao tác!";
-          return <b>{errorMsg}</b>;
+          return <b>{err.message || "Lỗi thao tác!"}</b>;
         },
       },
       {
@@ -168,9 +168,7 @@ const ScheduleManagement = () => {
         }
         return <b>{res.message || "Đã xóa thành công"}</b>;
       },
-      error: (err) => (
-        <b>Lỗi: {err.response?.data?.message || "Không thể xóa"}</b>
-      ),
+      error: (err) => <b>Lỗi: {err.message || "Không thể xóa"}</b>,
     });
   };
 

@@ -47,11 +47,17 @@ const vaccinationApi = {
   /**
    * Lấy danh sách bệnh nhân dựa trên ngày tiêm (dùng cho màn hình Check-in tại quầy)
    */
-  getRegistrations: (params = { page: 0, size: 10 }) => {
+  getRegistrations: (arg) => {
+    // Nếu arg là string (người dùng truyền date trực tiếp)
+    // Nếu arg là object (người dùng truyền { date, page, size })
+    const params = typeof arg === "string" ? { date: arg } : arg;
+
     return axiosClient.get("/vaccination/schedules/registrations-by-date", {
       params: {
+        page: 0,
+        size: 10,
         ...params,
-        date: params.date || undefined,
+        date: params?.date || undefined,
       },
     });
   },

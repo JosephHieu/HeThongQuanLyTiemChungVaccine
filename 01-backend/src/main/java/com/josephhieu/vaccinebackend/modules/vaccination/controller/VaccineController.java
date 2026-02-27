@@ -12,11 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 
 /**
  * Controller chịu trách nhiệm điều phối các luồng nghiệp vụ tiêm chủng dành cho khách hàng.
@@ -42,6 +42,7 @@ public class VaccineController {
      * @return {@link ResponseEntity} bọc {@link ApiResponse} chứa trang dữ liệu vắc-xin kết quả.
      */
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<Page<VaccineInfoResponse>>> getVaccines(@Valid VaccineSearchRequest request) {
         log.info("Bắt đầu truy vấn danh sách vắc-xin với tiêu chí: {}", request);
         Page<VaccineInfoResponse> result = vaccineService.getVaccines(request);
@@ -60,6 +61,7 @@ public class VaccineController {
      * @return {@link ResponseEntity} với mã trạng thái 201 (Created) khi đăng ký thành công.
      */
     @PostMapping("/register")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<String>> register(@RequestBody @Valid VaccinationRegistrationRequest request) {
 
         vaccineService.registerVaccination(request);
@@ -73,6 +75,7 @@ public class VaccineController {
      * @return {@link ResponseEntity} chứa danh sách chi tiết các mũi tiêm đã đăng ký hoặc đã hoàn thành.
      */
     @GetMapping("/my-registrations")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<List<RegistrationHistoryResponse>>> getMyRegistrations() {
         log.info("Truy xuất lịch sử đăng ký cá nhân.");
         List<RegistrationHistoryResponse> result = vaccineService.getMyRegistrations();
@@ -91,6 +94,7 @@ public class VaccineController {
      * @return {@link ResponseEntity} xác nhận thao tác hủy đã hoàn tất.
      */
     @PostMapping("/cancel/{maDangKy}")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<String>> cancel(@PathVariable UUID maDangKy) {
         log.warn("Thực hiện lệnh hủy lượt đăng ký tiêm: {}", maDangKy);
         vaccineService.cancelRegistration(maDangKy);

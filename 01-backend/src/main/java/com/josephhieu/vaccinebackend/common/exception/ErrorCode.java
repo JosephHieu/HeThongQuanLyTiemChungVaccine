@@ -15,7 +15,7 @@ public enum ErrorCode {
     // SECURITY & AUTH (1001 - 1099)
     USER_EXISTED(1001, "Tên đăng nhập đã tồn tại!", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "Người dùng không tồn tại", HttpStatus.NOT_FOUND),
-    ROLE_NOT_FOUND(1006, "Quyền hạn không tồn tại!", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1006, "Bạn không có quyền truy cập chức năng này!", HttpStatus.FORBIDDEN),
     USER_LOCKED(1007, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.", HttpStatus.FORBIDDEN),
     MISSING_INFO(1008, "Vui lòng nhập đầy đủ thông tin", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1009, "Sai username / password", HttpStatus.UNAUTHORIZED),
@@ -47,6 +47,7 @@ public enum ErrorCode {
     ALREADY_REGISTERED(1304, "Bạn đã đăng ký mũi tiêm này rồi", HttpStatus.BAD_REQUEST),
     SCHEDULE_FULL(1305, "Đợt tiêm chủng này đã đủ số lượng người đăng ký", HttpStatus.BAD_REQUEST),
     SCHEDULE_EXPIRED(1306, "Lịch tiêm chủng này đã kết thúc, không thể đăng ký", HttpStatus.BAD_REQUEST),
+    SCHEDULE_ALREADY_EXISTS(1314, "Lịch tiêm chủng này đã tồn tại rồi", HttpStatus.BAD_REQUEST),
     REGISTRATION_NOT_FOUND(1307, "Không tìm thấy thông tin đăng ký tiêm chủng", HttpStatus.NOT_FOUND),
     CANNOT_CANCEL(1308, "Không thể hủy đăng ký đã hoàn thành hoặc quá hạn", HttpStatus.BAD_REQUEST),
     REGISTRATION_EXPIRED(1309, "Đăng ký này đã quá thời gian xử lý", HttpStatus.BAD_REQUEST),

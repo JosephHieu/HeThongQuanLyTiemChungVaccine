@@ -38,7 +38,7 @@ public class VaccinationReminderController {
      * @return {@link ResponseEntity} chứa thông tin tổng hợp về lịch tiêm của bệnh nhân.
      */
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('Administrator', 'Hỗ trợ khách hàng')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Hỗ trợ khách hàng')")
     public ResponseEntity<ApiResponse<VaccinationReminderResponse>> searchByEmail(@RequestParam String email) {
         log.info("Nhân viên hỗ trợ thực hiện tra cứu thông tin nhắc lịch cho email: {}", email);
         VaccinationReminderResponse result = reminderService.getPatientDataByEmail(email);
@@ -57,7 +57,7 @@ public class VaccinationReminderController {
      * @return {@link ResponseEntity} xác nhận trạng thái gửi email thành công.
      */
     @PostMapping("/send")
-    @PreAuthorize("hasAnyRole('Administrator', 'Hỗ trợ khách hàng')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Hỗ trợ khách hàng')")
     public ResponseEntity<ApiResponse<Void>> sendEmail(@RequestBody VaccinationReminderRequest request) {
         log.info("Bắt đầu quy trình gửi email nhắc lịch tiêm chủng đến: {}", request.getEmail());
         reminderService.sendReminderEmail(request);

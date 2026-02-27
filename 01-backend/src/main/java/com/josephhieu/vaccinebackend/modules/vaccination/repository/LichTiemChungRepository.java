@@ -61,4 +61,13 @@ public interface LichTiemChungRepository extends JpaRepository<LichTiemChung, UU
      * Phục vụ người dân tra cứu lịch tiêm sắp tới trên Portal.
      */
     List<LichTiemChung> findByNgayTiemGreaterThanEqualOrderByNgayTiemAsc(LocalDate date);
+
+    /**
+     * Kiểm tra xem đã tồn tại lịch tiêm cho một ngày và ca cụ thể chưa.
+     * Phục vụ việc chặn lỗi Duplicate entry trước khi thực hiện save().
+     * * @param ngayTiem Ngày cần kiểm tra.
+     * @param thoiGianChung Ca làm việc (Sáng/Chiều).
+     * @return true nếu đã tồn tại bản ghi trùng lặp.
+     */
+    boolean existsByNgayTiemAndThoiGianChung(LocalDate ngayTiem, String thoiGianChung);
 }

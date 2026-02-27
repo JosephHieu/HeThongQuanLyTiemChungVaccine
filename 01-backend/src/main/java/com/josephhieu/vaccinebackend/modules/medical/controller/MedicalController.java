@@ -51,7 +51,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} chứa dữ liệu hồ sơ bệnh án chi tiết.
      */
     @GetMapping("/records/{id}")
-    @PreAuthorize("hasRole('Administrator') or hasRole('Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<MedicalRecordResponse>> getRecord(@PathVariable UUID id) {
         log.info("Nhân viên y tế truy xuất hồ sơ bệnh án của bệnh nhân ID: {}", id);
         MedicalRecordResponse result = medicalRecordService.getMedicalRecord(id);
@@ -67,7 +67,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} chứa hồ sơ bệnh án sau khi đã cập nhật thành công.
      */
     @PutMapping("/records/{id}")
-    @PreAuthorize("hasRole('Administrator') or hasRole('Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<MedicalRecordResponse>> updateInfo(
             @PathVariable UUID id,
             @RequestBody @Valid UpdatePatientRequest request) {
@@ -89,7 +89,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận chỉ định đã được lưu.
      */
     @PostMapping("/records/{id}/prescribe")
-    @PreAuthorize("hasRole('Administrator') or hasRole('Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<String>> prescribe(
             @PathVariable UUID id,
             @RequestBody @Valid PrescribeRequest request) {
@@ -112,7 +112,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận mũi tiêm đã hoàn tất.
      */
     @PostMapping("/records/confirm-injection/{maDangKy}")
-    @PreAuthorize("hasRole('Administrator') or hasRole('Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<String>> confirmInjection(
             @PathVariable UUID maDangKy,
             @RequestBody Map<String, String> request) {
@@ -138,7 +138,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} chứa thông tin hồ sơ bệnh nhân hiện tại.
      */
     @GetMapping("/my-profile")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<PatientProfileResponse>> getMyProfile() {
         log.info("Người dùng đang truy cập hồ sơ cá nhân tự phục vụ.");
         PatientProfileResponse result = medicalRecordService.getMyProfile();
@@ -153,7 +153,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} chứa thông tin hồ sơ sau cập nhật.
      */
     @PutMapping("/my-profile")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<PatientProfileResponse>> updateMyProfile(
             @RequestBody @Valid UpdateProfileRequest request) {
 
@@ -170,7 +170,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} chứa danh sách lịch sử tiêm chủng cá nhân.
      */
     @GetMapping("/my-history")
-    @PreAuthorize("hasRole('Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account')")
     public ResponseEntity<ApiResponse<List<VaccinationHistoryResponse>>> getMyHistory() {
         log.info("Người dùng tra cứu lịch sử tiêm chủng cá nhân.");
         List<VaccinationHistoryResponse> result = medicalRecordService.getMyVaccinationHistory();

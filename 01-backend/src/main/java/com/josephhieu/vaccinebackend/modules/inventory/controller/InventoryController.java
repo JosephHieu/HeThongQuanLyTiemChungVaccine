@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -55,6 +56,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} chứa trang dữ liệu tồn kho.
      */
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<Page<InventoryResponse>>> getInventory(
             @RequestParam(required = false, defaultValue = "name") String criteria,
             @RequestParam(required = false, defaultValue = "") String search,
@@ -79,6 +81,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} với mã trạng thái 201 và dữ liệu lô vừa nhập.
      */
     @PostMapping("/import")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<InventoryResponse>> importVaccine(@RequestBody @Valid VaccineImportRequest request) {
         log.info("Bắt đầu quy trình nhập kho vắc-xin: {}", request.getTenVacXin());
         InventoryResponse result = inventoryService.importVaccine(request);
@@ -98,6 +101,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} xác nhận xuất kho kèm số phiếu xuất.
      */
     @PostMapping("/export")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<VaccineExportResponse>> exportVaccine(@RequestBody @Valid VaccineExportRequest request) {
         log.warn("Thực hiện lệnh xuất kho vắc-xin");
         VaccineExportResponse result = inventoryService.exportVaccine(request);
@@ -113,6 +117,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} chứa chi tiết lô hàng và trạng thái hiện tại.
      */
     @GetMapping("/{maLo}")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<InventoryResponse>> getBatchDetail(@PathVariable UUID maLo) {
         log.info("Truy vấn chi tiết lô vắc-xin ID: {}", maLo);
         InventoryResponse result = inventoryService.getBatchDetail(maLo);
@@ -127,6 +132,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} danh sách các đối tượng {@link NhaCungCap}.
      */
     @GetMapping("/suppliers")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<List<NhaCungCap>>> getAllSuppliers() {
         log.info("Tải danh mục nhà cung cấp");
         List<NhaCungCap> result = inventoryService.getAllSuppliers();
@@ -139,6 +145,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} danh sách các đối tượng {@link LoaiVacXin}.
      */
     @GetMapping("/vaccine-types")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<List<LoaiVacXin>>> getAllVaccineTypes() {
         log.info("Tải danh mục loại vắc-xin");
         List<LoaiVacXin> result = inventoryService.getAllVaccineTypes();
@@ -151,6 +158,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} tổng số liều (Long).
      */
     @GetMapping("/stats/total-doses")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<Long>> getTotalDoses() {
         log.info("Tính toán tổng số liều tồn kho hiện tại");
         Long result = inventoryService.getTotalDoses();
@@ -170,6 +178,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} trang dữ liệu lịch sử xuất kho.
      */
     @GetMapping("/export-history")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
     public ResponseEntity<ApiResponse<Page<VaccineExportResponse>>> getExportHistory(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
