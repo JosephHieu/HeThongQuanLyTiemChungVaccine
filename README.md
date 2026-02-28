@@ -43,7 +43,8 @@ Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Sc
 
 - **System:** NHANVIEN, TAIKHOAN, PHANQUYEN.
 
-<img src="docs/DB_Vaccine_Management_SChema.svg" width="800" style="border:1px solid #ddd"/>
+<img width="1277" height="895" alt="image" src="https://github.com/user-attachments/assets/c779745f-bf47-4921-b5ab-608b45f09e91" />
+
 
 ## 🛠 Công nghệ sử dụng
 `Backend`
@@ -90,6 +91,7 @@ spring.datasource.password=your_password
 
 
   
+
 
 
 
