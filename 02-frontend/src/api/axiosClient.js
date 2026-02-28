@@ -29,30 +29,34 @@ axiosClient.interceptors.response.use(
     const status = error.response?.status;
     const errorCode = backendError?.code;
 
-    // 1. Xử lý lỗi Unauthenticated (Mã 1009 hoặc Status 401)
+    // 1. Xử lý lỗi Unauthenticated (Mã 1009) hoặc Token hết hạn (401)
     if (status === 401 || errorCode === 1009) {
-      console.warn("Phiên làm việc hết hạn!");
       localStorage.removeItem("token");
-      localStorage.removeItem("user"); // Xóa cả thông tin user nếu có lưu
-
-      // Chỉ redirect nếu không phải đang ở trang login
+      localStorage.removeItem("user");
       if (!window.location.pathname.includes("/login")) {
         window.location.href = "/login?message=expired";
       }
     }
 
-    // 2. Xử lý lỗi Access Denied (Mã 1010 hoặc Status 403)
-    // Đây là khi @PreAuthorize chặn người dùng
-    if (status === 403 || errorCode === 1010) {
-      toast.error(
-        backendError?.message || "Bạn không có quyền thực hiện hành động này!",
-      );
+    // 2. Xử lý lỗi Reset Password đặc thù
+    if (errorCode === 1013) {
+      toast.error("Mã xác thực đã hết hạn. Vui lòng yêu cầu lại mã mới!");
+    } else if (errorCode === 1012) {
+      toast.error("Mã xác thực không hợp lệ!");
     }
 
-    // 3. Xử lý các lỗi nghiệp vụ khác (Ví dụ: 1301 - Hết hàng, 1001 - Trùng tên...)
-    if (backendError && backendError.message) {
-      // Bạn có thể chọn hiện toast tại đây hoặc để Page tự xử lý
-      // toast.error(backendError.message);
+    // 3. Xử lý Access Denied (Mã 1010)
+    if (status === 403 || errorCode === 1010) {
+      toast.error(backendError?.message || "Bạn không có quyền truy cập!");
+    }
+
+    // 4. Các lỗi nghiệp vụ khác
+    if (
+      backendError &&
+      backendError.message &&
+      ![1012, 1013, 1009].includes(errorCode)
+    ) {
+      toast.error(backendError.message);
     }
 
     return Promise.reject(

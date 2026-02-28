@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import toast, { Toaster } from "react-hot-toast";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
+import authApi from "../api/authApi";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -11,6 +12,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   // Lấy trang mà người dùng định vào trước khi bị đá ra Login (nếu có)
   const from = location.state?.from?.pathname || "/admin/dashboard";
@@ -57,6 +61,20 @@ const Login = () => {
       toast.error(error.message || "Đăng nhập thất bại");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setSendingEmail(true);
+    try {
+      // Gọi API mới (cần cập nhật ở file API bên dưới)
+      await authApi.forgotPassword(resetEmail);
+      toast.success("Hướng dẫn đã được gửi vào Email của bạn!");
+      setIsForgotModalOpen(false);
+    } catch (error) {
+      toast.error(error.message || "Gửi email thất bại");
+      setSendingEmail(false);
     }
   };
 
@@ -121,12 +139,13 @@ const Login = () => {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <a
-                href="#"
+              <button
+                type="button"
+                onClick={() => setIsForgotModalOpen(true)}
                 className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
                 Quên mật khẩu?
-              </a>
+              </button>
             </div>
 
             <button
@@ -162,6 +181,44 @@ const Login = () => {
           </form>
         </div>
       </div>
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-8">
+            <h2 className="text-xl font-bold text-slate-800 mb-2 uppercase">
+              Khôi phục mật khẩu
+            </h2>
+            <p className="text-sm text-slate-500 mb-6">
+              Nhập Email để nhận link đặt lại mật khẩu.
+            </p>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <input
+                type="email"
+                required
+                placeholder="email@example.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotModalOpen(false)}
+                  className="flex-1 py-3 text-slate-400 font-bold"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={sendingEmail}
+                  className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl disabled:opacity-50"
+                >
+                  {sendingEmail ? "Đang gửi..." : "Gửi yêu cầu"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

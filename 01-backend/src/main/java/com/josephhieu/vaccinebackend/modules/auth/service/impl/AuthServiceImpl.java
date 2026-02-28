@@ -142,7 +142,9 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }
 
-        TaiKhoan user = resetToken.getTaiKhoan();
+        TaiKhoan user = taiKhoanRepository.findById(resetToken.getTaiKhoan().getMaTaiKhoan())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         user.setMatKhau(passwordEncoder.encode(newPassword));
         taiKhoanRepository.save(user);
 

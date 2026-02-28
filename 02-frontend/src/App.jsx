@@ -14,6 +14,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 // Pages
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import AccountManagement from "./pages/AccountManagement";
 import ScheduleManagement from "./pages/Vaccination/ScheduleManagement";
@@ -50,6 +51,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* --- PHÂN HỆ DÀNH CHO BỆNH NHÂN (USER PORTAL) --- */}
         <Route

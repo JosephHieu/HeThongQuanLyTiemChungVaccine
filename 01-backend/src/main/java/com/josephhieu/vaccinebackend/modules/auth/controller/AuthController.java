@@ -75,7 +75,7 @@ public class AuthController {
      * Hệ thống sẽ kiểm tra email và gửi link chứa token xác thực.
      */
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestParam @Valid ForgotPasswordRequest request) {
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         log.info("Tiếp nhận yêu cầu quên mật khẩu cho email: {}", request.getEmail());
         authService.processForgotPassword(request.getEmail());
 
