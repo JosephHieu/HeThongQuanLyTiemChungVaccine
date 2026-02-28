@@ -15,6 +15,8 @@ import java.util.UUID;
 @Repository
 public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, UUID> {
 
+    Optional<TaiKhoan> findByEmail(String email);
+
     @Query("SELECT DISTINCT t FROM TaiKhoan t LEFT JOIN FETCH t.chiTietPhanQuyens WHERE t.tenDangNhap = :username")
     Optional<TaiKhoan> findByTenDangNhap(@Param("username") String username);
 

@@ -1,8 +1,10 @@
 package com.josephhieu.vaccinebackend.modules.auth.controller;
 
 import com.josephhieu.vaccinebackend.common.dto.response.ApiResponse;
+import com.josephhieu.vaccinebackend.modules.auth.dto.request.ForgotPasswordRequest;
 import com.josephhieu.vaccinebackend.modules.auth.dto.request.LoginRequest;
 import com.josephhieu.vaccinebackend.modules.auth.dto.request.RegisterRequest;
+import com.josephhieu.vaccinebackend.modules.auth.dto.request.ResetPasswordRequest;
 import com.josephhieu.vaccinebackend.modules.auth.service.AuthService;
 import com.josephhieu.vaccinebackend.modules.identity.dto.response.UserResponse;
 import jakarta.validation.Valid;
@@ -66,5 +68,32 @@ public class AuthController {
         UserResponse result = authService.login(request);
 
         return ResponseEntity.ok(ApiResponse.success(result, "Đăng nhập hệ thống thành công."));
+    }
+
+    /**
+     * Tiếp nhận yêu cầu khôi phục mật khẩu qua Email.
+     * Hệ thống sẽ kiểm tra email và gửi link chứa token xác thực.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestParam @Valid ForgotPasswordRequest request) {
+        log.info("Tiếp nhận yêu cầu quên mật khẩu cho email: {}", request.getEmail());
+        authService.processForgotPassword(request.getEmail());
+
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .message("Hướng dẫn đặt lại mật khẩu đã được gửi đến email của bạn.")
+                .build());
+    }
+
+    /**
+     * Thực hiện đặt lại mật khẩu mới dựa trên mã xác thực (Token).
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        log.info("Xử lý xác thực mã token và cập nhật mật khẩu mới.");
+        authService.resetPassword(request.getToken(), request.getNewPassword());
+
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .message("Mật khẩu của bạn đã được cập nhật thành công.")
+                .build());
     }
 }

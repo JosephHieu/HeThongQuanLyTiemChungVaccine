@@ -21,6 +21,10 @@ public enum ErrorCode {
     UNAUTHENTICATED(1009, "Sai username / password", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1010, "Bạn không có quyền truy cập chức năng này", HttpStatus.FORBIDDEN),
     INVALID_INFO(1011, "Thông tin yêu cầu không hợp lệ", HttpStatus.BAD_REQUEST),
+    TOKEN_INVALID(1012, "Mã xác thực không hợp lệ hoặc đã được sử dụng", HttpStatus.BAD_REQUEST),
+    TOKEN_EXPIRED(1013, "Mã xác thực đã hết hạn (15 phút). Vui lòng yêu cầu lại.", HttpStatus.BAD_REQUEST),
+    PASSWORD_TOO_SHORT(1014, "Mật khẩu phải có ít nhất 6 ký tự", HttpStatus.BAD_REQUEST),
+    EMAIL_FORMAT_INVALID(1015, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 
     // INVENTORY ERRORS (1100 - 1199)
     INVENTORY_NOT_FOUND(1101, "Lô vắc-xin không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),
