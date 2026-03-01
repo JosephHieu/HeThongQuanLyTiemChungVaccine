@@ -38,7 +38,6 @@ public class FinanceServiceImpl implements FinanceService {
     private final LoaiVacXinRepository loaiVacXinRepository;
     private final LoVacXinRepository loVacXinRepository;
     private final HoaDonRepository hoaDonRepository;
-    // Cập nhật: Xóa hoSoBenhAnRepository vì đã chuyển logic sang hoaDonRepository
 
     private static final String TYPE_XUAT = "XUAT";
     private static final String TYPE_NHAP = "NHAP";
@@ -170,7 +169,6 @@ public class FinanceServiceImpl implements FinanceService {
     public PageResponse<SupplierTransactionResponse> getSupplierTransactions(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
 
-        // SỬA: Gọi hàm Repository trả về DTO thay vì Entity
         Page<SupplierTransactionResponse> result = hoaDonRepository.findSupplierTransactions(search, pageable);
 
         return PageResponse.<SupplierTransactionResponse>builder()
@@ -226,7 +224,7 @@ public class FinanceServiceImpl implements FinanceService {
         LocalDateTime end = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
 
         BigDecimal revenue = hoaDonRepository.sumRevenueByPeriod(start, end);
-        // SỬA: Chỉ đếm hóa đơn chờ của khách hàng
+
         long pending = hoaDonRepository.countByTrangThaiAndLoaiHoaDon(0, TYPE_XUAT);
         BigDecimal inventoryValue = calculateTotalInventoryValue();
 
