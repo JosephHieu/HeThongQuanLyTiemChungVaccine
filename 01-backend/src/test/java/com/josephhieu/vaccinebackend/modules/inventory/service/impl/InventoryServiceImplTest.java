@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class InventoryServiceTest {
+public class InventoryServiceImplTest {
 
     @Mock private LoVacXinRepository loVacXinRepository;
     @Mock private VacXinRepository vacXinRepository;
