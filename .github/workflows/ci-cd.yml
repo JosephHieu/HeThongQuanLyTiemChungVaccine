@@ -22,11 +22,9 @@ jobs:
           cache: maven
 
       - name: Build and Run Tests
-        # Sử dụng 'working-directory' để trỏ vào thư mục chứa dự án Java
         working-directory: ./01-backend
         run: mvn clean verify -Dspring.profiles.active=test
         env:
-          # Ví dụ nếu bạn cần các biến môi trường cho test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Upload Test Report
