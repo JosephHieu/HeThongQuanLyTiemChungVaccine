@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final PhanQuyenRepository phanQuyenRepository;
     private final ChiTietPhanQuyenRepository chiTietPhanQuyenRepository;
     private final BenhNhanRepository benhNhanRepository;
+    private final AuthenticationManager authenticationManager;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
@@ -93,8 +95,17 @@ public class AuthServiceImpl implements AuthService {
         TaiKhoan user = taiKhoanRepository.findByTenDangNhap(request.getTenDangNhap())
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-        if (!passwordEncoder.matches(request.getMatKhau(), user.getMatKhau())) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getTenDangNhap(),
+                            request.getMatKhau()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED); // Sai mật khẩu
+        } catch (DisabledException | LockedException e) {
+            throw new AppException(ErrorCode.USER_LOCKED); // Tài khoản bị khóa
         }
 
         if (!user.isTrangThai()) {
