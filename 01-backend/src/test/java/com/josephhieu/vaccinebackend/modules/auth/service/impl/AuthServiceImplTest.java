@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ public class AuthServiceImplTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtTokenProvider tokenProvider;
     @Mock private JavaMailSender mailSender;
+    @Mock private AuthenticationManager authenticationManager;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -76,16 +78,24 @@ public class AuthServiceImplTest {
     @Test
     @DisplayName("Đăng nhập: Thành công khi đúng thông tin")
     void login_Success() {
+        // 1. Chuẩn bị dữ liệu
         LoginRequest request = new LoginRequest("josephhieu", "password123");
 
+        // 2. Giả lập hành vi (Stubbing)
         when(taiKhoanRepository.findByTenDangNhap(anyString())).thenReturn(Optional.of(mockUser));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+        // Giả lập authenticate thành công (không làm gì cả/không ném lỗi)
+        when(authenticationManager.authenticate(any())).thenReturn(null);
+
         when(tokenProvider.generateToken(any())).thenReturn("mocked_jwt_token");
 
+        // 3. Thực thi
         UserResponse response = authService.login(request);
 
+        // 4. Kiểm chứng
         assertNotNull(response.getToken());
         assertEquals("josephhieu", response.getTenDangNhap());
+        verify(authenticationManager, times(1)).authenticate(any());
     }
 
     // --- TEST FORGOT PASSWORD ---
