@@ -32,10 +32,10 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
 - **Quản lý thu chi:** Thống kê định kỳ doanh thu từ khách hàng và công nợ nhà cung cấp.
 - **Biên lai điện tử:** Xuất biên lai giao dịch ngay sau khi hoàn tất quy trình tiêm.
 
-### 4. Hanling Exception rõ ràng
+### 4. Một số vấn đề xử lý.
 - Sử dụng Enum để quản lý tất cả lỗi RuntimeException.
 - Định nghĩa class riêng AppException kế thừa từ RuntimeException.
-- Viết class ApiResponse 
+- Viết class ApiResponse định nghĩa chuẩn để toàn bộ api dự án phải tuân theo.
 
 ## 📊 Thiết kế Cơ sở dữ liệu (Database Schema)
 Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Schema) tối ưu, đảm bảo tính toàn vẹn dữ liệu cho hơn 15 thực thể chính.
@@ -95,6 +95,7 @@ spring.datasource.password=your_password
 
 
   
+
 
 
 
