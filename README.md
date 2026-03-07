@@ -36,6 +36,21 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
 - Sử dụng Enum để quản lý tất cả lỗi RuntimeException.
 - Định nghĩa class riêng AppException kế thừa từ RuntimeException.
 - Viết class ApiResponse định nghĩa chuẩn để toàn bộ api dự án phải tuân theo.
+- Sử dụng Junit và Mockito đề viết unit test và itegration test cho dự án kết hợp CI với Github Actions (Sử dụng H2 database)
+- Sử dụng Spring Data Jpa cho truy vấn dự liệu, quản lý quan hệ và phân trang cùng với Hibernate để mapping Entity.
+- Spring Security cho Authentication và Authorization.
+- Ngoài ra còn sử dụng thêm một số thư viện như:
+  
+| Thành phần        | Công nghệ                   |
+| ----------------- | --------------------------- |
+| Authentication    | JWT                         |
+| ORM               | Spring Data JPA + Hibernate |
+| Database          | MySQL                       |
+| Validation        | Bean Validation             |
+| Mail service      | Spring Mail                 |
+| Testing           | JUnit / Mockito             |
+| Boilerplate       | Lombok                      |
+
 
 ## 📊 Thiết kế Cơ sở dữ liệu (Database Schema)
 Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Schema) tối ưu, đảm bảo tính toàn vẹn dữ liệu cho hơn 15 thực thể chính.
@@ -95,6 +110,7 @@ spring.datasource.password=your_password
 
 
   
+
 
 
 
