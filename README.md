@@ -107,8 +107,41 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
+# 💉 VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
 
+Dự án Full-stack quản lý tiêm chủng (Spring Boot, ReactJS, MySQL) đã được đóng gói hoàn toàn bằng Docker. Người dùng không cần cài đặt môi trường lập trình, chỉ cần duy nhất Docker để khởi chạy.
 
+## 🚀 Hướng dẫn khởi chạy nhanh (Quick Start)
+
+Để chạy hệ thống trên máy tính của bạn, hãy thực hiện theo 3 bước sau:
+
+### 1. Yêu cầu hệ thống
+* Đã cài đặt [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac) hoặc Docker Engine (Linux).
+
+### 2. Chuẩn bị file
+* Tạo một thư mục mới trên máy tính.
+* Tạo một file tên là `docker-compose.yml` trong thư mục đó.
+* Sao chép toàn bộ nội dung cấu hình Docker Compose (sử dụng image `nguyenhoanghieu1510/...`) vào file vừa tạo.
+
+### 3. Khởi chạy
+Mở Terminal/PowerShell tại thư mục đó và chạy lệnh:
+```bash
+docker-compose up -d
+```
+
+### 🌐 Địa chỉ truy cập
+Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tại: http://localhost:3000
+
+### 🔑 Tài khoản dùng thử (Demo Data)
+
+| Vai trò (Role)      | Tài khoản (Username) | Mật khẩu (Password) | Mã Tài Khoản (ID)                     | Ghi chú                        |
+| ------------------- | -------------------- | ------------------- | ------------------------------------- | ------------------------------ |
+| Quản trị viên       | `hieu123`            | `123456`            | `20f2e44e-db16-4a53-875a-15b222f923af`| Toàn quyền quản trị hệ thống   |
+| Quản lý kho         | `khobai01`           | `123456`            | `12a7847a-4d75-4f75-8f50-be3f054df15d`| Quản lý vắc-xin, nhập/xuất kho |
+| Nhân viên tài chính | `TaiChinh02`         | `123456`            | `720f12c7-9c0e-4a36-8e8a-ad2f8f0ce89b`| Quản lý hóa đơn, doanh thu     |
+| Nhân viên y tế      | `BacSi02`            | `123456`            | `7734a5c8-a2a5-4bba-95fd-001b520ee52e`| Khám sàng lọc, kê đơn tiêm     |
+| Hỗ trợ khách hàng   | `HTKH01`             | `123456`            | `973b87c5-94a1-4d2d-b69c-df03de36a70d`| Tư vấn, nhắc lịch tiêm chủng   |
+| Khách hàng          | `BenhNhan02`         | `123456`            | `cb9fe6a2-b98b-4a76-bcc0-28d49862c48c`| Tra cứu hồ sơ, đặt lịch tiêm   |
   
 
 
