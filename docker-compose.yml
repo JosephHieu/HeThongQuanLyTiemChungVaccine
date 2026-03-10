@@ -1,4 +1,5 @@
 services:
+  # 1. Database Service
   vax-db:
     image: nguyenhoanghieu1510/vax-db:v1
     container_name: vax-db
@@ -8,6 +9,11 @@ services:
       MYSQL_ROOT_PASSWORD: 123456
     volumes:
       - vax-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - vax-network
 
@@ -16,7 +22,8 @@ services:
     image: nguyenhoanghieu1510/vaxtrack-backend:v1
     container_name: vax-backend
     depends_on:
-      - vax-db
+      vax-db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
