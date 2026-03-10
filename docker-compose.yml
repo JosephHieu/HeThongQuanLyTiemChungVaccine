@@ -1,0 +1,66 @@
+services:
+  # 1. Database Service
+  vax-db:
+    image: mysql:8.0
+    container_name: vax-db
+    ports:
+      - "3310:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - ./03-database:/docker-entrypoint-initdb.d
+      - vax-db-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p123456",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vax-network
+
+  # 2. Backend Service
+  vax-backend:
+    build: ./01-backend
+    container_name: vax-backend
+    depends_on:
+      vax-db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://vax-db:3306/vaccine_management?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      FRONTEND_URL: http://localhost:3000
+    networks:
+      - vax-network
+
+  # 3. Frontend Service
+  vax-frontend:
+    build: ./02-frontend
+    container_name: vax-frontend
+    depends_on:
+      - vax-backend
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api/v1
+    networks:
+      - vax-network
+
+networks:
+  vax-network:
+    driver: bridge
+
+volumes:
+  vax-db-data:
