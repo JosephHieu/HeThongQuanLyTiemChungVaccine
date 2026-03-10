@@ -1,40 +1,22 @@
 services:
-  # 1. Database Service
   vax-db:
-    image: mysql:8.0
+    image: nguyenhoanghieu1510/vax-db:v1
     container_name: vax-db
     ports:
       - "3310:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456
     volumes:
-      - ./03-database:/docker-entrypoint-initdb.d
       - vax-db-data:/var/lib/mysql
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-p123456",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - vax-network
 
   # 2. Backend Service
   vax-backend:
-    build: ./01-backend
+    image: nguyenhoanghieu1510/vaxtrack-backend:v1
     container_name: vax-backend
     depends_on:
-      vax-db:
-        condition: service_healthy
+      - vax-db
     ports:
       - "8080:8080"
     environment:
@@ -47,7 +29,7 @@ services:
 
   # 3. Frontend Service
   vax-frontend:
-    build: ./02-frontend
+    image: nguyenhoanghieu1510/vaxtrack-frontend:v1
     container_name: vax-frontend
     depends_on:
       - vax-backend
