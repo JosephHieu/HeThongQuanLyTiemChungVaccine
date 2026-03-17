@@ -5,13 +5,13 @@
 
 Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 nhóm chính với 6 vai trò cụ thể:
 
-- **Administrator:** Toàn quyền quản trị hệ thống, quản lý tài khoản và phân quyền. (username: hieu123, pass: 123456)
+- **Administrator:** Toàn quyền quản trị hệ thống, quản lý tài khoản và phân quyền.
 - **Moderator (Nhóm điều hành):**
-  - **Quản lý kho:** Theo dõi tình hình vắc-xin, thực hiện nhập/xuất kho. (username: khobai01, pass: 123456)
-  - **Nhân viên tài chính:** Quản lý giá, thu chi, đối soát giao dịch khách hàng và nhà cung cấp. (username: TaiChinh02, pass: 123456)
-  - **Nhân viên y tế:** Trực tiếp khám, cập nhật hồ sơ bệnh án và kê đơn. (username: BacSi02, pass: 123456)
-  - **Hỗ trợ khách hàng:** Tư vấn, giải đáp thắc mắc và nhắc lịch tiêm chủng qua Email/SMS. (username: HTKH01, pass: 123456)
-  - **Normal User (Khách hàng):** Tra cứu thông tin vắc-xin, đăng ký tiêm phòng trực tuyến và theo dõi hồ sơ cá nhân. (username: BenhNhan02, pass: 123456)
+  - **Quản lý kho:** Theo dõi tình hình vắc-xin, thực hiện nhập/xuất kho.
+  - **Nhân viên tài chính:** Quản lý giá, thu chi, đối soát giao dịch khách hàng và nhà cung cấp.
+  - **Nhân viên y tế:** Trực tiếp khám, cập nhật hồ sơ bệnh án và kê đơn.
+  - **Hỗ trợ khách hàng:** Tư vấn, giải đáp thắc mắc và nhắc lịch tiêm chủng qua Email/SMS.
+  - **Normal User (Khách hàng):** Tra cứu thông tin vắc-xin, đăng ký tiêm phòng trực tuyến và theo dõi hồ sơ cá nhân.
 
 ## 🌟 Tính năng cốt lõi theo quy trình SRS
 
