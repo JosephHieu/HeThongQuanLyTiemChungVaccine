@@ -1,7 +1,7 @@
 # VaxTrack Pro - Hệ thống Quản lý Tiêm chủng & Tài chính Tập trung
 **VaxTrack Pro** là giải pháp quản trị tổng thể cho các trung tâm y tế dự phòng, được thiết kế theo chuẩn SRS v3.0. Hệ thống giải quyết bài toán cấp thiết trong việc bảo vệ cộng đồng khỏi dịch bệnh thông qua quản lý tiêm chủng, cơ sở vật chất và tài chính minh bạch.
 
-## 👥 Hệ thống Phân quyền (Role-Based Access Control)
+## Hệ thống Phân quyền (Role-Based Access Control)
 
 Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 nhóm chính với 6 vai trò cụ thể:
 
@@ -13,7 +13,7 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
   - **Hỗ trợ khách hàng:** Tư vấn, giải đáp thắc mắc và nhắc lịch tiêm chủng qua Email/SMS.
   - **Normal User (Khách hàng):** Tra cứu thông tin vắc-xin, đăng ký tiêm phòng trực tuyến và theo dõi hồ sơ cá nhân.
 
-## 🌟 Tính năng cốt lõi theo quy trình SRS
+## Tính năng cốt lõi theo quy trình SRS
 
 ### 1. Quản lý Kho & Logistics
 
@@ -52,7 +52,7 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
 | Boilerplate       | Lombok                      |
 
 
-## 📊 Thiết kế Cơ sở dữ liệu (Database Schema)
+## Thiết kế Cơ sở dữ liệu (Database Schema)
 Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Schema) tối ưu, đảm bảo tính toàn vẹn dữ liệu cho hơn 15 thực thể chính.
 
 - **Core Inventory:** VACXIN, LOAIVACXIN, LOVACXIN, NHACUNGCAP.
@@ -84,7 +84,7 @@ Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Sc
 
 - **Lucide Icons:** Bộ icon vector chuyên nghiệp cho ngành y tế.
 
-## 🚀 Hướng dẫn cài đặt & Thiết lập Database
+## Hướng dẫn cài đặt & Thiết lập Database
 
 Dự án cung cấp file db-project-script.sql chứa đầy đủ cấu trúc và dữ liệu mẫu.
 
@@ -107,11 +107,11 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-# 💉 VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
+# VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
 
 Dự án Full-stack quản lý tiêm chủng (Spring Boot, ReactJS, MySQL) đã được đóng gói hoàn toàn bằng Docker. Người dùng không cần cài đặt môi trường lập trình, chỉ cần duy nhất Docker để khởi chạy.
 
-## 🚀 Hướng dẫn khởi chạy nhanh (Quick Start)
+## Hướng dẫn khởi chạy nhanh (Quick Start)
 
 Để chạy hệ thống trên máy tính của bạn, hãy thực hiện theo 3 bước sau:
 
@@ -129,10 +129,10 @@ Mở Terminal/PowerShell tại thư mục đó và chạy lệnh:
 docker-compose up -d
 ```
 
-### 🌐 Địa chỉ truy cập
+### Địa chỉ truy cập
 Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tại: http://localhost:3000
 
-### 🔑 Tài khoản dùng thử (Demo Data)
+### Tài khoản dùng thử (Demo Data)
 
 | Vai trò (Role)      | Tài khoản (Username) | Mật khẩu (Password) | Mã Tài Khoản (ID)                     | Ghi chú                        |
 | ------------------- | -------------------- | ------------------- | ------------------------------------- | ------------------------------ |
