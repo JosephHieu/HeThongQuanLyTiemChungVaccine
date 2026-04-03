@@ -1,6 +1,32 @@
 # VaxTrack Pro - Hệ thống Quản lý Tiêm chủng & Tài chính Tập trung
 **VaxTrack Pro** là giải pháp quản trị tổng thể cho các trung tâm y tế dự phòng, được thiết kế theo chuẩn SRS v3.0. Hệ thống giải quyết bài toán cấp thiết trong việc bảo vệ cộng đồng khỏi dịch bệnh thông qua quản lý tiêm chủng, cơ sở vật chất và tài chính minh bạch.
 
+## Mục tiêu xây dựng dự án
+Dự án VaxTrack Pro được xây dựng với mục tiêu chuyển đổi số quy trình quản lý tiêm chủng thủ công sang hệ thống quản trị tự động, tập trung vào 3 trụ cột chính:
+
+### 1. Tối ưu hóa quy trình Y tế (Clinical Efficiency)
+
+- Số hóa hồ sơ: Loại bỏ việc lưu trữ sổ tiêm giấy bằng Hồ sơ bệnh án điện tử, giúp tra cứu lịch sử tiêm chủng của bệnh nhân chỉ trong vài giây.
+- Chăm sóc chủ động: Tự động hóa việc lập lịch tiêm nhắc lại và hỗ trợ bác sĩ kê đơn chính xác dựa trên danh mục vắc-xin hiện có.
+- An toàn tiêm chủng: Theo dõi sát sao các phản ứng sau tiêm và thời gian tác dụng của từng loại lô vắc-xin.
+
+### 2. Quản trị Kho & Tài chính minh bạch (Logistics & Finance)
+
+- Kiểm soát thất thoát: Quản lý chặt chẽ vòng đời vắc-xin từ lúc nhập lô, lưu kho cho đến khi xuất dùng, đảm bảo số lượng tồn kho luôn khớp với thực tế.
+- Tự động hóa tài chính: Kết nối trực tiếp nghiệp vụ xuất kho với hóa đơn thanh toán, giúp minh bạch thu chi và dễ dàng đối soát công nợ với nhà cung cấp.
+
+### 3. Nâng cao trải nghiệm khách hàng (Customer Experience)
+
+- Tiếp cận thông tin: Cung cấp cổng thông tin trực tuyến để người dân dễ dàng tra cứu loại vắc-xin, giá cả và đăng ký tiêm chủng từ xa.
+- Tương tác đa kênh: Xây dựng kênh phản hồi và hỗ trợ giải đáp thắc mắc giữa trung tâm y tế và khách hàng một cách nhanh chóng.
+
+- Giao diện Admin:
+<img width="1920" height="1048" alt="image" src="https://github.com/user-attachments/assets/d971807c-2037-47f2-93bc-bd2a2503c09f" />
+
+- Giao diện User:
+<img width="1920" height="972" alt="image" src="https://github.com/user-attachments/assets/5a59b76d-73fe-4ae5-8c96-f7924f9ebe19" />
+
+
 ## Hệ thống Phân quyền (Role-Based Access Control)
 
 Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 nhóm chính với 6 vai trò cụ thể:
