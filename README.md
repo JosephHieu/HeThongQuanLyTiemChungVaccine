@@ -1,4 +1,4 @@
-# 💉 VaxTrack Pro - Hệ thống Quản lý Tiêm chủng & Tài chính Tập trung
+# VaxTrack Pro - Hệ thống Quản lý Tiêm chủng & Tài chính Tập trung
 **VaxTrack Pro** là giải pháp quản trị tổng thể cho các trung tâm y tế dự phòng, được thiết kế theo chuẩn SRS v3.0. Hệ thống giải quyết bài toán cấp thiết trong việc bảo vệ cộng đồng khỏi dịch bệnh thông qua quản lý tiêm chủng, cơ sở vật chất và tài chính minh bạch.
 
 ## 👥 Hệ thống Phân quyền (Role-Based Access Control)
