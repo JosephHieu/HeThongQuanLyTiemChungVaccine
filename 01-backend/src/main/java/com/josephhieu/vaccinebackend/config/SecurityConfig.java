@@ -132,12 +132,32 @@ public class SecurityConfig {
     // Định nghĩa quy tắc CORS cho frontend vite (port 5173)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(frontendUrl));
+
+        // Cho phép cả URL production và localhost để dễ debug
+        configuration.setAllowedOrigins(Arrays.asList(
+                frontendUrl,
+                "http://localhost:5173"
+        ));
+
+        // Đầy đủ các phương thức để làm hệ thống quản lý (có cả PATCH để cập nhật trạng thái tiêm)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+
+        // Bộ Header bạn vừa chọn - Rất chuẩn!
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Cache-Control",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "Access-Control-Allow-Origin"
+        ));
+
+        // Cho phép gửi kèm Cookie hoặc Header Authorization
         configuration.setAllowCredentials(true);
+
+        // Để Frontend có thể lấy được Token từ Header nếu cần
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
