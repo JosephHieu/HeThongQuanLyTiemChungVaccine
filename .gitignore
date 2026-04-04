@@ -1,0 +1,11 @@
+# Các file chứa mật khẩu
+.env
+01-backend/.env
+02-frontend/.env
+
+# Các file build của Java & React
+target/
+node_modules/
+build/
+dist/
+.DS_Store
