@@ -15,7 +15,9 @@ WORKDIR /app
 # Copy file jar từ stage build sang
 COPY --from=build /app/target/vaccinebackend-0.0.1-SNAPSHOT.jar app.jar
 
-ENV SERVER_PORT=8080
-EXPOSE ${SERVER_PORT}
+# Render sẽ tự động truyền biến PORT vào, chúng ta dùng nó làm mặc định
+ENV PORT=8080
+EXPOSE ${PORT}
 
-ENTRYPOINT ["java", "-Xmx512M", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+# QUAN TRỌNG: Thêm tham số -Dserver.port để Spring Boot nhận đúng port từ Render
+ENTRYPOINT ["java", "-Xmx512M", "-Dserver.port=${PORT}", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
