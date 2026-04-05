@@ -25,7 +25,7 @@ axiosClient.interceptors.response.use(
     return response.data?.result ?? response.data;
   },
   (error) => {
-    const backendError = error.response?.data; // Đây là ApiResponse của bạn
+    const backendError = error.response?.data;
     const status = error.response?.status;
     const errorCode = backendError?.code;
 

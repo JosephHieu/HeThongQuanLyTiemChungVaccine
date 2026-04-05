@@ -133,17 +133,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Cho phép cả URL production và localhost để dễ debug
+        
         configuration.setAllowedOrigins(Arrays.asList(
+                "https://vaccine-system-beta*.vercel.app",
                 frontendUrl,
                 "http://localhost:5173"
         ));
 
-        // Đầy đủ các phương thức để làm hệ thống quản lý (có cả PATCH để cập nhật trạng thái tiêm)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Bộ Header bạn vừa chọn - Rất chuẩn!
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Cache-Control",
