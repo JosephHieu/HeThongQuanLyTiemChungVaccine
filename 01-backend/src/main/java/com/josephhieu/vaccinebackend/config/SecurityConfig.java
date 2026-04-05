@@ -72,7 +72,7 @@ public class SecurityConfig {
                         // QUYỀN KHO: Quản lý vắc-xin, lô hàng
                         .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
 
-                        // QUYỀN Y TẾ: Hồ sơ bệnh án, ĐIỀU PHỐI LỊCH TIÊM (Đã bổ sung vaccination/**)
+                        // QUYỀN Y TẾ: Hồ sơ bệnh án, ĐIỀU PHỐI LỊCH TIÊM
                         .requestMatchers("/api/v1/medical/feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
                         .requestMatchers("/api/v1/medical/my-profile", "/api/v1/medical/my-history").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
                         .requestMatchers("/api/v1/medical/high-level-feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
@@ -134,28 +134,28 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList(
-                "https://vaccine-system-beta*.vercel.app",
-                frontendUrl,
-                "http://localhost:5173"
+        // Sử dụng OriginPatterns để chấp nhận tất cả các sub-domain của Vercel và Localhost
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "https://vaccine-system-*.vercel.app",
+                "https://vaccine-system-beta.vercel.app",
+                "http://localhost:5173",
+                "http://localhost:3000"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
+        // Đảm bảo có đầy đủ các Headers cần thiết
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
-                "Cache-Control",
                 "Content-Type",
                 "Accept",
                 "X-Requested-With",
-                "Access-Control-Allow-Origin"
+                "Cache-Control"
         ));
 
-        // Cho phép gửi kèm Cookie hoặc Header Authorization
         configuration.setAllowCredentials(true);
-
-        // Để Frontend có thể lấy được Token từ Header nếu cần
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
