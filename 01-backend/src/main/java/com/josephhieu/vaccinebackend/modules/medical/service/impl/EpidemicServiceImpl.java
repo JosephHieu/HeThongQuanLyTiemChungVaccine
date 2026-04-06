@@ -3,7 +3,9 @@ package com.josephhieu.vaccinebackend.modules.medical.service.impl;
 import com.josephhieu.vaccinebackend.common.exception.AppException;
 import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
 import com.josephhieu.vaccinebackend.modules.identity.entity.NhanVien;
+import com.josephhieu.vaccinebackend.modules.identity.entity.TaiKhoan;
 import com.josephhieu.vaccinebackend.modules.identity.repository.NhanVienRepository;
+import com.josephhieu.vaccinebackend.modules.identity.repository.TaiKhoanRepository;
 import com.josephhieu.vaccinebackend.modules.inventory.entity.VacXin;
 import com.josephhieu.vaccinebackend.modules.inventory.repository.VacXinRepository;
 import com.josephhieu.vaccinebackend.modules.medical.dto.request.EpidemicRequest;
@@ -34,6 +36,7 @@ public class EpidemicServiceImpl implements EpidemicService {
     private final DichBenhRepository dichBenhRepository;
     private final VacXinRepository vacXinRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final TaiKhoanRepository taiKhoanRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,6 +63,10 @@ public class EpidemicServiceImpl implements EpidemicService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         NhanVien nv = nhanVienRepository.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        TaiKhoan admin = taiKhoanRepository.findByTenDangNhap(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+
 
         // 2. Xây dựng thực thể DichBenh từ Request
         DichBenh dichBenh = DichBenh.builder()
