@@ -247,7 +247,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         .lieuLuong("01 liều")
                         .nguoiTiem(item.getNhanVienThucHien() != null
                         ? item.getNhanVienThucHien().getTenNhanVien()
-                                : "Nhân viên y tế")
+                                : "MEDICAL")
                         .ketQua(item.getPhanUngSauTiem())
                         .build())
                 .toList();

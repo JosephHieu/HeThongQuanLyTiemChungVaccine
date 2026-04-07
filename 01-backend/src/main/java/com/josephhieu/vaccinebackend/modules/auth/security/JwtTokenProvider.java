@@ -31,8 +31,10 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
 
         Set<String> authorities = user.getChiTietPhanQuyens().stream()
-                .map(ct -> ct.getPhanQuyen().getTenQuyen())
+                .map(ct -> ct.getPhanQuyen().getTenQuyen().trim())
                 .collect(Collectors.toSet());
+
+        log.info("Authorities in Token: {}", authorities);
 
         return Jwts.builder()
                 .setSubject(user.getTenDangNhap())

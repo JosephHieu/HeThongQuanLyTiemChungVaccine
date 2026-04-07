@@ -42,7 +42,7 @@ public class VaccinationReminderControllerTest {
     @MockitoBean private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Test
-    @WithMockUser(authorities = "Hỗ trợ khách hàng")
+    @WithMockUser(authorities = "SUPPORT")
     @DisplayName("GET /search: Nhân viên hỗ trợ tra cứu email thành công")
     void searchByEmail_Success() throws Exception {
         String email = "joseph.hieu@example.com";

@@ -43,7 +43,7 @@ public class VaccineControllerTest {
     @MockitoBean private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Test
-    @WithMockUser(authorities = "Nhân viên y tế")
+    @WithMockUser(authorities = "MEDICAL")
     @DisplayName("POST /register: Nhân viên y tế bị chặn (403) khi cố đăng ký tiêm")
     void register_ForbiddenForStaff() throws Exception {
         mockMvc.perform(post("/api/v1/vaccinations/register")

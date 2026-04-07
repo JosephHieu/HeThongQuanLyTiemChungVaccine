@@ -79,7 +79,7 @@ public class InventoryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Quản lý kho")
+    @WithMockUser(authorities = "WAREHOUSE")
     @DisplayName("POST /import: Thành công khi Quản lý kho nhập hàng")
     void importVaccine_Success() throws Exception {
         when(inventoryService.importVaccine(any())).thenReturn(inventoryResponse);
@@ -104,7 +104,7 @@ public class InventoryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Quản lý kho")
+    @WithMockUser(authorities = "WAREHOUSE")
     @DisplayName("POST /export: Thành công khi xuất kho điều phối")
     void exportVaccine_Success() throws Exception {
         VaccineExportResponse exportResponse = VaccineExportResponse.builder()
@@ -141,7 +141,7 @@ public class InventoryControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Quản lý kho")
+    @WithMockUser(authorities = "WAREHOUSE")
     @DisplayName("GET /export-history: Kiểm tra format ngày tháng trong lịch sử")
     void getExportHistory_Success() throws Exception {
         // Test kiểm tra việc gửi param ngày tháng có gây lỗi format không

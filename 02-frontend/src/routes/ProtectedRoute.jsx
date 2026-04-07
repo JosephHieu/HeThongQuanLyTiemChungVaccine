@@ -20,13 +20,23 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   // 3. Kiểm tra quyền hạn (Dùng logic giao thoa mảng để linh hoạt hơn)
-  const hasPermission =
-    !allowedRoles ||
-    (Array.isArray(role)
-      ? role.some((r) => allowedRoles.includes(r))
-      : allowedRoles.includes(role));
+  const hasPermission = () => {
+    // Nếu không yêu cầu role nào thì cho qua
+    if (!allowedRoles || allowedRoles.length === 0) return true;
 
-  if (!hasPermission) {
+    // Chuyển role về mảng để xử lý chung (phòng trường hợp role là string hoặc array)
+    const userRoles = Array.isArray(role) ? role : [role];
+
+    return userRoles.some((r) =>
+      allowedRoles.map((a) => a?.trim()).includes(r?.trim()),
+    );
+  };
+
+  if (!hasPermission()) {
+    console.error("DEBUG PHÂN QUYỀN:", {
+      "Role của bạn hiện tại": role,
+      "Quyền cần có để vào trang": allowedRoles,
+    });
     return <Navigate to="/unauthorized" replace />;
   }
 

@@ -86,10 +86,10 @@ function App() {
             <ProtectedRoute
               allowedRoles={[
                 "Administrator",
-                "Nhân viên y tế",
-                "Quản lý kho",
-                "Tài chính",
-                "Hỗ trợ khách hàng",
+                "MEDICAL",
+                "WAREHOUSE",
+                "FINANCE",
+                "SUPPORT",
               ]}
             >
               <AdminLayout />
@@ -115,7 +115,7 @@ function App() {
           <Route
             path="warehouse"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "Quản lý kho"]}>
+              <ProtectedRoute allowedRoles={["Administrator", "WAREHOUSE"]}>
                 <InventoryManagement />
               </ProtectedRoute>
             }
@@ -141,7 +141,7 @@ function App() {
           <Route
             path="reports"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "Tài chính"]}>
+              <ProtectedRoute allowedRoles={["Administrator", "FINANCE"]}>
                 <FinancialManagement />
               </ProtectedRoute>
             }
@@ -151,9 +151,7 @@ function App() {
           <Route
             path="moderator"
             element={
-              <ProtectedRoute
-                allowedRoles={["Administrator", "Nhân viên y tế"]}
-              >
+              <ProtectedRoute allowedRoles={["Administrator", "MEDICAL"]}>
                 <MedicalRecord />
               </ProtectedRoute>
             }
@@ -163,9 +161,7 @@ function App() {
           <Route
             path="feedbacks"
             element={
-              <ProtectedRoute
-                allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
-              >
+              <ProtectedRoute allowedRoles={["Administrator", "SUPPORT"]}>
                 <AdminFeedbackManagement />
               </ProtectedRoute>
             }
@@ -175,9 +171,7 @@ function App() {
           <Route
             path="reminders" // Khớp với path "/admin/reminders" trong Sidebar
             element={
-              <ProtectedRoute
-                allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
-              >
+              <ProtectedRoute allowedRoles={["Administrator", "SUPPORT"]}>
                 <VaccinationReminder />
               </ProtectedRoute>
             }
@@ -187,9 +181,7 @@ function App() {
           <Route
             path="epidemics"
             element={
-              <ProtectedRoute
-                allowedRoles={["Administrator", "Nhân viên y tế"]}
-              >
+              <ProtectedRoute allowedRoles={["Administrator", "MEDICAL"]}>
                 <EpidemicManagement />
               </ProtectedRoute>
             }

@@ -108,10 +108,10 @@ public class UserController {
      * @return {@link ResponseEntity} danh sách nhân sự y tế phù hợp.
      */
     @GetMapping("/medical-staffs")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<List<StaffSummaryResponse>>> getMedicalStaffs() {
         log.info("Truy vấn danh sách nhân viên y tế phục vụ công tác điều phối lịch trực.");
-        List<StaffSummaryResponse> result = userService.getStaffsByRole("Nhân viên y tế");
+        List<StaffSummaryResponse> result = userService.getStaffsByRole("MEDICAL");
 
         return ResponseEntity.ok(ApiResponse.success(result));
     }

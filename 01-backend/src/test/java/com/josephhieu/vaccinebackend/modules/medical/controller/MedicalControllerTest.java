@@ -49,7 +49,7 @@ public class MedicalControllerTest {
     // --- TEST PHÂN HỆ NHÂN VIÊN ---
 
     @Test
-    @WithMockUser(authorities = "Nhân viên y tế")
+    @WithMockUser(authorities = "MEDICAL")
     @DisplayName("GET /records/{id}: Nhân viên y tế truy cập hồ sơ thành công")
     void getRecord_Success() throws Exception {
         UUID patientId = UUID.randomUUID();
@@ -75,7 +75,7 @@ public class MedicalControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Nhân viên y tế")
+    @WithMockUser(authorities = "MEDICAL")
     @DisplayName("POST /confirm-injection: Xác nhận tiêm thành công")
     void confirmInjection_Success() throws Exception {
         UUID maDangKy = UUID.randomUUID();
@@ -109,7 +109,7 @@ public class MedicalControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Nhân viên y tế")
+    @WithMockUser(authorities = "MEDICAL")
     @DisplayName("GET /my-profile: Nhân viên không có quyền truy cập profile cá nhân (403)")
     void getMyProfile_Forbidden() throws Exception {
         // Lưu ý: Tùy vào thiết kế Role, nếu Nhân viên cũng là Bệnh nhân thì test này sẽ khác.

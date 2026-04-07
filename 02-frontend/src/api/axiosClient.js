@@ -1,5 +1,5 @@
 import axios from "axios";
-import { toast } from "react-hot-toast"; // Khuyên dùng để hiện thông báo đẹp hơn alert
+import { toast } from "react-hot-toast";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1",
@@ -46,8 +46,16 @@ axiosClient.interceptors.response.use(
     }
 
     // 3. Xử lý Access Denied (Mã 1010)
+    if (status === 401 || errorCode === 1009) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("userName");
+      window.location.href = "/login?message=expired";
+    }
+
     if (status === 403 || errorCode === 1010) {
-      toast.error(backendError?.message || "Bạn không có quyền truy cập!");
+      // CHỈ HIỆN TOAST, KHÔNG ĐƯỢC XÓA TOKEN VÀ KHÔNG ĐƯỢC REDIRECT
+      toast.error("Bạn không có quyền truy cập chức năng này!");
     }
 
     // 4. Các lỗi nghiệp vụ khác

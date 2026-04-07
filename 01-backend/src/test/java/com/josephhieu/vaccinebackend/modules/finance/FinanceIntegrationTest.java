@@ -64,7 +64,7 @@ public class FinanceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Tài chính")
+    @WithMockUser(authorities = "FINANCE")
     @DisplayName("IT - Thống kê doanh thu hôm nay phải khớp với dữ liệu đã nạp")
     void getFinanceSummary_IntegrationSuccess() throws Exception {
         mockMvc.perform(get("/api/v1/finance/summary")
@@ -76,7 +76,7 @@ public class FinanceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "Tài chính")
+    @WithMockUser(authorities = "FINANCE")
     @DisplayName("IT - Thống kê NCC phải thấy 1 hóa đơn đang nợ (NHAP, TrangThai 0)")
     void getSupplierSummary_IntegrationSuccess() throws Exception {
         mockMvc.perform(get("/api/v1/finance/summary/suppliers")

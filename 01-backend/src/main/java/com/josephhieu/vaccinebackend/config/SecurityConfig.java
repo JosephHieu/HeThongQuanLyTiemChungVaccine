@@ -61,32 +61,36 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000)))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
-                .authenticationProvider(authenticationProvider()) // Đăng ký bộ xác thực
+                .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        // Cho phép truy cập công khai các API xác thực
+                        // 1. PUBLIC APIS
                         .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        // QUYỀN ADMIN: Quản lý người dùng, vai trò
+                        // 2. QUYỀN ADMIN (Dùng Administrator cho khớp ảnh DB của bạn)
                         .requestMatchers("/api/v1/admin/**", "/api/v1/roles/**", "/api/v1/users/**").hasAuthority("Administrator")
 
-                        // QUYỀN KHO: Quản lý vắc-xin, lô hàng
-                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
+                        // 3. QUYỀN KHO (WAREHOUSE)
+                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "WAREHOUSE")
 
-                        // QUYỀN Y TẾ: Hồ sơ bệnh án, ĐIỀU PHỐI LỊCH TIÊM
-                        .requestMatchers("/api/v1/medical/feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
-                        .requestMatchers("/api/v1/medical/my-profile", "/api/v1/medical/my-history").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
-                        .requestMatchers("/api/v1/medical/high-level-feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
-                        .requestMatchers("/api/v1/medical/epidemics/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
-                        .requestMatchers("/api/v1/vaccination/schedules/opening").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
-                        .requestMatchers("/api/v1/medical/**", "/api/v1/vaccination/**").hasAnyAuthority("Administrator", "Nhân viên y tế")
+                        // 4. QUYỀN TÀI CHÍNH (FINANCE)
+                        .requestMatchers("/api/v1/finance/**").hasAnyAuthority("Administrator", "FINANCE")
 
-                        // QUYỀN TÀI CHÍNH: (Đã thêm v1)
-                        .requestMatchers("/api/v1/finance/**").hasAnyAuthority("Administrator", "Tài chính")
+                        // 5. QUYỀN HỖ TRỢ (SUPPORT)
+                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("Administrator", "SUPPORT")
 
-                        // QUYỀN HỖ TRỢ: Nhắc lịch, phản hồi
-                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("Administrator", "Hỗ trợ khách hàng")
+                        // 6. QUYỀN Y TẾ (MEDICAL)
+                        .requestMatchers("/api/v1/medical/feedback/**",
+                                "/api/v1/medical/my-profile",
+                                "/api/v1/medical/my-history",
+                                "/api/v1/medical/high-level-feedback/**",
+                                "/api/v1/medical/epidemics/**",
+                                "/api/v1/vaccination/schedules/opening")
+                        .hasAnyAuthority("Administrator", "MEDICAL", "Normal User Account")
 
-                        // QUYỀN BỆNH NHÂN: (Đã thêm v1)
+                        .requestMatchers("/api/v1/medical/**", "/api/v1/vaccination/**")
+                        .hasAnyAuthority("Administrator", "MEDICAL")
+
+                        // 7. QUYỀN BỆNH NHÂN (USER)
                         .requestMatchers("/api/v1/patients/me/**", "/api/v1/vaccinations/**").hasAuthority("Normal User Account")
 
                         .anyRequest().authenticated()

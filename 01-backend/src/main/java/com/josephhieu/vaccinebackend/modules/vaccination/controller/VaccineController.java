@@ -42,7 +42,7 @@ public class VaccineController {
      * @return {@link ResponseEntity} bọc {@link ApiResponse} chứa trang dữ liệu vắc-xin kết quả.
      */
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<Page<VaccineInfoResponse>>> getVaccines(@Valid VaccineSearchRequest request) {
         log.info("Bắt đầu truy vấn danh sách vắc-xin với tiêu chí: {}", request);
         Page<VaccineInfoResponse> result = vaccineService.getVaccines(request);

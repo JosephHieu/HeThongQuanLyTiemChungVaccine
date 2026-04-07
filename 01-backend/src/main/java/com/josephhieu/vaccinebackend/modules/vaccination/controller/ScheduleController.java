@@ -48,7 +48,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa thông tin chi tiết ca tiêm.
      */
     @GetMapping("/by-date")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<ScheduleResponse>> getByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam String shift) {
@@ -67,7 +67,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa danh sách các đối tượng {@link LocalDate}.
      */
     @GetMapping("/active-dates")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<List<LocalDate>>> getActiveDates(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
@@ -85,7 +85,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} với mã 201 (Created) và thông tin lịch vừa tạo.
      */
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL)")
     public ResponseEntity<ApiResponse<ScheduleResponse>> createSchedule(@RequestBody @Valid ScheduleCreationRequest request) {
         log.info("Yêu cầu tạo mới lịch tiêm chủng cho ngày: {}", request.getNgayTiem());
         ScheduleResponse result = scheduleService.createScheduleService(request);
@@ -102,7 +102,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa thông tin sau khi cập nhật.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<ScheduleResponse>> updateSchedule(
             @PathVariable UUID id,
             @RequestBody @Valid ScheduleCreationRequest request) {
@@ -119,7 +119,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} xác nhận thao tác xóa thành công.
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<Void>> deleteSchedule(@PathVariable UUID id) {
         log.warn("Thực hiện xóa lịch tiêm chủng ID: {}", id);
         scheduleService.deleteSchedule(id);
@@ -138,7 +138,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa trang dữ liệu lịch tiêm.
      */
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<PageResponse<ScheduleResponse>>> getAllSchedules(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -161,7 +161,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa trang danh sách đăng ký.
      */
     @GetMapping("/registrations-by-date")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<PageResponse<RegistrationResponse>>> getRegistrationsByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(defaultValue = "1") int page,
@@ -179,7 +179,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa danh sách tóm tắt các lô khả dụng.
      */
     @GetMapping("/available-batches")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<List<BatchSummaryResponse>>> getAvailableBatches() {
         log.info("Truy vấn danh sách lô vắc-xin khả dụng để thiết lập lịch tiêm.");
         List<BatchSummaryResponse> result = scheduleService.getAvailableBatches();
@@ -193,7 +193,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} chứa danh sách các lịch tiêm khả dụng cho người dùng.
      */
     @GetMapping("/opening")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế', 'Normal User Account')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL', 'Normal User Account')")
     public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getOpeningSchedules() {
         log.info("Bệnh nhân thực hiện tra cứu các lịch tiêm đang mở đăng ký.");
         List<ScheduleResponse> result = scheduleService.getOpeningSchedulesForUser();

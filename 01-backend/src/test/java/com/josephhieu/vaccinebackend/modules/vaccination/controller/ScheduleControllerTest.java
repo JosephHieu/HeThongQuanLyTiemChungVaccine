@@ -45,7 +45,7 @@ public class ScheduleControllerTest {
     @MockitoBean private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Test
-    @WithMockUser(authorities = "Nhân viên y tế")
+    @WithMockUser(authorities = "MEDICAL")
     @DisplayName("POST /schedules: Nhân viên tạo lịch tiêm thành công")
     void createSchedule_Success() throws Exception {
         ScheduleCreationRequest request = ScheduleCreationRequest.builder()

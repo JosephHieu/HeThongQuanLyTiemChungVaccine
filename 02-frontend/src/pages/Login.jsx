@@ -34,7 +34,7 @@ const Login = () => {
 
       // Lưu thông tin
       localStorage.setItem("token", token);
-      localStorage.setItem("role", roles[0]);
+      localStorage.setItem("role", roles[0].trim());
       localStorage.setItem("userName", hoTen);
 
       toast.success(`Chào mừng ${hoTen} trở lại!`);
@@ -42,10 +42,10 @@ const Login = () => {
       // Logic điều hướng dựa trên Role
       const staffRoles = [
         "Administrator",
-        "Quản lý kho",
-        "Nhân viên y tế",
-        "Tài chính",
-        "Hỗ trợ khách hàng",
+        "WAREHOUSE",
+        "MEDICAL",
+        "FINANCE",
+        "SUPPORT",
       ];
       const isStaffMember = roles.some((role) => staffRoles.includes(role));
 
