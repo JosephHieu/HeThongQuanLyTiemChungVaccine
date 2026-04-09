@@ -33,7 +33,7 @@ const Dashboard = () => {
       color: "bg-green-600",
       desc: "Quản lý vắc-xin, lô hàng, hạn sử dụng và tồn kho.",
       path: "/admin/warehouse",
-      roles: ["Administrator", "WAREHOUSE"],
+      roles: ["Administrator", "Quản lý kho"],
     },
     // 3. ĐIỀU PHỐI & KHÁM BỆNH (Admin + Y tế) - Khớp với path 'moderator' trong App.jsx
     {
@@ -42,7 +42,7 @@ const Dashboard = () => {
       color: "bg-purple-500",
       desc: "Xem danh sách chờ khám và cập nhật hồ sơ bệnh án.",
       path: "/admin/moderator",
-      roles: ["Administrator", "MEDICAL"],
+      roles: ["Administrator", "Nhân viên y tế"],
     },
     // 4. BÁO CÁO & TÀI CHÍNH (Admin + Tài chính)
     {
@@ -51,7 +51,7 @@ const Dashboard = () => {
       color: "bg-blue-500",
       desc: "Theo dõi doanh thu, hóa đơn và chi tiết thu chi.",
       path: "/admin/reports",
-      roles: ["Administrator", "FINANCE"],
+      roles: ["Administrator", "Tài chính"],
     },
     // 5. LỊCH TIÊM CHỦNG (Admin + Hỗ trợ + Y tế)
     {
@@ -69,7 +69,7 @@ const Dashboard = () => {
       color: "bg-cyan-500",
       desc: "Xem phản hồi và giải đáp thắc mắc từ người dân.",
       path: "/admin/feedbacks",
-      roles: ["Administrator", "SUPPORT"],
+      roles: ["Administrator", "Hỗ trợ khách hàng"],
     },
     // 7. QUẢN LÝ DỊCH BỆNH (MỚI THÊM)
     {
@@ -78,7 +78,7 @@ const Dashboard = () => {
       color: "bg-orange-600",
       desc: "Ghi nhận tình hình dịch tễ, cập nhật số ca nhiễm và ổ dịch địa phương.",
       path: "/admin/epidemics", // Đường dẫn bạn sẽ cấu hình trong App.jsx
-      roles: ["Administrator", "MEDICAL"],
+      roles: ["Administrator", "Nhân viên y tế"],
     },
   ];
 

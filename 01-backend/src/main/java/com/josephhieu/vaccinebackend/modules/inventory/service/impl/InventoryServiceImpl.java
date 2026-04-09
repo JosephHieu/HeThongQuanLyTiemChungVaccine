@@ -68,7 +68,7 @@ public class InventoryServiceImpl implements InventoryService {
         NhaCungCap ncc = nhaCungCapRepository.findById(request.getMaNhaCungCap())
                 .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_FOUND));
 
-        // 4. --- BƯỚC QUAN TRỌNG: TẠO HÓA ĐƠN FINANCE ---
+        // 4. --- BƯỚC QUAN TRỌNG: TẠO HÓA ĐƠN TÀI CHÍNH ---
         BigDecimal tongTienHienTai = request.getGiaNhap().multiply(BigDecimal.valueOf(request.getSoLuong()));
 
         HoaDon hoaDonNhap = HoaDon.builder()

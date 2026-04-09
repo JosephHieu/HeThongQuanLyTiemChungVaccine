@@ -86,10 +86,10 @@ function App() {
             <ProtectedRoute
               allowedRoles={[
                 "Administrator",
-                "MEDICAL",
-                "WAREHOUSE",
-                "FINANCE",
-                "SUPPORT",
+                "Nhân viên y tế",
+                "Quản lý kho",
+                "Tài chính",
+                "Hỗ trợ khách hàng",
               ]}
             >
               <AdminLayout />
@@ -115,7 +115,7 @@ function App() {
           <Route
             path="warehouse"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "WAREHOUSE"]}>
+              <ProtectedRoute allowedRoles={["Administrator", "Quản lý kho"]}>
                 <InventoryManagement />
               </ProtectedRoute>
             }
@@ -126,7 +126,11 @@ function App() {
             path="schedules"
             element={
               <ProtectedRoute
-                allowedRoles={["Administrator", "SUPPORT", "MEDICAL"]}
+                allowedRoles={[
+                  "Administrator",
+                  "Hỗ trợ khách hàng",
+                  "Nhân viên y tế",
+                ]}
               >
                 <ScheduleManagement />
               </ProtectedRoute>
@@ -137,7 +141,7 @@ function App() {
           <Route
             path="reports"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "FINANCE"]}>
+              <ProtectedRoute allowedRoles={["Administrator", "Tài chính"]}>
                 <FinancialManagement />
               </ProtectedRoute>
             }
@@ -147,7 +151,9 @@ function App() {
           <Route
             path="moderator"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "MEDICAL"]}>
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Nhân viên y tế"]}
+              >
                 <MedicalRecord />
               </ProtectedRoute>
             }
@@ -157,7 +163,9 @@ function App() {
           <Route
             path="feedbacks"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "SUPPORT"]}>
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
+              >
                 <AdminFeedbackManagement />
               </ProtectedRoute>
             }
@@ -165,9 +173,11 @@ function App() {
 
           {/* BỔ SUNG 9.6.1: Nhắc lịch tiêm chủng (Support Module) */}
           <Route
-            path="reminders"
+            path="reminders" // Khớp với path "/admin/reminders" trong Sidebar
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "SUPPORT"]}>
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Hỗ trợ khách hàng"]}
+              >
                 <VaccinationReminder />
               </ProtectedRoute>
             }
@@ -177,7 +187,9 @@ function App() {
           <Route
             path="epidemics"
             element={
-              <ProtectedRoute allowedRoles={["Administrator", "MEDICAL"]}>
+              <ProtectedRoute
+                allowedRoles={["Administrator", "Nhân viên y tế"]}
+              >
                 <EpidemicManagement />
               </ProtectedRoute>
             }

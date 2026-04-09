@@ -29,7 +29,7 @@ public interface EpidemicService {
 
     /**
      * Ghi nhận một đợt khảo sát dịch bệnh mới vào hệ thống.
-     * Chức năng này chỉ dành cho MEDICAL có thẩm quyền.
+     * Chức năng này chỉ dành cho Nhân viên y tế có thẩm quyền.
      * * @param request Thông tin chi tiết về đợt dịch bệnh từ {@link EpidemicRequest}.
      */
     void createEpidemic(EpidemicRequest request);

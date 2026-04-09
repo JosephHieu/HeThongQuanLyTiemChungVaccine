@@ -64,7 +64,7 @@ public class FinanceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "FINANCE")
+    @WithMockUser(authorities = "Tài chính")
     @DisplayName("IT - Thống kê doanh thu hôm nay phải khớp với dữ liệu đã nạp")
     void getFinanceSummary_IntegrationSuccess() throws Exception {
         mockMvc.perform(get("/api/v1/finance/summary")
@@ -76,7 +76,7 @@ public class FinanceIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "FINANCE")
+    @WithMockUser(authorities = "Tài chính")
     @DisplayName("IT - Thống kê NCC phải thấy 1 hóa đơn đang nợ (NHAP, TrangThai 0)")
     void getSupplierSummary_IntegrationSuccess() throws Exception {
         mockMvc.perform(get("/api/v1/finance/summary/suppliers")
@@ -87,7 +87,7 @@ public class FinanceIntegrationTest {
 
     @Test
     @WithMockUser(authorities = "Normal User Account")
-    @DisplayName("IT - Security chặn người dùng thường xem báo cáo FINANCE")
+    @DisplayName("IT - Security chặn người dùng thường xem báo cáo tài chính")
     void getSummary_AccessDenied() throws Exception {
         mockMvc.perform(get("/api/v1/finance/summary")
                         .contentType(MediaType.APPLICATION_JSON))

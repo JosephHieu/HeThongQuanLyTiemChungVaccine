@@ -150,7 +150,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} danh sách các đối tượng {@link LoaiPhanHoi}.
      */
     @GetMapping("/types")
-    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<List<LoaiPhanHoi>>> getFeedbackTypes() {
         log.info("Truy xuất danh mục phân loại phản hồi.");
         List<LoaiPhanHoi> result = highLevelFeedbackService.getFeedbackTypes();

@@ -61,8 +61,6 @@ public class EpidemicServiceImpl implements EpidemicService {
         NhanVien nv = nhanVienRepository.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        
-
         // 2. Xây dựng thực thể DichBenh từ Request
         DichBenh dichBenh = DichBenh.builder()
                 .nhanVien(nv)
@@ -119,7 +117,7 @@ public class EpidemicServiceImpl implements EpidemicService {
             throw new AppException(ErrorCode.EPIDEMIC_NOT_FOUND);
         }
         dichBenhRepository.deleteById(id);
-        log.warn("MEDICAL đã xóa bản ghi dịch bênh có ID: {}", id);
+        log.warn("Nhân viên y tế đã xóa bản ghi dịch bênh có ID: {}", id);
     }
 
 

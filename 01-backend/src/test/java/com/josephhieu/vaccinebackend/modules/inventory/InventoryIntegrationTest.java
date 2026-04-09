@@ -59,8 +59,8 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WAREHOUSE")
-    @DisplayName("Integration: Nhập kho vắc-xin mới và tự động sinh hóa đơn FINANCE")
+    @WithMockUser(authorities = "Quản lý kho")
+    @DisplayName("Integration: Nhập kho vắc-xin mới và tự động sinh hóa đơn tài chính")
     void importVaccine_Integration_Success() throws Exception {
         VaccineImportRequest request = VaccineImportRequest.builder()
                 .tenVacXin("Moderna-2026")
@@ -94,7 +94,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "WAREHOUSE")
+    @WithMockUser(authorities = "Quản lý kho")
     @DisplayName("Integration: Xuất kho và kiểm tra trừ tồn thực tế")
     void exportVaccine_Integration_Success() throws Exception {
         // GIVEN: Tạo sẵn 1 lô hàng 100 liều

@@ -36,7 +36,13 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       path: "/admin/dashboard",
       icon: <LayoutDashboard size={20} />,
       label: "Dashboard",
-      roles: ["Administrator", "MEDICAL", "WAREHOUSE", "FINANCE", "SUPPORT"],
+      roles: [
+        "Administrator",
+        "Nhân viên y tế",
+        "Quản lý kho",
+        "Tài chính",
+        "Hỗ trợ khách hàng",
+      ],
     },
     {
       path: "/admin/accounts",
@@ -48,7 +54,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       path: "/admin/warehouse",
       icon: <Warehouse size={20} />,
       label: "Kho vắc-xin",
-      roles: ["Administrator", "WAREHOUSE"],
+      roles: ["Administrator", "Quản lý kho"],
     },
     // BỔ SUNG: Lịch tiêm (Cho Y tế và Hỗ trợ)
     {
@@ -61,42 +67,48 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       path: "/admin/feedbacks",
       icon: <MessageSquare size={20} />, // Icon tin nhắn
       label: "Quản lý phản hồi",
-      roles: ["Administrator", "SUPPORT"],
+      roles: ["Administrator", "Hỗ trợ khách hàng"],
     },
     {
       path: "/admin/reminders",
       icon: <BellRing size={20} />,
       label: "Nhắc lịch tiêm",
-      roles: ["Administrator", "SUPPORT"],
+      roles: ["Administrator", "Hỗ trợ khách hàng"],
     },
     {
       path: "/admin/moderator",
       icon: <ShieldCheck size={20} />,
       label: "Điều phối",
-      roles: ["Administrator", "MEDICAL"],
+      roles: ["Administrator", "Nhân viên y tế"],
     },
     {
       path: "/admin/epidemics",
       icon: <ShieldAlert size={20} />,
       label: "Dịch bệnh",
-      roles: ["Administrator", "MEDICAL"],
+      roles: ["Administrator", "Nhân viên y tế"],
     },
     {
       path: "/admin/reports",
       icon: <Wallet size={20} />,
       label: "Báo cáo",
-      roles: ["Administrator", "FINANCE"],
+      roles: ["Administrator", "Tài chính"],
     },
     {
       path: "/admin/about",
       icon: <Info size={20} />,
       label: "Thông tin",
-      roles: ["Administrator", "MEDICAL", "WAREHOUSE", "FINANCE", "SUPPORT"],
+      roles: [
+        "Administrator",
+        "Nhân viên y tế",
+        "Quản lý kho",
+        "Tài chính",
+        "Hỗ trợ khách hàng",
+      ],
     },
 
     // --- NHÓM NGƯỜI DÙNG (NORMAL USER) ---
     {
-      path: "/user/vaccines",
+      path: "/user/vaccines", // Chức năng 9.5.1
       icon: <Syringe size={20} />,
       label: "Tra cứu vắc-xin",
       roles: ["Normal User Account"],
@@ -108,7 +120,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       roles: ["Normal User Account"],
     },
     {
-      path: "/user/schedules",
+      path: "/user/schedules", // Chức năng 9.5.2
       icon: <CalendarDays size={20} />,
       label: "Lịch tiêm trung tâm",
       roles: ["Normal User Account"],

@@ -1,12 +1,9 @@
 export const useAuth = () => {
-  const role = localStorage.getItem("role")?.trim();
+  const role = localStorage.getItem("role");
   const name = localStorage.getItem("userName");
   const token = localStorage.getItem("token");
 
-  const isLoading = false;
-
   const hasAuthority = (allowedAuthorities) => {
-    if (!role || !allowedAuthorities) return false;
     return allowedAuthorities.includes(role);
   };
 
@@ -14,14 +11,14 @@ export const useAuth = () => {
     role,
     name,
     token,
-    isLoading,
-    isAuthenticated: !!token && !!role,
+    isAuthenticated: !!token,
     hasAuthority,
+    // Đầy đủ 6 quyền tương ứng với các phân hệ trong trung tâm
     isAdmin: role === "Administrator",
-    isMedical: role === "MEDICAL",
-    isInventory: role === "WAREHOUSE",
-    isFinance: role === "FINANCE",
-    isSupport: role === "SUPPORT",
+    isMedical: role === "Nhân viên y tế",
+    isInventory: role === "Quản lý kho",
+    isFinance: role === "Tài chính",
+    isSupport: role === "Hỗ trợ khách hàng",
     isUser: role === "Normal User Account",
   };
 };

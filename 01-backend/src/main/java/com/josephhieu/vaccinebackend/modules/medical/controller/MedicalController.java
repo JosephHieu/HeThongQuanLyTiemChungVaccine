@@ -45,15 +45,15 @@ public class MedicalController {
 
     /**
      * Truy xuất thông tin hồ sơ bệnh án chi tiết của bệnh nhân.
-     * Phục vụ trực tiếp cho MEDICAL trong quá trình điều phối hoặc khám sàng lọc trước tiêm.
+     * Phục vụ trực tiếp cho nhân viên y tế trong quá trình điều phối hoặc khám sàng lọc trước tiêm.
      *
      * @param id Mã định danh duy nhất của bệnh nhân.
      * @return {@link ResponseEntity} chứa dữ liệu hồ sơ bệnh án chi tiết.
      */
     @GetMapping("/records/{id}")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<MedicalRecordResponse>> getRecord(@PathVariable UUID id) {
-        log.info("MEDICAL truy xuất hồ sơ bệnh án của bệnh nhân ID: {}", id);
+        log.info("Nhân viên y tế truy xuất hồ sơ bệnh án của bệnh nhân ID: {}", id);
         MedicalRecordResponse result = medicalRecordService.getMedicalRecord(id);
 
         return ResponseEntity.ok(ApiResponse.success(result));
@@ -67,7 +67,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} chứa hồ sơ bệnh án sau khi đã cập nhật thành công.
      */
     @PutMapping("/records/{id}")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<MedicalRecordResponse>> updateInfo(
             @PathVariable UUID id,
             @RequestBody @Valid UpdatePatientRequest request) {
@@ -89,7 +89,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận chỉ định đã được lưu.
      */
     @PostMapping("/records/{id}/prescribe")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<String>> prescribe(
             @PathVariable UUID id,
             @RequestBody @Valid PrescribeRequest request) {
@@ -112,7 +112,7 @@ public class MedicalController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận mũi tiêm đã hoàn tất.
      */
     @PostMapping("/records/confirm-injection/{maDangKy}")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<String>> confirmInjection(
             @PathVariable UUID maDangKy,
             @RequestBody Map<String, String> request) {

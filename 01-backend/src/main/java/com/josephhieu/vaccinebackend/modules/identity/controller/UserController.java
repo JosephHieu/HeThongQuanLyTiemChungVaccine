@@ -99,7 +99,7 @@ public class UserController {
     }
 
     /**
-     * Truy xuất danh sách rút gọn các MEDICAL (Bác sĩ/Y tá) hiện đang hoạt động.
+     * Truy xuất danh sách rút gọn các nhân viên y tế (Bác sĩ/Y tá) hiện đang hoạt động.
      * <p>
      * API này được thiết kế để cung cấp dữ liệu cho các phân hệ điều phối tiêm chủng
      * khi cần phân công cán bộ phụ trách các ca tiêm.
@@ -108,10 +108,10 @@ public class UserController {
      * @return {@link ResponseEntity} danh sách nhân sự y tế phù hợp.
      */
     @GetMapping("/medical-staffs")
-    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<List<StaffSummaryResponse>>> getMedicalStaffs() {
-        log.info("Truy vấn danh sách MEDICAL phục vụ công tác điều phối lịch trực.");
-        List<StaffSummaryResponse> result = userService.getStaffsByRole("MEDICAL");
+        log.info("Truy vấn danh sách nhân viên y tế phục vụ công tác điều phối lịch trực.");
+        List<StaffSummaryResponse> result = userService.getStaffsByRole("Nhân viên y tế");
 
         return ResponseEntity.ok(ApiResponse.success(result));
     }

@@ -120,7 +120,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new AppException(ErrorCode.VACCINATION_ALREADY_COMPLETED);
         }
 
-        // --- CHỐT CHẶN FINANCE MỚI ---
+        // --- CHỐT CHẶN TÀI CHÍNH MỚI ---
         HoaDon hd = registration.getHoaDon();
         if (hd == null) {
             throw new AppException(ErrorCode.INVOICE_NOT_FOUND); // chưa có hóa đơn
@@ -247,7 +247,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                         .lieuLuong("01 liều")
                         .nguoiTiem(item.getNhanVienThucHien() != null
                         ? item.getNhanVienThucHien().getTenNhanVien()
-                                : "MEDICAL")
+                                : "Nhân viên y tế")
                         .ketQua(item.getPhanUngSauTiem())
                         .build())
                 .toList();

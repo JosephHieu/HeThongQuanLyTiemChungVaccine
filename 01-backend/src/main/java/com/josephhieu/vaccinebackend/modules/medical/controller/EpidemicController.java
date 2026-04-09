@@ -19,7 +19,7 @@ import java.util.UUID;
  * Controller quản lý dữ liệu dịch tễ và tình hình dịch bệnh địa phương.
  * <p>
  * Cung cấp khả năng công khai thông tin dịch bệnh cho người dân (Normal User)
- * và các công cụ quản lý, cập nhật dữ liệu khảo sát cho MEDICAL (Medical Staff).
+ * và các công cụ quản lý, cập nhật dữ liệu khảo sát cho nhân viên y tế (Medical Staff).
  * </p>
  *
  * @author Joseph Hieu
@@ -44,7 +44,8 @@ public class EpidemicController {
      * @return {@link ResponseEntity} chứa danh sách toàn bộ các ổ dịch và tình trạng tương ứng.
      */
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'MEDICAL')")    public ResponseEntity<ApiResponse<List<EpidemicResponse>>> getAllEpidemics() {
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
+    public ResponseEntity<ApiResponse<List<EpidemicResponse>>> getAllEpidemics() {
         log.info("Yêu cầu truy xuất toàn bộ dữ liệu tình hình dịch bệnh.");
         List<EpidemicResponse> result = epidemicService.getAllEpidemics();
 
@@ -58,7 +59,7 @@ public class EpidemicController {
      * @return {@link ResponseEntity} danh sách các vụ dịch trùng khớp với địa điểm tìm kiếm.
      */
     @GetMapping("/search")
-    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<List<EpidemicResponse>>> searchByLocation(@RequestParam String diaChi) {
         log.info("Thực hiện tra cứu dịch tễ tại khu vực: {}", diaChi);
         List<EpidemicResponse> result = epidemicService.searchByLocation(diaChi);
@@ -69,7 +70,7 @@ public class EpidemicController {
     /**
      * Ghi nhận một thông tin khảo sát dịch tễ mới vào hệ thống.
      * <p>
-     * Chức năng này dành riêng cho MEDICAL nhằm cập nhật diễn biến dịch bệnh
+     * Chức năng này dành riêng cho nhân viên y tế nhằm cập nhật diễn biến dịch bệnh
      * mới phát sinh để đưa ra các khuyến cáo tiêm chủng phù hợp.
      * </p>
      *
@@ -77,9 +78,9 @@ public class EpidemicController {
      * @return {@link ResponseEntity} với mã 201 (Created) xác nhận bản ghi đã được tạo.
      */
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('MEDICAL', 'Administrator')")
+    @PreAuthorize("hasAnyAuthority('Nhân viên y tế', 'Administrator')")
     public ResponseEntity<ApiResponse<Void>> createEpidemic(@RequestBody @Valid EpidemicRequest request) {
-        log.info("MEDICAL tạo mới hồ sơ khảo sát dịch tễ tại: {}", request.getDiaChi());
+        log.info("Nhân viên y tế tạo mới hồ sơ khảo sát dịch tễ tại: {}", request.getDiaChi());
         epidemicService.createEpidemic(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -93,7 +94,7 @@ public class EpidemicController {
      * @return {@link ResponseEntity} chứa thông tin chi tiết của bản ghi.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'MEDICAL')")
+    @PreAuthorize("hasAnyAuthority('Normal User Account', 'Administrator', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<EpidemicResponse>> getById(@PathVariable UUID id) {
         log.info("Truy xuất chi tiết bản ghi dịch bệnh ID: {}", id);
         EpidemicResponse result = epidemicService.getEpidemicById(id);
@@ -109,7 +110,7 @@ public class EpidemicController {
      * @return {@link ResponseEntity} chứa dữ liệu sau khi đã được cập nhật thành công.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('MEDICAL', 'Administrator')")
+    @PreAuthorize("hasAnyAuthority('Nhân viên y tế', 'Administrator')")
     public ResponseEntity<ApiResponse<EpidemicResponse>> update(@PathVariable UUID id, @RequestBody @Valid EpidemicRequest request) {
         log.info("Cập nhật thông tin bản ghi dịch bệnh ID: {}", id);
         EpidemicResponse result = epidemicService.updateEpidemic(id, request);
@@ -124,7 +125,7 @@ public class EpidemicController {
      * @return {@link ResponseEntity} xác nhận thao tác xóa đã hoàn tất.
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('MEDICAL', 'Administrator')")
+    @PreAuthorize("hasAnyAuthority('Nhân viên y tế', 'Administrator')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         log.warn("Thực hiện lệnh xóa bản ghi dịch bệnh ID: {}", id);
         epidemicService.deleteEpidemic(id);

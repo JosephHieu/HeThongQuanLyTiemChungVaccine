@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Service quản lý danh mục vắc-xin và các nghiệp vụ FINANCE liên quan.
+ * Service quản lý danh mục vắc-xin và các nghiệp vụ tài chính liên quan.
  * Cung cấp khả năng quản lý toàn diện (CRUD) và thống kê giá trị tài sản kho.
  */
 public interface FinanceService {
