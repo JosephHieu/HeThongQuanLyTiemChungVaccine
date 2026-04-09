@@ -91,7 +91,7 @@ Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Sc
 
 ![Database Schema](docs/DB_Vaccine_Management_SChema.svg)
 
-## 🛠 Công nghệ sử dụng
+## Công nghệ sử dụng
 `Backend`
 
 - **Spring Boot 3.x:** Framework chính cho REST API.
@@ -169,7 +169,7 @@ Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tạ
 | Hỗ trợ khách hàng   | `HTKH01`             | `123456`            | `973b87c5-94a1-4d2d-b69c-df03de36a70d`| Tư vấn, nhắc lịch tiêm chủng   |
 | Khách hàng          | `BenhNhan02`         | `123456`            | `cb9fe6a2-b98b-4a76-bcc0-28d49862c48c`| Tra cứu hồ sơ, đặt lịch tiêm   |
   
-
+*** Lưu ý: nếu lần đầu sử dụng web đã deploy thì request sẽ mất khoảng 5 - 7 phút để xử lý. (vì xử dụng dịch vụ cloud free nên sẽ hơi lâu cho request đầu tiên)
 
 
 
