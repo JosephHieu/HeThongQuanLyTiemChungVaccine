@@ -25,6 +25,8 @@ public enum ErrorCode {
     TOKEN_EXPIRED(1013, "Mã xác thực đã hết hạn (15 phút). Vui lòng yêu cầu lại.", HttpStatus.UNAUTHORIZED),
     PASSWORD_TOO_SHORT(1014, "Mật khẩu phải có ít nhất 6 ký tự", HttpStatus.BAD_REQUEST),
     EMAIL_FORMAT_INVALID(1015, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1016, "Mã xác thực không hợp lệ", HttpStatus.UNAUTHORIZED), // 401
+    NOT_LOGGED_IN(1017, "Vui lòng đăng nhập", HttpStatus.UNAUTHORIZED), // 401
 
     // INVENTORY ERRORS (1100 - 1199)
     INVENTORY_NOT_FOUND(1101, "Lô vắc-xin không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),

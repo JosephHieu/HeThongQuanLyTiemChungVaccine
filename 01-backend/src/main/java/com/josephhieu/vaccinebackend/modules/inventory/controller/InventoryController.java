@@ -56,7 +56,7 @@ public class InventoryController {
      * @return {@link ResponseEntity} chứa trang dữ liệu tồn kho.
      */
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Quản lý kho', 'Nhân viên y tế')")
     public ResponseEntity<ApiResponse<Page<InventoryResponse>>> getInventory(
             @RequestParam(required = false, defaultValue = "name") String criteria,
             @RequestParam(required = false, defaultValue = "") String search,

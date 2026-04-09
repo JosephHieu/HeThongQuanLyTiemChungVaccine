@@ -70,7 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**", "/api/v1/roles/**", "/api/v1/users/**").hasAuthority("Administrator")
 
                         // QUYỀN KHO: Quản lý vắc-xin, lô hàng
-                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho")
+                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "Quản lý kho", "Nhân viên y tế")
 
                         // QUYỀN Y TẾ: Hồ sơ bệnh án, ĐIỀU PHỐI LỊCH TIÊM
                         .requestMatchers("/api/v1/medical/feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")

@@ -20,42 +20,45 @@ axiosClient.interceptors.request.use(
 
 // [Response Interceptor] - CẬP NHẬT THÊM LOGIC
 axiosClient.interceptors.response.use(
-  (response) => {
-    // Trả về phần result để code ở Page ngắn gọn hơn
-    return response.data?.result ?? response.data;
-  },
+  (response) => response.data?.result ?? response.data,
   (error) => {
     const backendError = error.response?.data;
     const status = error.response?.status;
     const errorCode = backendError?.code;
 
-    // 1. Xử lý lỗi Unauthenticated (Mã 1009) hoặc Token hết hạn (401)
-    if (status === 401 || errorCode === 1009) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login?message=expired";
+    // --- NHÓM 1: LỖI BUỘC PHẢI LOGOUT (1013, 1016, 1017) ---
+    // Chúng ta sử dụng mã lỗi mà mình đã hướng dẫn bạn thêm vào Backend
+    const forceLogoutCodes = [1013, 1016, 1017];
+
+    if (status === 401) {
+      // CHỈ xóa khi mã lỗi khẳng định Token hỏng/hết hạn
+      if (forceLogoutCodes.includes(errorCode)) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("userName");
+
+        if (!window.location.pathname.includes("/login")) {
+          toast.error("Phiên làm việc hết hạn. Vui lòng đăng nhập lại!");
+          window.location.href = "/login?message=expired";
+        }
+      } else if (errorCode === 1009) {
+        // 1009 là sai Pass lúc Login, hiện Toast thôi, đừng xóa token cũ (nếu có)
+        toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
       }
+      return Promise.reject(backendError);
     }
 
-    // 2. Xử lý lỗi Reset Password đặc thù
-    if (errorCode === 1013) {
-      toast.error("Mã xác thực đã hết hạn. Vui lòng yêu cầu lại mã mới!");
-    } else if (errorCode === 1012) {
-      toast.error("Mã xác thực không hợp lệ!");
-    }
-
-    // 3. Xử lý Access Denied (Mã 1010)
+    // --- NHÓM 2: LỖI SAI QUYỀN (403 / 1010) ---
+    // Khi nhấn "Kê đơn" bị 403, nó sẽ nhảy vào đây -> Hiện Toast -> KHÔNG BỊ VĂNG
     if (status === 403 || errorCode === 1010) {
-      toast.error(backendError?.message || "Bạn không có quyền truy cập!");
+      toast.error(
+        backendError?.message || "Bạn không có quyền thực hiện chức năng này!",
+      );
+      return Promise.reject(backendError);
     }
 
-    // 4. Các lỗi nghiệp vụ khác
-    if (
-      backendError &&
-      backendError.message &&
-      ![1012, 1013, 1009].includes(errorCode)
-    ) {
+    // --- NHÓM 3: LỖI NGHIỆP VỤ KHÁC ---
+    if (backendError?.message && errorCode !== 1009) {
       toast.error(backendError.message);
     }
 
