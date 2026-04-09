@@ -25,7 +25,7 @@ public class VaccineFullResponse {
     private String doTuoiTiemChung;
     private String dieuKienBaoQuan;
 
-    // Thông tin tài chính
+    // Thông tin FINANCE
     private BigDecimal donGia;
 
     // Audit info (Dành cho quản lý)

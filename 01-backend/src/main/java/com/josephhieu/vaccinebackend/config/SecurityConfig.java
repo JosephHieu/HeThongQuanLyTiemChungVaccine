@@ -72,7 +72,7 @@ public class SecurityConfig {
                         // 3. QUYỀN KHO (WAREHOUSE)
                         .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("Administrator", "WAREHOUSE")
 
-                        // 4. QUYỀN TÀI CHÍNH (FINANCE)
+                        // 4. QUYỀN FINANCE (FINANCE)
                         .requestMatchers("/api/v1/finance/**").hasAnyAuthority("Administrator", "FINANCE")
 
                         // 5. QUYỀN HỖ TRỢ (SUPPORT)

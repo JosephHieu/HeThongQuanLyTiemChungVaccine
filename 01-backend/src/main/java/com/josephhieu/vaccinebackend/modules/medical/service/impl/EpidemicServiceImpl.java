@@ -119,7 +119,7 @@ public class EpidemicServiceImpl implements EpidemicService {
             throw new AppException(ErrorCode.EPIDEMIC_NOT_FOUND);
         }
         dichBenhRepository.deleteById(id);
-        log.warn("Nhân viên y tế đã xóa bản ghi dịch bênh có ID: {}", id);
+        log.warn("MEDICAL đã xóa bản ghi dịch bênh có ID: {}", id);
     }
 
 

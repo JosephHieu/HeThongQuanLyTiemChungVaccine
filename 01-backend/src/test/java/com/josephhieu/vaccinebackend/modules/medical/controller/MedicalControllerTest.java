@@ -50,7 +50,7 @@ public class MedicalControllerTest {
 
     @Test
     @WithMockUser(authorities = "MEDICAL")
-    @DisplayName("GET /records/{id}: Nhân viên y tế truy cập hồ sơ thành công")
+    @DisplayName("GET /records/{id}: MEDICAL truy cập hồ sơ thành công")
     void getRecord_Success() throws Exception {
         UUID patientId = UUID.randomUUID();
         MedicalRecordResponse response = MedicalRecordResponse.builder()

@@ -31,7 +31,7 @@ public class UserCreationRequest {
     private String matKhau;
 
     /** * Mã quyền hạn (UUID).
-     * Dùng để ánh xạ vào bảng PHANQUYEN (Administrator, Quản lý kho, Tài chính...).
+     * Dùng để ánh xạ vào bảng PHANQUYEN (Administrator, WAREHOUSE, FINANCE...).
      */
     @NotBlank(message = "MISSING_INFO")
     private String maQuyen;

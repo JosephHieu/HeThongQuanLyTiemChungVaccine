@@ -87,7 +87,7 @@ public class FinanceIntegrationTest {
 
     @Test
     @WithMockUser(authorities = "Normal User Account")
-    @DisplayName("IT - Security chặn người dùng thường xem báo cáo tài chính")
+    @DisplayName("IT - Security chặn người dùng thường xem báo cáo FINANCE")
     void getSummary_AccessDenied() throws Exception {
         mockMvc.perform(get("/api/v1/finance/summary")
                         .contentType(MediaType.APPLICATION_JSON))

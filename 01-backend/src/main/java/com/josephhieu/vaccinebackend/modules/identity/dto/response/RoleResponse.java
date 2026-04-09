@@ -9,5 +9,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RoleResponse {
     private UUID maQuyen;
-    private String tenQuyen; // Ví dụ: Administrator, Quản lý kho...
+    private String tenQuyen; // Ví dụ: Administrator, WAREHOUSE...
 }

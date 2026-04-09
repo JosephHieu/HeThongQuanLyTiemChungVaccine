@@ -73,7 +73,7 @@ public class InventoryController {
     /**
      * Thực hiện nhập lô vắc-xin mới vào hệ thống kho.
      * <p>
-     * Quy trình bao gồm khởi tạo số lô, cập nhật số lượng tồn và ghi nhận thông tin tài chính liên quan.
+     * Quy trình bao gồm khởi tạo số lô, cập nhật số lượng tồn và ghi nhận thông tin FINANCE liên quan.
      * Sử dụng mã 201 (Created) để xác nhận tài nguyên kho mới đã được thiết lập.
      * </p>
      *

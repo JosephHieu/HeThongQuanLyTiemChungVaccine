@@ -1,5 +1,6 @@
 package com.josephhieu.vaccinebackend.modules.auth.security;
 
+import com.josephhieu.vaccinebackend.common.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,24 +32,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String username = tokenProvider.getUsernameFromJWT(jwt);
+            if (StringUtils.hasText(jwt)) {
+                if (tokenProvider.validateToken(jwt)) {
+                    String username = tokenProvider.getUsernameFromJWT(jwt);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (userDetails != null && userDetails.isEnabled()) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    if (userDetails != null && userDetails.isEnabled()) {
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
                 } else {
-                    log.warn("Tài khoản {} đã bị khóa hoặc vô hiệu hóa.", username);
+                    request.setAttribute("jwt_error", ErrorCode.INVALID_TOKEN);
                 }
             }
         } catch (Exception ex) {
-            log.error("Không thể thiết lập xác thực người dùng trong security context", ex);
+            log.error("Xác thực thất bại", ex);
         }
 
         filterChain.doFilter(request, response);

@@ -91,13 +91,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       path: "/admin/about",
       icon: <Info size={20} />,
       label: "Thông tin",
-      roles: [
-        "Administrator",
-        "Nhân viên y tế",
-        "Quản lý kho",
-        "Tài chính",
-        "Hỗ trợ khách hàng",
-      ],
+      roles: ["Administrator", "MEDICAL", "WAREHOUSE", "FINANCE", "SUPPORT"],
     },
 
     // --- NHÓM NGƯỜI DÙNG (NORMAL USER) ---

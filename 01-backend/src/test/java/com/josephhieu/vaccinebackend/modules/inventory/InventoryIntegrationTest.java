@@ -60,7 +60,7 @@ public class InventoryIntegrationTest {
 
     @Test
     @WithMockUser(authorities = "WAREHOUSE")
-    @DisplayName("Integration: Nhập kho vắc-xin mới và tự động sinh hóa đơn tài chính")
+    @DisplayName("Integration: Nhập kho vắc-xin mới và tự động sinh hóa đơn FINANCE")
     void importVaccine_Integration_Success() throws Exception {
         VaccineImportRequest request = VaccineImportRequest.builder()
                 .tenVacXin("Moderna-2026")

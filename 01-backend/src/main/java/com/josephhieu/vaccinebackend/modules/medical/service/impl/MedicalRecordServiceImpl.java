@@ -120,7 +120,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new AppException(ErrorCode.VACCINATION_ALREADY_COMPLETED);
         }
 
-        // --- CHỐT CHẶN TÀI CHÍNH MỚI ---
+        // --- CHỐT CHẶN FINANCE MỚI ---
         HoaDon hd = registration.getHoaDon();
         if (hd == null) {
             throw new AppException(ErrorCode.INVOICE_NOT_FOUND); // chưa có hóa đơn

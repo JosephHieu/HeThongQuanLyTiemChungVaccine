@@ -85,7 +85,7 @@ public class ScheduleController {
      * @return {@link ResponseEntity} với mã 201 (Created) và thông tin lịch vừa tạo.
      */
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL)")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'MEDICAL')")
     public ResponseEntity<ApiResponse<ScheduleResponse>> createSchedule(@RequestBody @Valid ScheduleCreationRequest request) {
         log.info("Yêu cầu tạo mới lịch tiêm chủng cho ngày: {}", request.getNgayTiem());
         ScheduleResponse result = scheduleService.createScheduleService(request);

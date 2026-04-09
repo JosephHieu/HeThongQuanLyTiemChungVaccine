@@ -31,7 +31,7 @@ public class FinanceController {
     @GetMapping("/summary")
     @PreAuthorize("hasAnyAuthority('Administrator', 'FINANCE')")
     public ResponseEntity<ApiResponse<FinanceSummaryResponse>> getSummary() {
-        log.info("Yêu cầu truy xuất báo cáo tổng quan tài chính hệ thống.");
+        log.info("Yêu cầu truy xuất báo cáo tổng quan FINANCE hệ thống.");
         return ResponseEntity.ok(ApiResponse.success(financeService.getFinanceSummary()));
     }
 

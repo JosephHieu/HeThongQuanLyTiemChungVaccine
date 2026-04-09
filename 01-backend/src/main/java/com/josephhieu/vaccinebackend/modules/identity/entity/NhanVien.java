@@ -7,7 +7,7 @@ import java.util.UUID;
 
 /**
  * Thực thể ánh xạ đến bảng NHANVIEN trong cơ sở dữ liệu.
- * Đại diện cho hồ sơ nhân viên y tế, quản kho, tài chính và hỗ trợ.
+ * Đại diện cho hồ sơ MEDICAL, quản kho, FINANCE và hỗ trợ.
  * * @author Joseph Hieu
  */
 @Entity

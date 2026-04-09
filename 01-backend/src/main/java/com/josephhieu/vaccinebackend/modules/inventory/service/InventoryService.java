@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Interface định nghĩa các nghiệp vụ quản lý kho vắc-xin.
+ * Interface định nghĩa các nghiệp vụ WAREHOUSE vắc-xin.
  * Bao gồm: Nhập kho, xuất kho, tìm kiếm và thống kê.
  * * @author Joseph Hieu
  */

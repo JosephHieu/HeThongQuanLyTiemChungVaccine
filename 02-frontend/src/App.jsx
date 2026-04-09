@@ -126,11 +126,7 @@ function App() {
             path="schedules"
             element={
               <ProtectedRoute
-                allowedRoles={[
-                  "Administrator",
-                  "Hỗ trợ khách hàng",
-                  "Nhân viên y tế",
-                ]}
+                allowedRoles={["Administrator", "SUPPORT", "MEDICAL"]}
               >
                 <ScheduleManagement />
               </ProtectedRoute>
@@ -169,7 +165,7 @@ function App() {
 
           {/* BỔ SUNG 9.6.1: Nhắc lịch tiêm chủng (Support Module) */}
           <Route
-            path="reminders" // Khớp với path "/admin/reminders" trong Sidebar
+            path="reminders"
             element={
               <ProtectedRoute allowedRoles={["Administrator", "SUPPORT"]}>
                 <VaccinationReminder />

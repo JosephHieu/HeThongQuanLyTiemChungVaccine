@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 /**
- * DTO phụ để chứa thông tin rút gọn của nhân viên y tế.
+ * DTO phụ để chứa thông tin rút gọn của MEDICAL.
  */
 @Data
 @Builder

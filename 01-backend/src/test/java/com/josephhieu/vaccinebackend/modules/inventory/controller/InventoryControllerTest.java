@@ -80,7 +80,7 @@ public class InventoryControllerTest {
 
     @Test
     @WithMockUser(authorities = "WAREHOUSE")
-    @DisplayName("POST /import: Thành công khi Quản lý kho nhập hàng")
+    @DisplayName("POST /import: Thành công khi WAREHOUSE nhập hàng")
     void importVaccine_Success() throws Exception {
         when(inventoryService.importVaccine(any())).thenReturn(inventoryResponse);
 

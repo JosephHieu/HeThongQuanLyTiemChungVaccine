@@ -6,22 +6,9 @@ const axiosClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// [Request Interceptor] - ĐÃ TỐT
-axiosClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-// [Response Interceptor] - CẬP NHẬT THÊM LOGIC
+// axiosClient.js
 axiosClient.interceptors.response.use(
   (response) => {
-    // Trả về phần result để code ở Page ngắn gọn hơn
     return response.data?.result ?? response.data;
   },
   (error) => {
@@ -29,41 +16,38 @@ axiosClient.interceptors.response.use(
     const status = error.response?.status;
     const errorCode = backendError?.code;
 
-    // 1. Xử lý lỗi Unauthenticated (Mã 1009) hoặc Token hết hạn (401)
-    if (status === 401 || errorCode === 1009) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login?message=expired";
-      }
-    }
+    // --- NHÓM 1: LỖI BUỘC PHẢI ĐĂNG XUẤT (401 / INVALID TOKEN / NOT LOGGED IN) ---
+    // Chỉ xóa token khi mã lỗi là 1016 (Token hỏng), 1017 (Chưa login) hoặc 1013 (Token hết hạn)
+    const logoutErrorCodes = [1013, 1016, 1017];
 
-    // 2. Xử lý lỗi Reset Password đặc thù
-    if (errorCode === 1013) {
-      toast.error("Mã xác thực đã hết hạn. Vui lòng yêu cầu lại mã mới!");
-    } else if (errorCode === 1012) {
-      toast.error("Mã xác thực không hợp lệ!");
-    }
+    if (status === 401 && logoutErrorCodes.includes(errorCode)) {
+      console.warn("Hệ thống yêu cầu đăng xuất. Mã lỗi:", errorCode);
 
-    // 3. Xử lý Access Denied (Mã 1010)
-    if (status === 401 || errorCode === 1009) {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("userName");
-      window.location.href = "/login?message=expired";
+
+      if (!window.location.pathname.includes("/login")) {
+        toast.error("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!");
+        window.location.href = "/login?message=expired";
+      }
+      return Promise.reject(backendError);
     }
 
+    // --- NHÓM 2: LỖI SAI THÔNG TIN ĐĂNG NHẬP (1009) ---
+    if (errorCode === 1009) {
+      toast.error("Tên đăng nhập hoặc mật khẩu không đúng!");
+      return Promise.reject(backendError);
+    }
+
+    // --- NHÓM 3: LỖI CẤM TRUY CẬP (403 / 1010) ---
     if (status === 403 || errorCode === 1010) {
-      // CHỈ HIỆN TOAST, KHÔNG ĐƯỢC XÓA TOKEN VÀ KHÔNG ĐƯỢC REDIRECT
-      toast.error("Bạn không có quyền truy cập chức năng này!");
+      toast.error("Bạn không có quyền thực hiện chức năng này!");
+      return Promise.reject(backendError);
     }
 
-    // 4. Các lỗi nghiệp vụ khác
-    if (
-      backendError &&
-      backendError.message &&
-      ![1012, 1013, 1009].includes(errorCode)
-    ) {
+    // --- NHÓM 4: CÁC LỖI NGHIỆP VỤ KHÁC ---
+    if (backendError?.message) {
       toast.error(backendError.message);
     }
 

@@ -53,7 +53,7 @@ public class UserIntegrationTest {
 
     @Test
     @WithMockUser(authorities = "Administrator")
-    @DisplayName("Integration: Tạo nhân viên y tế - Dữ liệu phải lưu đồng thời vào 3 bảng")
+    @DisplayName("Integration: Tạo MEDICAL - Dữ liệu phải lưu đồng thời vào 3 bảng")
     void createStaff_IntegrationFlow() throws Exception {
         UserCreationRequest request = UserCreationRequest.builder()
                 .tenDangNhap("staff_2026")
