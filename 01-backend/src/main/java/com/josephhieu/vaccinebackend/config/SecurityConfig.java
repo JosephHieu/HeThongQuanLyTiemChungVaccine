@@ -75,7 +75,7 @@ public class SecurityConfig {
                         // QUYỀN Y TẾ: Hồ sơ bệnh án, ĐIỀU PHỐI LỊCH TIÊM
                         .requestMatchers("/api/v1/medical/feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
                         .requestMatchers("/api/v1/medical/my-profile", "/api/v1/medical/my-history").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
-                        .requestMatchers("/api/v1/medical/high-level-feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
+                        .requestMatchers("/api/v1/medical/high-level-feedback/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account", "Hỗ trợ khách hàng")
                         .requestMatchers("/api/v1/medical/epidemics/**").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
                         .requestMatchers("/api/v1/vaccination/schedules/opening").hasAnyAuthority("Administrator", "Nhân viên y tế", "Normal User Account")
                         .requestMatchers("/api/v1/medical/**", "/api/v1/vaccination/**").hasAnyAuthority("Administrator", "Nhân viên y tế")

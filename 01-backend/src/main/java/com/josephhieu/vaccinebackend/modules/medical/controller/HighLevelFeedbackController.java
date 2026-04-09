@@ -105,7 +105,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} danh sách tổng hợp dành cho Administrator.
      */
     @GetMapping("/admin/all")
-    @PreAuthorize("hasAnyAuthority('Administrator')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Hỗ trợ khách hàng')")
     public ResponseEntity<ApiResponse<List<HighLevelFeedbackResponse>>> getAllForAdmin() {
         log.info("Quản trị viên đang truy cập danh sách phản hồi tổng hợp toàn hệ thống.");
         List<HighLevelFeedbackResponse> result = highLevelFeedbackService.getAllFeedbackForAdmin();
@@ -120,7 +120,7 @@ public class HighLevelFeedbackController {
      * @return {@link ResponseEntity} thông báo cập nhật thành công.
      */
     @PutMapping("/admin/{id}/status")
-    @PreAuthorize("hasAnyAuthority('Administrator')")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Hỗ trợ khách hàng')")
     public ResponseEntity<ApiResponse<Void>> updateStatus(
             @PathVariable UUID id,
             @RequestParam Integer status) {
