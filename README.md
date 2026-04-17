@@ -168,7 +168,19 @@ Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tạ
 | Nhân viên y tế      | `BacSi02`            | `123456`            | `7734a5c8-a2a5-4bba-95fd-001b520ee52e`| Khám sàng lọc, kê đơn tiêm     |
 | Hỗ trợ khách hàng   | `HTKH01`             | `123456`            | `973b87c5-94a1-4d2d-b69c-df03de36a70d`| Tư vấn, nhắc lịch tiêm chủng   |
 | Khách hàng          | `BenhNhan02`         | `123456`            | `cb9fe6a2-b98b-4a76-bcc0-28d49862c48c`| Tra cứu hồ sơ, đặt lịch tiêm   |
-  
+
+
+## Deployment & Infrastructure
+
+Hệ thống đã được đóng gói và triển khai thực tế trên các nền tảng Cloud hiện đại, tối ưu hóa cho hiệu suất và khả năng mở rộng:
+
+| Thành phần | Nền tảng (Platform) | Đường dẫn (URL) |
+| :--- | :--- | :--- |
+| **Frontend** | Vercel | `https://vaccine-system-beta.vercel.app` |
+| **Backend** | Render | `https://hethongquanlytiemchungvaccine.onrender.com` |
+| **Database** | TiDB Cloud | `MySQL Distributed SQL Cluster` |
+| **CI/CD** | GitHub Actions | `Automated Workflow` |
+
 *** Lưu ý: nếu lần đầu sử dụng web đã deploy thì request sẽ mất khoảng 5 - 7 phút để xử lý. (vì xử dụng dịch vụ cloud free nên sẽ hơi lâu cho request đầu tiên)
 
 
