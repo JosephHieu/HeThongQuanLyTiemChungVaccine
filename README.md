@@ -202,10 +202,26 @@ src/main/java/com/josephhieu/vaccinebackend/
     ├── medical/            # Quản lý bệnh án, phản hồi & dịch bệnh
     ├── support/            # Hệ thống nhắc lịch & hỗ trợ khách hàng
     └── vaccination/        # Quy trình tiêm chủng & đăng ký tiêm
-
-
 ```
 ## Cấu trúc thư mục Frontend
 
+### Frontend (ReactJS & Tailwind CSS)
 
+Frontend được xây dựng với **ReactJS** và **Vite**, tổ chức theo cấu trúc module hóa, giúp tách biệt rõ ràng giữa logic xử lý API, giao diện người dùng và quản lý trạng thái.
 
+```text
+src/
+├── api/                # Quản lý tập trung các Axios call, phân loại theo nghiệp vụ
+│   ├── axiosClient.js  # Cấu hình Interceptors xử lý JWT & Error Code (1009-1017)
+│   └── [Module]Api.js  # API định nghĩa riêng cho Auth, Medical, Inventory...
+├── components/         # UI Components dùng chung và các Modals hệ thống
+├── hooks/              # Custom Hooks (useAuth) quản lý logic xác thực
+├── layouts/            # Định nghĩa khung giao diện cho Admin và Người dùng
+├── pages/              # Phân hệ màn hình nghiệp vụ (Feature-based)
+│   ├── Finance/        # Quản lý tài chính & Giao dịch
+│   ├── Inventory/      # Quản lý kho vắc-xin & Xuất nhập kho
+│   ├── Medical/        # Hồ sơ bệnh án & Kê đơn thuốc
+│   ├── Support/        # Feedback & Nhắc lịch tiêm chủng
+│   └── Vaccination/    # Quản lý lịch tiêm & Đăng ký tiêm chủng
+└── routes/             # Phân quyền truy cập với ProtectedRoute
+```
