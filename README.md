@@ -183,10 +183,29 @@ Hệ thống đã được đóng gói và triển khai thực tế trên các n
 
 *** Lưu ý: nếu lần đầu sử dụng web đã deploy thì request sẽ mất khoảng 5 - 7 phút để xử lý. (vì xử dụng dịch vụ cloud free nên sẽ hơi lâu cho request đầu tiên)
 
+## Cấu trúc thư mục Backend
+
+- Dự án được xây dựng theo kiến trúc **Modular Layered Architecture** (Kiến trúc phân lớp theo Module). Cách tổ chức này kết hợp giữa tính đóng gói của từng phân hệ nghiệp vụ và cấu trúc 3 lớp (3-tier) chuẩn của Spring Boot, giúp hệ thống dễ dàng mở rộng và bảo trì.
+
+```text
+src/main/java/com/josephhieu/vaccinebackend/
+├── common/                 # Cấu trúc dùng chung (Shared Kernel)
+│   ├── dto/                # Data Transfer Objects (ApiResponse, PageResponse)
+│   ├── exception/          # Xử lý lỗi tập trung (GlobalExceptionHandler)
+│   └── utils/              # Lớp tiện ích hỗ trợ hệ thống
+├── config/                 # Cấu hình Spring Security, JWT & Bean Factory
+└── modules/                # Các phân hệ nghiệp vụ (Business Modules)
+    ├── auth/               # Xác thực, bảo mật & Quản lý Token
+    ├── finance/            # Quản lý tài chính, hóa đơn & doanh thu
+    ├── identity/           # Quản lý định danh (User, Staff, Roles)
+    ├── inventory/          # Quản lý kho, xuất nhập & vắc-xin
+    ├── medical/            # Quản lý bệnh án, phản hồi & dịch bệnh
+    ├── support/            # Hệ thống nhắc lịch & hỗ trợ khách hàng
+    └── vaccination/        # Quy trình tiêm chủng & đăng ký tiêm
 
 
-
-
+```
+## Cấu trúc thư mục Frontend
 
 
 
