@@ -169,7 +169,7 @@ Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tạ
 | Hỗ trợ khách hàng   | `HTKH01`             | `123456`            | `973b87c5-94a1-4d2d-b69c-df03de36a70d`| Tư vấn, nhắc lịch tiêm chủng   |
 | Khách hàng          | `BenhNhan02`         | `123456`            | `cb9fe6a2-b98b-4a76-bcc0-28d49862c48c`| Tra cứu hồ sơ, đặt lịch tiêm   |
 
-
+# Thông tin hệ thống
 ## Deployment & Infrastructure
 
 Hệ thống đã được đóng gói và triển khai thực tế trên các nền tảng Cloud hiện đại, tối ưu hóa cho hiệu suất và khả năng mở rộng:
