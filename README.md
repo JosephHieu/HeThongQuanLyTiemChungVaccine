@@ -183,6 +183,21 @@ Hệ thống đã được đóng gói và triển khai thực tế trên các n
 
 *** Lưu ý: nếu lần đầu sử dụng web đã deploy thì request sẽ mất khoảng 5 - 7 phút để xử lý. (vì xử dụng dịch vụ cloud free nên sẽ hơi lâu cho request đầu tiên)
 
+## Cấu trúc dự án
+
+Dự án được tổ chức theo mô hình **Mono-repo** đơn giản, tách biệt rõ ràng giữa các thành phần cốt lõi, giúp quy trình phát triển và triển khai (CI/CD) trở nên linh hoạt:
+
+```text
+HeThongQuanLyTiemChungVaccine/
+├── .github/             # Cấu hình GitHub Actions (CI/CD Pipelines)
+├── 01-backend/          # Mã nguồn Server-side (Spring Boot 3, Java 21)
+├── 02-frontend/         # Mã nguồn Client-side (ReactJS, Vite, Tailwind CSS)
+├── 03-database/         # Scripts khởi tạo DB, sơ đồ ERD và cấu hình TiDB
+├── docs/                # Tài liệu hướng dẫn, API Documentation & Mockups
+├── docker-compose.yml   # Cấu hình chạy toàn bộ hệ thống bằng Docker
+└── README.md            # Tài liệu hướng dẫn tổng quát của dự án
+```
+
 ## Cấu trúc thư mục Backend
 
 - Dự án được xây dựng theo kiến trúc **Modular Layered Architecture** (Kiến trúc phân lớp theo Module). Cách tổ chức này kết hợp giữa tính đóng gói của từng phân hệ nghiệp vụ và cấu trúc 3 lớp (3-tier) chuẩn của Spring Boot, giúp hệ thống dễ dàng mở rộng và bảo trì.
