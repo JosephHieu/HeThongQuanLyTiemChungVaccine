@@ -1,21 +1,21 @@
 # VaxTrack Pro - Hệ thống Quản lý Tiêm chủng & Tài chính Tập trung
 **VaxTrack Pro** là giải pháp quản trị tổng thể cho các trung tâm y tế dự phòng, được thiết kế theo chuẩn SRS v3.0. Hệ thống giải quyết bài toán cấp thiết trong việc bảo vệ cộng đồng khỏi dịch bệnh thông qua quản lý tiêm chủng, cơ sở vật chất và tài chính minh bạch.
 
-## Mục tiêu xây dựng dự án
+## 1. Mục tiêu xây dựng dự án
 Dự án VaxTrack Pro được xây dựng với mục tiêu chuyển đổi số quy trình quản lý tiêm chủng thủ công sang hệ thống quản trị tự động, tập trung vào 3 trụ cột chính:
 
-### 1. Tối ưu hóa quy trình Y tế (Clinical Efficiency)
+### 1.1 Tối ưu hóa quy trình Y tế (Clinical Efficiency)
 
 - Số hóa hồ sơ: Loại bỏ việc lưu trữ sổ tiêm giấy bằng Hồ sơ bệnh án điện tử, giúp tra cứu lịch sử tiêm chủng của bệnh nhân chỉ trong vài giây.
 - Chăm sóc chủ động: Tự động hóa việc lập lịch tiêm nhắc lại và hỗ trợ bác sĩ kê đơn chính xác dựa trên danh mục vắc-xin hiện có.
 - An toàn tiêm chủng: Theo dõi sát sao các phản ứng sau tiêm và thời gian tác dụng của từng loại lô vắc-xin.
 
-### 2. Quản trị Kho & Tài chính minh bạch (Logistics & Finance)
+### 1.2 Quản trị Kho & Tài chính minh bạch (Logistics & Finance)
 
 - Kiểm soát thất thoát: Quản lý chặt chẽ vòng đời vắc-xin từ lúc nhập lô, lưu kho cho đến khi xuất dùng, đảm bảo số lượng tồn kho luôn khớp với thực tế.
 - Tự động hóa tài chính: Kết nối trực tiếp nghiệp vụ xuất kho với hóa đơn thanh toán, giúp minh bạch thu chi và dễ dàng đối soát công nợ với nhà cung cấp.
 
-### 3. Nâng cao trải nghiệm khách hàng (Customer Experience)
+### 1.3 Nâng cao trải nghiệm khách hàng (Customer Experience)
 
 - Tiếp cận thông tin: Cung cấp cổng thông tin trực tuyến để người dân dễ dàng tra cứu loại vắc-xin, giá cả và đăng ký tiêm chủng từ xa.
 - Tương tác đa kênh: Xây dựng kênh phản hồi và hỗ trợ giải đáp thắc mắc giữa trung tâm y tế và khách hàng một cách nhanh chóng.
@@ -27,7 +27,7 @@ Dự án VaxTrack Pro được xây dựng với mục tiêu chuyển đổi s�
 <img width="1920" height="972" alt="image" src="https://github.com/user-attachments/assets/5a59b76d-73fe-4ae5-8c96-f7924f9ebe19" />
 
 
-## Hệ thống Phân quyền (Role-Based Access Control)
+## 2. Hệ thống Phân quyền (Role-Based Access Control)
 
 Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 nhóm chính với 6 vai trò cụ thể:
 
@@ -39,26 +39,26 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
   - **Hỗ trợ khách hàng:** Tư vấn, giải đáp thắc mắc và nhắc lịch tiêm chủng qua Email/SMS.
   - **Normal User (Khách hàng):** Tra cứu thông tin vắc-xin, đăng ký tiêm phòng trực tuyến và theo dõi hồ sơ cá nhân.
 
-## Tính năng cốt lõi theo quy trình SRS
+## 3. Tính năng cốt lõi theo quy trình SRS
 
-### 1. Quản lý Kho & Logistics
+### 3.1 Quản lý Kho & Logistics
 
 - **Xem tình hình kho:** Tra cứu đa năng theo tên, loại vắc-xin, nơi sản xuất hoặc độ tuổi.
 - **Nhập kho tự động:** Tự động tạo hóa đơn tài chính ngay khi thêm lô mới.
 - **Xuất kho:** Kiểm soát số lượng xuất thực tế, đảm bảo không xuất quá số lượng tồn.
 
-### 2. Quy trình Y tế Khép kín (E2E)
+### 3.2 Quy trình Y tế Khép kín (E2E)
 
 - **Hồ sơ bệnh án điện tử:** Lưu vết toàn bộ lịch sử tiêm, phản ứng sau tiêm và thời gian tác dụng của vắc-xin.
 - **Kê đơn & Hẹn tiêm:** Hỗ trợ bác sĩ kê đơn và lập lịch tiêm nhắc lại cho bệnh nhân.
 - **Tư vấn khách hàng:** Hệ thống giải đáp thắc mắc và FAQ tự động cho người dùng.
 
-### 3. Quản trị Tài chính & Giao dịch 
+### 3.3 Quản trị Tài chính & Giao dịch 
 
 - **Quản lý thu chi:** Thống kê định kỳ doanh thu từ khách hàng và công nợ nhà cung cấp.
 - **Biên lai điện tử:** Xuất biên lai giao dịch ngay sau khi hoàn tất quy trình tiêm.
 
-### 4. Một số vấn đề xử lý.
+### 3.4 Một số vấn đề xử lý.
 - Sử dụng Enum để quản lý tất cả lỗi RuntimeException.
 - Định nghĩa class riêng AppException kế thừa từ RuntimeException.
 - Viết class ApiResponse định nghĩa chuẩn để toàn bộ api dự án phải tuân theo.
@@ -77,24 +77,24 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
 | Testing           | JUnit / Mockito             |
 | Boilerplate       | Lombok                      |
 
-## Kiến trúc hệ thống (System Design)
+## 4. Kiến trúc hệ thống (System Design)
 
 Hệ thống được thiết kế theo mô hình **Modular Layered Architecture** (Phân lớp theo Module), giúp tối ưu hóa khả năng bảo mật, bảo trì và dễ dàng mở rộng.
 
-### 1. Kiến trúc tổng thể (High-Level Architecture)
+### 4.1 Kiến trúc tổng thể (High-Level Architecture)
 * **Client Layer:** Giao diện người dùng được xây dựng bằng ReactJS & Tailwind CSS, triển khai trên **Vercel**.
 * **Application Layer:** Backend sử dụng Spring Boot 3 (Java 21), vận hành trên **Render**.
 * **Database Layer:** Sử dụng giải pháp cơ sở dữ liệu phân tán **TiDB Cloud** tương thích MySQL, đảm bảo hiệu năng cao và nhất quán dữ liệu.
 * **Infrastructure:** Tự động hóa toàn bộ quy trình kiểm thử và triển khai bằng **GitHub Actions**.
 
-### 2. Luồng bảo mật và xác thực (Security Flow)
+### 4.2 Luồng bảo mật và xác thực (Security Flow)
 Hệ thống sử dụng **JWT (JSON Web Token)** để quản lý phiên làm việc và phân quyền (RBAC):
 1. **Xác thực:** Client gửi thông tin đăng nhập, Server trả về Access Token & Refresh Token.
 2. **Kiểm tra:** Các request gửi lên đều được `JwtAuthenticationFilter` xác thực trước khi qua tầng Controller.
 3. **Phân quyền:** Cấu hình `SecurityConfig` và sử dụng `@PreAuthorize` để phân quyền cho các vai trò (Administrator, Nhân viên Y tế, Hỗ trợ Khách hàng).
 4. **Xử lý lỗi:** `JwtAuthenticationEntryPoint` và `GlobalExceptionHandler` chuẩn hóa mã lỗi (1009-1017) giúp Client xử lý linh hoạt.
 
-### 3. Luồng luân chuyển dữ liệu (System Data Flow)
+### 4.3 Luồng luân chuyển dữ liệu (System Data Flow)
 ```text
 [Client (Frontend/Vercel)] 
       │ 
@@ -107,7 +107,7 @@ Hệ thống sử dụng **JWT (JSON Web Token)** để quản lý phiên làm v
 [Database (TiDB Cloud)]
 ```
 
-## Thiết kế Cơ sở dữ liệu (Database Schema)
+## 5. Thiết kế Cơ sở dữ liệu (Database Schema)
 Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Schema) tối ưu, đảm bảo tính toàn vẹn dữ liệu cho hơn 15 thực thể chính.
 
 - **Core Inventory:** VACXIN, LOAIVACXIN, LOVACXIN, NHACUNGCAP.
@@ -120,7 +120,7 @@ Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Sc
 
 ![Database Schema](docs/DB_Vaccine_Management_SChema.svg)
 
-## Công nghệ sử dụng
+## 6. Công nghệ sử dụng
 `Backend`
 
 - **Spring Boot 3.x:** Framework chính cho REST API.
@@ -139,11 +139,11 @@ Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Sc
 
 - **Lucide Icons:** Bộ icon vector chuyên nghiệp cho ngành y tế.
 
-## Hướng dẫn cài đặt & Thiết lập Database
+## 7. Hướng dẫn cài đặt & Thiết lập Database
 
 Dự án cung cấp file db-project-script.sql chứa đầy đủ cấu trúc và dữ liệu mẫu.
 
-**1. Thiết lập Database**
+**7.1 Thiết lập Database**
 
 1. Mở MySQL Workbench hoặc Terminal.
 2. Tạo database: CREATE DATABASE vaccine_management;
@@ -153,7 +153,7 @@ Dự án cung cấp file db-project-script.sql chứa đầy đủ cấu trúc v
 mysql -u username -p vaccine_management < db-project-script.sql
 ```
 
-**2. Cấu hình Backend**
+**7.2 Cấu hình Backend**
 Sửa file application.properties:
 
 ```Properties
@@ -162,7 +162,7 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-# VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
+# 8. VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
 
 Dự án Full-stack quản lý tiêm chủng (Spring Boot, ReactJS, MySQL) đã được đóng gói hoàn toàn bằng Docker. Người dùng không cần cài đặt môi trường lập trình, chỉ cần duy nhất Docker để khởi chạy.
 
@@ -198,8 +198,8 @@ Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tạ
 | Hỗ trợ khách hàng   | `HTKH01`             | `123456`            | `973b87c5-94a1-4d2d-b69c-df03de36a70d`| Tư vấn, nhắc lịch tiêm chủng   |
 | Khách hàng          | `BenhNhan02`         | `123456`            | `cb9fe6a2-b98b-4a76-bcc0-28d49862c48c`| Tra cứu hồ sơ, đặt lịch tiêm   |
 
-# Thông tin hệ thống
-## Deployment & Infrastructure
+# 9. Thông tin hệ thống
+## 9.1 Deployment & Infrastructure
 
 Hệ thống đã được đóng gói và triển khai thực tế trên các nền tảng Cloud hiện đại, tối ưu hóa cho hiệu suất và khả năng mở rộng:
 
@@ -212,7 +212,7 @@ Hệ thống đã được đóng gói và triển khai thực tế trên các n
 
 *** Lưu ý: nếu lần đầu sử dụng web đã deploy thì request sẽ mất khoảng 5 - 7 phút để xử lý. (vì xử dụng dịch vụ cloud free nên sẽ hơi lâu cho request đầu tiên)
 
-## Cấu trúc dự án
+## 9.2 Cấu trúc dự án
 
 Dự án được tổ chức theo mô hình **Mono-repo** đơn giản, tách biệt rõ ràng giữa các thành phần cốt lõi, giúp quy trình phát triển và triển khai (CI/CD) trở nên linh hoạt:
 
@@ -227,7 +227,7 @@ HeThongQuanLyTiemChungVaccine/
 └── README.md            # Tài liệu hướng dẫn tổng quát của dự án
 ```
 
-## Cấu trúc thư mục Backend
+## 9.3 Cấu trúc thư mục Backend
 
 - Dự án được xây dựng theo kiến trúc **Modular Layered Architecture** (Kiến trúc phân lớp theo Module). Cách tổ chức này kết hợp giữa tính đóng gói của từng phân hệ nghiệp vụ và cấu trúc 3 lớp (3-tier) chuẩn của Spring Boot, giúp hệ thống dễ dàng mở rộng và bảo trì.
 
@@ -247,7 +247,7 @@ src/main/java/com/josephhieu/vaccinebackend/
     ├── support/            # Hệ thống nhắc lịch & hỗ trợ khách hàng
     └── vaccination/        # Quy trình tiêm chủng & đăng ký tiêm
 ```
-## Cấu trúc thư mục Frontend
+## 9.4 Cấu trúc thư mục Frontend
 
 ### Frontend (ReactJS & Tailwind CSS)
 
