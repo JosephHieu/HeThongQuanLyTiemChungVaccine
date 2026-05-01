@@ -77,6 +77,35 @@ Dựa trên yêu cầu nghiệp vụ, hệ thống chia người dùng thành 3 
 | Testing           | JUnit / Mockito             |
 | Boilerplate       | Lombok                      |
 
+## Kiến trúc hệ thống (System Design)
+
+Hệ thống được thiết kế theo mô hình **Modular Layered Architecture** (Phân lớp theo Module), giúp tối ưu hóa khả năng bảo mật, bảo trì và dễ dàng mở rộng.
+
+### 1. Kiến trúc tổng thể (High-Level Architecture)
+* **Client Layer:** Giao diện người dùng được xây dựng bằng ReactJS & Tailwind CSS, triển khai trên **Vercel**.
+* **Application Layer:** Backend sử dụng Spring Boot 3 (Java 21), vận hành trên **Render**.
+* **Database Layer:** Sử dụng giải pháp cơ sở dữ liệu phân tán **TiDB Cloud** tương thích MySQL, đảm bảo hiệu năng cao và nhất quán dữ liệu.
+* **Infrastructure:** Tự động hóa toàn bộ quy trình kiểm thử và triển khai bằng **GitHub Actions**.
+
+### 2. Luồng bảo mật và xác thực (Security Flow)
+Hệ thống sử dụng **JWT (JSON Web Token)** để quản lý phiên làm việc và phân quyền (RBAC):
+1. **Xác thực:** Client gửi thông tin đăng nhập, Server trả về Access Token & Refresh Token.
+2. **Kiểm tra:** Các request gửi lên đều được `JwtAuthenticationFilter` xác thực trước khi qua tầng Controller.
+3. **Phân quyền:** Cấu hình `SecurityConfig` và sử dụng `@PreAuthorize` để phân quyền cho các vai trò (Administrator, Nhân viên Y tế, Hỗ trợ Khách hàng).
+4. **Xử lý lỗi:** `JwtAuthenticationEntryPoint` và `GlobalExceptionHandler` chuẩn hóa mã lỗi (1009-1017) giúp Client xử lý linh hoạt.
+
+### 3. Luồng luân chuyển dữ liệu (System Data Flow)
+```text
+[Client (Frontend/Vercel)] 
+      │ 
+      ▼ (HTTPS Request with Bearer Token)
+[Backend (Spring Boot/Render)] 
+      │
+      ├── (JwtAuthenticationFilter kiểm tra Token)
+      ├── (Phân quyền nghiệp vụ)
+      ▼
+[Database (TiDB Cloud)]
+```
 
 ## Thiết kế Cơ sở dữ liệu (Database Schema)
 Hệ thống được xây dựng trên một sơ đồ quan hệ (Relational Schema) tối ưu, đảm bảo tính toàn vẹn dữ liệu cho hơn 15 thực thể chính.
