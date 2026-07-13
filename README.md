@@ -162,11 +162,11 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-# 8. VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
+## 8. VaxTrack Pro - Hệ Thống Quản Lý Tiêm Chủng Vaccine (Dành cho người muốn chạy luôn dự án và không cần phải setup cầu kỳ)
 
 Dự án Full-stack quản lý tiêm chủng (Spring Boot, ReactJS, MySQL) đã được đóng gói hoàn toàn bằng Docker. Người dùng không cần cài đặt môi trường lập trình, chỉ cần duy nhất Docker để khởi chạy.
 
-## Hướng dẫn khởi chạy nhanh (Quick Start)
+### Hướng dẫn khởi chạy nhanh (Quick Start)
 
 Để chạy hệ thống trên máy tính của bạn, hãy thực hiện theo 3 bước sau:
 
@@ -198,8 +198,8 @@ Sau khi chạy lệnh thành công, bạn có thể truy cập hệ thống tạ
 | Hỗ trợ khách hàng   | `HTKH01`             | `123456`            | `973b87c5-94a1-4d2d-b69c-df03de36a70d`| Tư vấn, nhắc lịch tiêm chủng   |
 | Khách hàng          | `BenhNhan02`         | `123456`            | `cb9fe6a2-b98b-4a76-bcc0-28d49862c48c`| Tra cứu hồ sơ, đặt lịch tiêm   |
 
-# 9. Thông tin hệ thống
-## 9.1 Deployment & Infrastructure
+## 9. Thông tin hệ thống
+### 9.1 Deployment & Infrastructure
 
 Hệ thống đã được đóng gói và triển khai thực tế trên các nền tảng Cloud hiện đại, tối ưu hóa cho hiệu suất và khả năng mở rộng:
 
@@ -212,7 +212,7 @@ Hệ thống đã được đóng gói và triển khai thực tế trên các n
 
 *** Lưu ý: nếu lần đầu sử dụng web đã deploy thì request sẽ mất khoảng 5 - 7 phút để xử lý. (vì xử dụng dịch vụ cloud free nên sẽ hơi lâu cho request đầu tiên)
 
-## 9.2 Cấu trúc dự án
+### 9.2 Cấu trúc dự án
 
 Dự án được tổ chức theo mô hình **Mono-repo** đơn giản, tách biệt rõ ràng giữa các thành phần cốt lõi, giúp quy trình phát triển và triển khai (CI/CD) trở nên linh hoạt:
 
@@ -227,7 +227,7 @@ HeThongQuanLyTiemChungVaccine/
 └── README.md            # Tài liệu hướng dẫn tổng quát của dự án
 ```
 
-## 9.3 Cấu trúc thư mục Backend
+### 9.3 Cấu trúc thư mục Backend
 
 - Dự án được xây dựng theo kiến trúc **Modular Layered Architecture** (Kiến trúc phân lớp theo Module). Cách tổ chức này kết hợp giữa tính đóng gói của từng phân hệ nghiệp vụ và cấu trúc 3 lớp (3-tier) chuẩn của Spring Boot, giúp hệ thống dễ dàng mở rộng và bảo trì.
 
@@ -247,7 +247,7 @@ src/main/java/com/josephhieu/vaccinebackend/
     ├── support/            # Hệ thống nhắc lịch & hỗ trợ khách hàng
     └── vaccination/        # Quy trình tiêm chủng & đăng ký tiêm
 ```
-## 9.4 Cấu trúc thư mục Frontend
+### 9.4 Cấu trúc thư mục Frontend
 
 ### Frontend (ReactJS & Tailwind CSS)
 
